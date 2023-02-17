@@ -2,4 +2,56 @@
 
 \chapter{Background}
 \label{chapter:Background}
-Dies ist ein Test, ob man jetzt hier einfach so schreiben kann \cite{vielleicht:daher}?
+\section{Mashine Learning}
+\label{section:Learning}
+
+In this thesis we will define mashine learning as the guided search for candidate functions ${f: X \rightarrow Y}$ using an objective function $g$:
+
+\begin{equation}
+    \begin{aligned}
+    \label{ml_eq}
+    g: X \times Y \to \mathbb{R} \\
+    g(x,y) = r
+    \end{aligned}
+\end{equation}
+
+Depending on the formulation $r$ can either be a reward or a loss.\\
+Following the book "Pattern Recognition and Machine Learning" \cite{bishop} there are three learning paradigms common in machine learning: 
+\begin{itemize}
+	\item Supervised Learning
+	\item Unsupervised Learning
+	\item Reinforcement Learning
+\end{itemize} 
+
+In supervised learning, the objective function $g$ has access to labels $y^*(x)$ for inputs $x$, from which it can compute the objective value of an output 
+${y = f(x)}$. The set of input and output data to which g has access is called the training data $D$. 
+\begin{equation}
+    \label{supervised_paradigm}
+    l = g(x, f(x)) = g(y^*(x), f(x)) | x, y^* \in D
+\end{equation}
+A classical example of this paradigm is image classification, where $y \in \mathbb{R}^n$ with n classes and $y_n = 1$, 0 else indicates input image $x$ shows a 
+object of class n. Regression problems can also be described in this way.\\ \\
+
+In unsupervised learning, the objective function $g$ does not have access to labels. Instead it computes a value using only the input vector $x$.
+\begin{equation}
+    \label{unsupervised_learning_paradigm}
+    l = g(x, f(x))
+\end{equation}
+
+This paradigm can be useful to explore structure in the data by clustering or dimensionality reduction. Resent work has made use of a combination of unsupervised 
+learning together with supervised- or reinforcement -learning to achieve high scores with less needed labels.\\ \\
+
+In reinforcement learning, the objective is to find actions given an input or observation, which maximize a reward. It is different from supervised learning, 
+because the recieved input depends on former taken actions. That is why it can be seen as sequence learning where the goal is to maximize the expected reward.
+
+\section{Sequence Learning}
+\subsection{Markov Descicion Processes}
+\subsection{Partially Observable Markov Descicion Processes}
+\subsection{Policy}
+
+\subsection{SAC}
+\subsection{Imiation Learning}
+\subsection{Behavioural Cloning}
+\subsection{Inverse Reinforcement Learning}
+\section{Symmetry}
+%Argue about POMDP vs. MDP from symmetry group
