@@ -6,7 +6,7 @@
 \label{section:Learning}
 
 In this thesis we will define mashine learning as the guided search for candidate functions defined on a pre-image $X$ with image $Y$ ${f: X \rightarrow Y}$ 
-using the expectation ${R = \mathbb{E}\left[g(x,f(x))\right]}$ over an objective function $g$:
+optimizing the expectation ${R = \mathbb{E}\left[g(x,f(x))\right]}$ over an objective function $g$:
 
 \begin{equation}
     \begin{aligned}
@@ -16,8 +16,8 @@ using the expectation ${R = \mathbb{E}\left[g(x,f(x))\right]}$ over an objective
     \end{aligned}
 \end{equation}
 
-Depending on the formulation $r$ can either be a reward or a loss. If the objective is to minimize $R$, it is more common to refer to it as $L$,
- indicating a loss.\\ \\
+Depending on the formulation $r$ can either be a reward or a loss. If the objective is to minimize $R$, it is more common to refer to it as $L$.\\ \\
+
 Following the book "Pattern Recognition and Machine Learning" \cite{bishop} there are three learning paradigms common in machine learning: 
 \begin{itemize}
 	\item Supervised Learning
@@ -26,18 +26,25 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 \end{itemize} 
 
 In supervised learning, the objective function $g$ has access to labels $y^*(x)$ for inputs $x$, from which it can compute the objective value of an output 
-${y = f(x)}$. The set of input and output data to which g has access is called the training data $D$. 
+${y = f(x)}$. The set of input and output data to which g has access to during train time is called the training dataset $D_{train}$. The goal is to minimize $L$ over $D$ using 
+$D_{train}$: 
 \begin{equation}
     \label{supervised_paradigm}
-    l = g(x, f(x)) = g(y^*(x), f(x)) | x, y^* \in D
+    \begin{aligned}
+        l = g(x, f(x)) = g(y^*(x), f(x)) | x, y^* \in D_{train}\\
+        L_{train} = \mathbb{E}_D_{train}\left[ l_{train} \right]
+    \end{aligned}
 \end{equation}
-A classical example of this paradigm is image classification, where $y \in \mathbb{R}^n$ with n classes and $y_n = 1$, 0 else indicates input image $x$ shows a 
-object of class n. Regression problems can also be described in this way.\\ \\
+A classical example of this paradigm is image classification, where $y \in \mathbb{R}^n$ with n classes and $y_n = 1$, if $X$ is an image depicting on object of class n and 0 for all other classes. 
+Regression problems can also be described in this way.\\ \\
 
 In unsupervised learning, the objective function $g$ does not have access to labels. Instead it computes a value using only the input vector $x$.
 \begin{equation}
     \label{unsupervised_learning_paradigm}
-    l = g(x, f(x))
+    \begin{aligned}
+        l = g(x, f(x))\\
+        L = \mathbb{E}\left[ l \right]
+    \end{aligned}
 \end{equation}
 
 This paradigm can be useful to explore structure in the data by clustering or dimensionality reduction. Resent work has made use of a combination of unsupervised 
@@ -47,13 +54,16 @@ In both paradigms, the distribution of the data is independent of $f$. For examp
 you gave to the last picture. \\ \\  
 
 In reinforcement learning, an agent interacts with an environment and learns to make decisions based on rewards or penalties 
-received from the environment. The process is defined as a sequence of actions $a_t$ acting on the environment in states $s_t$. The objective function 
-$g$ in this paradigm is defined as the reward $r = g(s, a)$ or $r=g(s)$. In contrast to supervised and unsupervised learning, the data distribution 
-is dependent on $f$. This means , which can be mathematically represented as follows:
+received from the environment. 
+
+
+The process is defined as a sequence of actions $a_t$ acting on the environment in states $s_t$. The objective function 
+$g$ in this paradigm is defined as the reward $r_t = g_t(s_t, a_t)$ or $r_t=g_t(s_t)$. In contrast to supervised and unsupervised learning, the data distribution 
+is dependent on $f$. This means the expectation $R$ is over sequences, rather then singular data points:
 
 \begin{equation}
-\label{reinforcement_paradigm}
-R = \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t\right]
+    \label{reinforcement_paradigm}
+    R = \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t\right]
 \end{equation}
 
 where $R$ is the expected reward, $T$ is the final time step, $r_t$ is the reward received at time step $t$, and $\gamma$ is a discount factor 
@@ -64,6 +74,8 @@ the expected reward:
 \label{policy}
 \pi^* = \arg\max_{\pi} \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t | \pi\right]
 \end{equation}
+
+For finite horizon tasks, $\gamma$ can be set to 1. For infinite horizon tasks, $\gamma$ must be smaller then 1.
 
 Reinforcement learning has been successfully applied in various domains, such as game playing \cite{mnih2015human}, 
 robotics \cite{kober2013reinforcement}, and recommendation systems \cite{zhao2018deep}.
