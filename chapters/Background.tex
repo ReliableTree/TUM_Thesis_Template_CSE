@@ -5,7 +5,8 @@
 \section{Mashine Learning}
 \label{section:Learning}
 
-In this thesis we will define mashine learning as the guided search for candidate functions ${f: X \rightarrow Y}$ using an objective function $g$:
+In this thesis we will define mashine learning as the guided search for candidate functions defined on a pre-image $X$ with image $Y$ ${f: X \rightarrow Y}$ 
+using the expectation ${R = \mathbb{E}\left[g(x,f(x))\right]}$ over an objective function $g$:
 
 \begin{equation}
     \begin{aligned}
@@ -15,7 +16,8 @@ In this thesis we will define mashine learning as the guided search for candidat
     \end{aligned}
 \end{equation}
 
-Depending on the formulation $r$ can either be a reward or a loss.\\
+Depending on the formulation $r$ can either be a reward or a loss. If the objective is to minimize $R$, it is more common to refer to it as $L$,
+ indicating a loss.\\ \\
 Following the book "Pattern Recognition and Machine Learning" \cite{bishop} there are three learning paradigms common in machine learning: 
 \begin{itemize}
 	\item Supervised Learning
@@ -39,10 +41,41 @@ In unsupervised learning, the objective function $g$ does not have access to lab
 \end{equation}
 
 This paradigm can be useful to explore structure in the data by clustering or dimensionality reduction. Resent work has made use of a combination of unsupervised 
-learning together with supervised- or reinforcement -learning to achieve high scores with less needed labels.\\ \\
+learning together with supervised- or reinforcement -learning to achieve high scores with less needed labels.\\
 
-In reinforcement learning, the objective is to find actions given an input or observation, which maximize a reward. It is different from supervised learning, 
-because the recieved input depends on former taken actions. That is why it can be seen as sequence learning where the goal is to maximize the expected reward.
+In both paradigms, the distribution of the data is independent of $f$. For example, the next picture you are shown does not depend on the label 
+you gave to the last picture. \\ \\  
+
+In reinforcement learning, an agent interacts with an environment and learns to make decisions based on rewards or penalties 
+received from the environment. The process is defined as a sequence of actions $a_t$ acting on the environment in states $s_t$. The objective function 
+$g$ in this paradigm is defined as the reward $r = g(s, a)$ or $r=g(s)$. In contrast to supervised and unsupervised learning, the data distribution 
+is dependent on $f$. This means , which can be mathematically represented as follows:
+
+\begin{equation}
+\label{reinforcement_paradigm}
+R = \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t\right]
+\end{equation}
+
+where $R$ is the expected reward, $T$ is the final time step, $r_t$ is the reward received at time step $t$, and $\gamma$ is a discount factor 
+that determines the importance of immediate rewards versus future rewards. The goal of the agent is to find an optimal policy $\pi$ that maximizes 
+the expected reward:
+
+\begin{equation}
+\label{policy}
+\pi^* = \arg\max_{\pi} \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t | \pi\right]
+\end{equation}
+
+Reinforcement learning has been successfully applied in various domains, such as game playing \cite{mnih2015human}, 
+robotics \cite{kober2013reinforcement}, and recommendation systems \cite{zhao2018deep}.
+
+One common approach in reinforcement learning is to use a function approximator to estimate the value of a state or action. 
+This can be achieved through deep neural networks, such as in the case of deep Q-networks (DQN) \cite{mnih2015human}, or through 
+linear function approximators, such as in the case of linear value function approximation \cite{sutton2018reinforcement}. Another approach 
+is to use policy gradients, where the policy is optimized directly using gradient ascent \cite{sutton2000policy}.
+
+In summary, machine learning can be categorized into three paradigms: supervised learning, unsupervised learning, 
+and reinforcement learning. Each paradigm has its own objective function and learning algorithm, and can be applied to 
+various domains.
 
 \section{Sequence Learning}
 \subsection{Markov Descicion Processes}
