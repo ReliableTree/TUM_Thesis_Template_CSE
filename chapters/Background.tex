@@ -2,101 +2,228 @@
 
 \chapter{Background}
 \label{chapter:Background}
-\section{Mashine Learning}
-\label{section:Learning}
-
-In this thesis we will define mashine learning as the guided search for candidate functions defined on a pre-image $X$ with image $Y$ ${f: X \rightarrow Y}$ 
-optimizing the expectation ${R = \mathbb{E}\left[g(x,f(x))\right]}$ over an objective function $g$:
-
+In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ to maximize the expectation of an objective function 
+${g: X \times Y \to \mathbb{R}}$ using a signal function $g^*$, which is available during training time:
 \begin{equation}
     \begin{aligned}
-    \label{ml_eq}
-    g: X \times Y \to \mathbb{R} \\
-    g(x,y) = r
+        f^* &= \arg\max_{f} \mathbb{E}_{x \sim D}[g(x,f(x))] \\
+        f^* &\approx f' = \arg\max_{f} \mathbb{E}_{x \sim D_{train}}[g^*(x,f(x))]
     \end{aligned}
 \end{equation}
 
-Depending on the formulation $r$ can either be a reward or a loss. If the objective is to minimize $R$, it is more common to refer to it as $L$.\\ \\
+Commonly, $g^*$ is either a (negative) loss or a (positive) reward.
 
 Following the book "Pattern Recognition and Machine Learning" \cite{bishop} there are three learning paradigms common in machine learning: 
 \begin{itemize}
 	\item Supervised Learning
 	\item Unsupervised Learning
 	\item Reinforcement Learning
-\end{itemize} 
+\end{itemize} .
 
-In supervised learning, the objective function $g$ has access to labels $y^*(x)$ for inputs $x$, from which it can compute the objective value of an output 
-${y = f(x)}$. The set of input and output data to which g has access to during train time is called the training dataset $D_{train}$. The goal is to minimize $L$ over $D$ using 
-$D_{train}$: 
+\section{Supervised Learning}
+\label{section:super_learn}
+Supervised learning is a learning paradigm where the input-output pairs $(x,y) \in X \times Y$ are given, and the goal is to learn a function 
+$f^*$ that maps inputs $x \in X$ to outputs $y \in Y$. The objective function is typically a loss function that measures the difference between 
+the predicted output $f(x)$ and the true output $y$.
+
+Formally, the signal or loss function $L = g^*$ is defined on a training set $D_{train} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
+labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimizing $f$ for $L$ 
+over $D_{train}$ should be aligned with optimizing $f$ for $g$ over $D$:
+
 \begin{equation}
-    \label{supervised_paradigm}
+\begin{aligned}
+f^* &= \arg\min_{f} \mathbb{E}_{(x,y) \sim D}[g(f(x), y)] \\
+f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim D_{train}}[L(f(x),y)] = \arg\min{f} \frac{1}{n}\sum_{i=1}^n L(f(x_i),y_i)
+\end{aligned}
+\end{equation}
+
+
+Supervised learning can be used for a variety of tasks, including classification, regression, and sequence prediction. In classification, 
+the goal is to predict a discrete class label $y \in {1,2,\ldots,K}$ for a given input $x$. In regression, the goal is to predict a continuous 
+output $y \in \mathbb{R}$ for a given input $x$. In sequence prediction, the goal is to predict a sequence of outputs $y_1,\ldots,y_T$ for a 
+given input sequence $x_1,\ldots,x_T$ \cite[chapter~4]{bishop} \cite[chapter~5, chapter~6]{Goodfellow}.
+
+\section{Unsupervised Learning}
+\label{section:unsup_learn}
+Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to discover underlying patterns or structure in the data.
+The objective function in unsupervised learning is typically not based on a pre-defined notion of correctness, but rather on measures of statistical
+independence or data compression.\\
+
+Unsupervised learning can be used for a variety of tasks, including clustering, density estimation, dimensionality reduction, and anomaly detection.
+It is also often used as a pre-processing step in supervised learning, where the goal is to learn a representation of the input data that is more informative
+for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}. 
+
+\section{Reinforcement Learning}
+\label{section:rl}
+
+Reinforcement learning is a learning paradigm where an agent interacts with an environment and learns to take actions that maximize a 
+cumulative reward signal. In this paradigm, the input $x$ is typically the state $s$ of the environment, the output $y$ is the action $a$ taken by the agent, 
+and the the objective function $g$ is a reward signal $r$.
+
+The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximize the expected cumulative reward:
+
+\begin{equation}
+    \label{rl_objective}
     \begin{aligned}
-        l = g(x, f(x)) = g(y^*(x), f(x)) | x, y^* \in D_{train}\\
-        L_{train} = \mathbb{E}_D_{train}\left[ l_{train} \right]
+    \pi^* &= \arg\max_{\pi} \mathbb{E}{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \
+    &\approx \pi' = \arg\max_{\pi} \frac{1}{N} \sum_{i=1}^N \left[ \sum_{t=0}^{T_i} \gamma^t r_{i,t} \right]
     \end{aligned}
 \end{equation}
-A classical example of this paradigm is image classification, where $y \in \mathbb{R}^n$ with n classes and $y_n = 1$, if $X$ is an image depicting on object of class n and 0 for all other classes. 
-Regression problems can also be described in this way.\\ \\
 
-In unsupervised learning, the objective function $g$ does not have access to labels. Instead it computes a value using only the input vector $x$.
+where $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T, a_T, r_T)$ is a trajectory, $p(\tau | \pi)$ is the probability of a trajectory 
+under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the importance of future rewards, and $N$ is the number of trajectories sampled.
+
+\subsection{Classification of Reinforcement Learning}
+\begin{minipage}{\textwidth}
+\begin{itemize}
+
+    \item \textbf{Model type:}
+    \begin{itemize}
+    \item Model-based: the algorithm explicitly models the dynamics of the environment.
+    \item Model-free: the algorithm learns a policy without explicitly modeling the environment.
+    \end{itemize}
+    \item \textbf{Action/Observation space:}
+    \begin{itemize}
+    \item Continuous: the action/observation space is continuous, typically represented by a real-valued vector.
+    \item Discrete: the action/observation space is discrete, typically represented by a finite set of actions.
+    \end{itemize}
+    \item \textbf{Policy type:}
+    \begin{itemize}
+    \item On-policy: the algorithm learns the optimal policy while using the same policy to collect experience.
+    \item Off-policy: the algorithm learns the optimal policy while using a different policy to collect experience.
+    \end{itemize}
+    \item \textbf{Reward type:}
+    \begin{itemize}
+    \item Dense reward: the agent receives a reward signal for every time step in the environment.
+    \item Sparse reward: the agent receives a reward signal only for certain time steps in the environment.
+    \end{itemize}
+    \item \textbf{Time horizon:}
+    \begin{itemize}
+    \item Infinite horizon: the algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
+    \item Finite horizon: the algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
+    \end{itemize}
+    \item \textbf{inference type:}
+    \begin{itemize}
+    \item Probabalistic inference: the algorithm samples actions according to a probability distribution.
+    \item Deterministic inference: the algorithm chooses an action deterministicly.
+    \end{itemize}
+    \end{itemize}
+\end{minipage}
+
+\subsection{Markov Decision Processes}
+Markov Decision Processes (MDPs) are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
+context to develop reinforcement learning algorithms.
+
+An MDP is defined as a tuple $(S, A, T, R, \gamma)$, where:
+\begin{itemize}
+    \item $S$ is the set of possible states in the system
+    \item $A$ is the set of possible actions that can be taken in each state
+    \item $T$ is the transition function that specifies the probability of moving from one state to another given a certain action
+    \item $R$ is the reward function that specifies the immediate reward obtained after taking a certain action in a certain state
+    \item $\gamma$ is the discount factor that determines the importance of future rewards relative to immediate rewards
+\end{itemize}
+
+The transition function $T$ is defined as:
+
+$$T(s, a, s') = \mathbb{P}(s_{t+1}=s' \mid s_t=s, a_t=a)$$
+
+This function specifies the probability of moving from state $s$ to state $s'$ after taking action $a$. The reward function $R$ is defined as:
+
+$$R(s, a) = \mathbb{E}[r_{t+1} \mid s_t=s, a_t=a]$$
+
+This function specifies the expected immediate reward obtained after taking action $a$ in state $s$. The discount factor $\gamma$ is a 
+parameter that determines the importance of future rewards relative to immediate rewards. It is typically a value between 0 and 1, where 0 means that 
+only immediate rewards are important and 1 means that future rewards are equally important. \\
+
+Importantly, the transition function $T$ satisfies the markov property. The Markov property characterizes stochastic processes where the future state of the 
+process depends only on the current state and not on any past states. Formally, a stochastic process has the Markov property if, 
+for all time steps $t$, states $s_t$, and actions $a_t$, the following condition holds:
+
 \begin{equation}
-    \label{unsupervised_learning_paradigm}
-    \begin{aligned}
-        l = g(x, f(x))\\
-        L = \mathbb{E}\left[ l \right]
-    \end{aligned}
+    P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t)
 \end{equation}
 
-This paradigm can be useful to explore structure in the data by clustering or dimensionality reduction. Resent work has made use of a combination of unsupervised 
-learning together with supervised- or reinforcement -learning to achieve high scores with less needed labels.\\
+\subsection{Value Functions}
 
-In both paradigms, the distribution of the data is independent of $f$. For example, the next picture you are shown does not depend on the label 
-you gave to the last picture. \\ \\  
+Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in Markov decision processes (MDPs): state-value functions and action-value functions.
 
-In reinforcement learning, an agent interacts with an environment and learns to make decisions based on rewards or penalties 
-received from the environment. 
+\subsubsection{State-Value Function}
 
-
-The process is defined as a sequence of actions $a_t$ acting on the environment in states $s_t$. The objective function 
-$g$ in this paradigm is defined as the reward $r_t = g_t(s_t, a_t)$ or $r_t=g_t(s_t)$. In contrast to supervised and unsupervised learning, the data distribution 
-is dependent on $f$. This means the expectation $R$ is over sequences, rather then singular data points:
+The state-value function $v_{\pi}(s)$ is the expected return when starting in state $s$ and following policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
-    \label{reinforcement_paradigm}
-    R = \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t\right]
+v_{\pi}(s) = \mathbb{E}_{\pi}\left[G_t \mid S_t = s\right]
 \end{equation}
 
-where $R$ is the expected reward, $T$ is the final time step, $r_t$ is the reward received at time step $t$, and $\gamma$ is a discount factor 
-that determines the importance of immediate rewards versus future rewards. The goal of the agent is to find an optimal policy $\pi$ that maximizes 
-the expected reward:
+where $G_t$ is the total discounted reward from time step $t$ onwards and $\mathbb{E}_{\pi}$ denotes the expected value under policy $\pi$.
+
+The state-value function satisfies the Bellman equation, which expresses the relationship between the value of a state and the values of its successor states:
 
 \begin{equation}
-\label{policy}
-\pi^* = \arg\max_{\pi} \mathbb{E}\left[\sum_{t=0}^{T} \gamma^t r_t | \pi\right]
+v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v_{\pi}(s')\right)
 \end{equation}
 
-For finite horizon tasks, $\gamma$ can be set to 1. For infinite horizon tasks, $\gamma$ must be smaller then 1.
+where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
+from state $s$ to state $s'$ under action $a$, $r(s,a,s')$ is the reward received when transitioning from state $s$ to state $s'$ under 
+action $a$, and $\gamma \in [0,1]$ is the discount factor.
 
-Reinforcement learning has been successfully applied in various domains, such as game playing \cite{mnih2015human}, 
-robotics \cite{kober2013reinforcement}, and recommendation systems \cite{zhao2018deep}.
+\subsubsection{Action-State Value Function}
 
-One common approach in reinforcement learning is to use a function approximator to estimate the value of a state or action. 
-This can be achieved through deep neural networks, such as in the case of deep Q-networks (DQN) \cite{mnih2015human}, or through 
-linear function approximators, such as in the case of linear value function approximation \cite{sutton2018reinforcement}. Another approach 
-is to use policy gradients, where the policy is optimized directly using gradient ascent \cite{sutton2000policy}.
+The action-state value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
+policy $\pi$ thereafter. It is defined as:
 
-In summary, machine learning can be categorized into three paradigms: supervised learning, unsupervised learning, 
-and reinforcement learning. Each paradigm has its own objective function and learning algorithm, and can be applied to 
-various domains.
+\begin{equation}
+q_{\pi}(s,a) = \mathbb{E}_{\pi}\left[G_t \mid S_t = s, A_t = a\right]
+\end{equation}
 
-\section{Sequence Learning}
-\subsection{Markov Descicion Processes}
-\subsection{Partially Observable Markov Descicion Processes}
-\subsection{Policy}
+where $A_t$ is the action taken at time step $t$.
 
-\subsection{SAC}
-\subsection{Imiation Learning}
-\subsection{Behavioural Cloning}
-\subsection{Inverse Reinforcement Learning}
-\section{Symmetry}
-%Argue about POMDP vs. MDP from symmetry group
+The action-state value function also satisfies the Bellman equation:
+
+\begin{equation}
+q_{\pi}(s,a) = \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s',a')\right)
+\end{equation}
+.
+
+\subsubsection{Optimality}
+
+The reinforcement learning optimality condition \ref{rl_objective} for both state-value and action-state value functions can be used to derive the optimal policy.
+
+The optimal state-value function $v_*(s)$ is the maximum expected return that can be obtained from state $s$ under any policy:
+
+\begin{equation}
+v_*(s) = \max_{\pi} (v_{\pi}(s))
+\end{equation}
+
+The optimal action-state value function $q_*(s,a)$ is the maximum expected return that can be obtained from state $s$ and taking action $a$ under any policy:
+
+\begin{equation}
+q_*(s,a) = \max_{\pi} (q_{\pi}(s,a))
+\end{equation}
+
+The optimal policy can be derived from the optimal value functions. For the state-value function, the optimal policy is to choose actions that 
+lead to the maximum expected return:
+
+\begin{equation}
+    \pi^*(a \mid s) = 
+    \begin{cases}
+        1 & \text{if } a = \operatorname{argmax}_{a' \in \mathcal{A}} \left(\sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v_*(s')\right)\right) \\
+        0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+
+For the action-state value function, the optimal policy is to choose actions that maximize the expected return:
+
+\begin{equation}
+\pi^*(a \mid s) = \begin{cases}
+1 & \text{if } a = {argmax}_{a' \in \mathcal{A}} \left( q^*(s,a') \right) \\
+0 & \text{otherwise}
+\end{cases}
+\end{equation}
+
+The Bellman optimality equations describe the relationship between the optimal value functions and the optimal policy:
+
+\begin{align}
+v^*(s) &= \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right) \\
+q^*(s,a) &= \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \max_{a' \in \mathcal{A}} q(s',a')\right)
+\end{align}
