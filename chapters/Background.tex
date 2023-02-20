@@ -187,7 +187,7 @@ q_{\pi}(s,a) = \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma
 
 \subsubsection{Optimality}
 
-The reinforcement learning optimality condition \ref{rl_objective} for both state-value and action-state value functions can be used to derive the optimal policy.
+Using the reinforcement learning objective \ref{rl_objective} we can find optimality conditions for state-value and action-state value functions.
 
 The optimal state-value function $v_*(s)$ is the maximum expected return that can be obtained from state $s$ under any policy:
 
@@ -224,6 +224,82 @@ For the action-state value function, the optimal policy is to choose actions tha
 The Bellman optimality equations describe the relationship between the optimal value functions and the optimal policy:
 
 \begin{align}
-v^*(s) &= \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right) \\
-q^*(s,a) &= \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \max_{a' \in \mathcal{A}} q(s',a')\right)
+v^*(s) &= \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v^*(s')\right) \\
+q^*(s,a) &= \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \max_{a' \in \mathcal{A}} q^*(s',a')\right).
 \end{align}
+\\
+\textbf{Exisitens, Uniquness and Optimality:}\\
+We will briefly cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality. 
+The argument can be adapted straight forward for $q^*$. To clean up the notation, we will use upper case letters for functions, if the argument 
+is implicit and lower case, if the argument is explicit.\\ \\
+\textbf{Definition:}\\
+Let $X, d$ be a complete metric space. A a map $T:X \rightarrow X$ is called a contractor if there exists a factor $\gamma$ s.t.
+\begin{equation}
+    d(T(x), T(y)) \leq q \cdot d(x,y) | x,y \in X \wedge q \in [0, 1)
+\end{equation}
+.\\ \\
+\textbf{Banach Fixed Point Theorem:}\\
+Let (X,d) be a complete metric space and $T:X \leftarrow X$ a contractor. 
+Then $B$ has a unique fixed point $x^* \in X$, s.t. $T(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}T^n(x)$ converges to $x^*$.\\ \\
+
+\textbf{Bellman Operator}\\
+Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = max|X|$. \\
+The Bellman operator $\mathcal{B}$ is defined as:
+\begin{equation}
+    (\mathcal{B}v)(s) = \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right)
+\end{equation}
+\textbf{Assertion}\\
+
+$\mathcal{B}$ is a contrator under the infinity norm.\\
+\textbf{Proof:}\\
+Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{B}$ the Bellman operator, then:
+\begin{equation}
+||\mathcal{B}V_1(s) - \mathcal{B}V_2(s)||_{\infty, s} = 
+\end{equation}
+\begin{equation}
+    ||\max_a[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) V_1(s')] - \max_{a'}[ r(s,a') + \gamma \sum_{s'} p(s' \mid s,a') V_2(s') ] ||_{\infty, s}
+\end{equation}
+\begin{equation}
+    \leq ||\max_a r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) V_1(s') - r(s,a) - \gamma \sum_{s'} p(s' \mid s,a) V_2(s')||_{\infty, s}
+\end{equation}
+\begin{equation}
+= \gamma ||\max_a \sum_{s'} p(s' \mid s,a) (V_1(s') -V_2(s'))||_{\infty, s}
+\end{equation}
+\begin{equation}
+\leq \gamma ||\max_a \sum_{s'} p(s' \mid s,a) \cdot \max_{s''} (V_1(s'') -V_2(s''))||_{\infty, s}
+\end{equation}
+
+\begin{equation}
+= \gamma ||\max_{s''} (V_1(s'') - V_2(s''))||_{\infty, s}
+\end{equation}
+
+\begin{equation}
+= \gamma ||(V_1(s'') - V_2(s''))||_{\infty, s''}
+\end{equation}
+
+\begin{equation}
+= \gamma ||(V_1(s) - V_2(s))||_{\infty, s}.
+\end{equation}
+
+This leaves us to show, that the fix point $V_n$ under the Bellman operator is also the maximum of the value function $V$.\\
+$\mathcal{B}$ is a monoton increasing operator on $V$: 
+\begin{equation}
+    \begin{align}
+        \mathcal{B}v(s) = \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right)\\
+        \geq \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r(s,a',s') + \gamma v(s')\right) |a' \in A
+    \end{align}
+\end{equation}.
+$V$ is bound from above, if $\gamma < 1$ and $r$ finite. You can see this by using the maximum of $max(r) = r_{max}$ as an upper bound on the value function. Then
+\begin{equation}
+    \begin{aligned}
+        \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r(s,a',s') + \gamma v(s')\right) < \\
+        \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r_{max} + \gamma v(s')\right) = \\
+        r_{max} \cdot (1 + \frac{1}{r_{max}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a'') \gamma v(s')) = \\
+        r_{max} \cdot \sum_{i = 1}^{\infty} \gamma^i = \
+        r_{max} \cdot \frac{1}{1-\gamma} 
+    \end{aligned}
+\end{equation}
+Where $a''$ is an arbitrary action, as $v$ does not explicitly depend on it, if we use $r_{max}$ instead of $r(s,a)$. We used 
+$\sum_{s' \in \mathcal{S}} p(s' \mid s,a') = 1$ in line 2 and the geometric series is line 4. It is straight forward to adapt the proof for finite 
+horizon MDPs.
+Using the "Monotone Convergence Theorem" this proofs that the fix point of $\mathcal{B}$ for the value function is the optimal value function.
