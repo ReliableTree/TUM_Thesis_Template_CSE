@@ -110,7 +110,7 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \end{itemize}
 \end{minipage}
 
-\subsection{Markov Decision Processes}
+\section{Markov Decision Processes}
 Markov Decision Processes (MDPs) are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
 context to develop reinforcement learning algorithms.
 
@@ -143,11 +143,11 @@ for all time steps $t$, states $s_t$, and actions $a_t$, the following condition
     P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t)
 \end{equation}
 
-\subsection{Value Functions}
+\section{Value Functions}
 
 Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in Markov decision processes (MDPs): state-value functions and action-value functions.
 
-\subsubsection{State-Value Function}
+\subsection{State-Value Function}
 
 The state-value function $v_{\pi}(s)$ is the expected return when starting in state $s$ and following policy $\pi$ thereafter. It is defined as:
 
@@ -167,7 +167,7 @@ where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of 
 from state $s$ to state $s'$ under action $a$, $r(s,a,s')$ is the reward received when transitioning from state $s$ to state $s'$ under 
 action $a$, and $\gamma \in [0,1]$ is the discount factor.
 
-\subsubsection{Action-State Value Function}
+\section{Action-State Value Function}
 
 The action-state value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
 policy $\pi$ thereafter. It is defined as:
@@ -185,17 +185,17 @@ q_{\pi}(s,a) = \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma
 \end{equation}
 .
 
-\subsubsection{Optimality}
+\section{Optimality}
 
 Using the reinforcement learning objective \ref{rl_objective} we can find optimality conditions for state-value and action-state value functions.
 
-The optimal state-value function $v_*(s)$ is the maximum expected return that can be obtained from state $s$ under any policy:
+The optimal state-value function $v^*(s)$ is the maximum expected return that can be obtained from state $s$ under any policy:
 
 \begin{equation}
 v_*(s) = \max_{\pi} (v_{\pi}(s))
 \end{equation}
 
-The optimal action-state value function $q_*(s,a)$ is the maximum expected return that can be obtained from state $s$ and taking action $a$ under any policy:
+The optimal action-state value function $q^*(s,a)$ is the maximum expected return that can be obtained from state $s$ and taking action $a$ under any policy:
 
 \begin{equation}
 q_*(s,a) = \max_{\pi} (q_{\pi}(s,a))
@@ -207,7 +207,7 @@ lead to the maximum expected return:
 \begin{equation}
     \pi^*(a \mid s) = 
     \begin{cases}
-        1 & \text{if } a = \operatorname{argmax}_{a' \in \mathcal{A}} \left(\sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v_*(s')\right)\right) \\
+        1 & \text{if } a = \operatorname{argmax}_{a' \in \mathcal{A}} \left(\sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v^*(s')\right)\right) \\
         0 & \text{otherwise}
     \end{cases}
 \end{equation}
@@ -224,82 +224,92 @@ For the action-state value function, the optimal policy is to choose actions tha
 The Bellman optimality equations describe the relationship between the optimal value functions and the optimal policy:
 
 \begin{align}
-v^*(s) &= \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v^*(s')\right) \\
-q^*(s,a) &= \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \max_{a' \in \mathcal{A}} q^*(s',a')\right).
+v^*(s) &= \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v^*(s') \right] \\
+q^*(s,a) &=   r(s,a) + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \max_{a' \in \mathcal{A}}\left[ q^*(s',a')\right].
 \end{align}
-\\
+\\ \\
+
 \textbf{Exisitens, Uniquness and Optimality:}\\
-We will briefly cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality. 
+We will briefly cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality.   
 The argument can be adapted straight forward for $q^*$. To clean up the notation, we will use upper case letters for functions, if the argument 
-is implicit and lower case, if the argument is explicit.\\ \\
+is implicit and lower case, if the argument is explicit. Parts of this derivation follows \cite{optimality}.\\ \\
+
 \textbf{Definition:}\\
-Let $X, d$ be a complete metric space. A a map $T:X \rightarrow X$ is called a contractor if there exists a factor $\gamma$ s.t.
+Let $(X, d)$ be a complete metric space. A a map $T:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
 \begin{equation}
-    d(T(x), T(y)) \leq q \cdot d(x,y) | x,y \in X \wedge q \in [0, 1)
+    d(T(x), T(y)) \leq \gamma \cdot d(x,y) | x,y \in X.
 \end{equation}
-.\\ \\
+\\ \\
+
 \textbf{Banach Fixed Point Theorem:}\\
 Let (X,d) be a complete metric space and $T:X \leftarrow X$ a contractor. 
-Then $B$ has a unique fixed point $x^* \in X$, s.t. $T(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}T^n(x)$ converges to $x^*$.\\ \\
+Then $T$ has a unique fixed point $x^* \in X$, s.t. $T(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}T^n(x)$ converges to $x^*$.\\ \\
 
-\textbf{Bellman Operator}\\
+\textbf{Value Iteration}\\
 Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = max|X|$. \\
-The Bellman operator $\mathcal{B}$ is defined as:
+The value iteration operator $\mathcal{B}$ is defined as:
 \begin{equation}
-    (\mathcal{B}v)(s) = \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right)
+    (\mathcal{B}v)(s) = \max_{a \in \mathcal{A}} \left[  r(s,a) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left( v(s')\right) \right]
 \end{equation}
 \textbf{Assertion}\\
 
-$\mathcal{B}$ is a contrator under the infinity norm.\\
+$\mathcal{B}$ is a contrator under the $\infty$-norm.\\ \\
+
 \textbf{Proof:}\\
-Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{B}$ the Bellman operator, then:
+Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{B}$ the value iteration operator, then:
 \begin{equation}
+    \label{contractor}
 ||\mathcal{B}V_1(s) - \mathcal{B}V_2(s)||_{\infty, s} = 
 \end{equation}
 \begin{equation}
-    ||\max_a[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) V_1(s')] - \max_{a'}[ r(s,a') + \gamma \sum_{s'} p(s' \mid s,a') V_2(s') ] ||_{\infty, s}
+    \left|\left| \max_a \left[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) v_1(s')\right] - \max_{a'}\left[ r(s,a') + \gamma \sum_{s'} p(s' \mid s,a') v_2(s') \right] \right|\right|_{\infty, s}
 \end{equation}
 \begin{equation}
-    \leq ||\max_a r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) V_1(s') - r(s,a) - \gamma \sum_{s'} p(s' \mid s,a) V_2(s')||_{\infty, s}
+    \leq \left|\left|\max_a \left[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) v_1(s') - r(s,a) - \gamma \sum_{s'} p(s' \mid s,a) v_2(s')\right]\right|\right|_{\infty, s}
 \end{equation}
 \begin{equation}
-= \gamma ||\max_a \sum_{s'} p(s' \mid s,a) (V_1(s') -V_2(s'))||_{\infty, s}
+= \gamma \left|\left|\max_a \left[ \sum_{s'} p(s' \mid s,a) (v_1(s') -v_2(s'))\right]\right|\right|_{\infty, s}
 \end{equation}
 \begin{equation}
-\leq \gamma ||\max_a \sum_{s'} p(s' \mid s,a) \cdot \max_{s''} (V_1(s'') -V_2(s''))||_{\infty, s}
+\leq \gamma \left|\left|\max_a \left[ \sum_{s'} p(s' \mid s,a) \cdot \max_{s''} (v_1(s'') -v_2(s''))\right]\right|\right|_{\infty, s}
 \end{equation}
 
 \begin{equation}
-= \gamma ||\max_{s''} (V_1(s'') - V_2(s''))||_{\infty, s}
+= \gamma \left|\left|\max_{s''} \left[ (v_1(s'') - v_2(s''))\right]\right|\right|_{\infty, s}
 \end{equation}
 
 \begin{equation}
-= \gamma ||(V_1(s'') - V_2(s''))||_{\infty, s''}
+= \gamma \left|\left|(v_1(s'') - v_2(s''))\right|\right|_{\infty, s''}
 \end{equation}
 
 \begin{equation}
-= \gamma ||(V_1(s) - V_2(s))||_{\infty, s}.
+= \gamma \left|\left|(v_1(s) - v_2(s))\right|\right|_{\infty, s}.
 \end{equation}
 
-This leaves us to show, that the fix point $V_n$ under the Bellman operator is also the maximum of the value function $V$.\\
+This leaves us to show, that the fix point $V_n$ under the value iteration operator is also the maximum of the value function $V$.\\
 $\mathcal{B}$ is a monoton increasing operator on $V$: 
 \begin{equation}
     \begin{align}
-        \mathcal{B}v(s) = \max_{a \in \mathcal{A}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v(s')\right)\\
-        \geq \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r(s,a',s') + \gamma v(s')\right) |a' \in A
+        \mathcal{B}v(s) = \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v(s')\right]\\
+        \geq r(s,a') + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a') v(s') |a' \in A
     \end{align}
 \end{equation}.
-$V$ is bound from above, if $\gamma < 1$ and $r$ finite. You can see this by using the maximum of $max(r) = r_{max}$ as an upper bound on the value function. Then
+As $V_n$ is monoton increasing and converges to a unique value, it will approach it's supremum. 
+For any practical application, this means it converges to it's maximum.
+
+\section{Actor-Critic Algorithm and Derivations}
+The Bellman equation for $Q$-values is defined as:
 \begin{equation}
-    \begin{aligned}
-        \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r(s,a',s') + \gamma v(s')\right) < \\
-        \sum_{s' \in \mathcal{S}} p(s' \mid s,a') \left(r_{max} + \gamma v(s')\right) = \\
-        r_{max} \cdot (1 + \frac{1}{r_{max}} \sum_{s' \in \mathcal{S}} p(s' \mid s,a'') \gamma v(s')) = \\
-        r_{max} \cdot \sum_{i = 1}^{\infty} \gamma^i = \
-        r_{max} \cdot \frac{1}{1-\gamma} 
-    \end{aligned}
+q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
 \end{equation}
-Where $a''$ is an arbitrary action, as $v$ does not explicitly depend on it, if we use $r_{max}$ instead of $r(s,a)$. We used 
-$\sum_{s' \in \mathcal{S}} p(s' \mid s,a') = 1$ in line 2 and the geometric series is line 4. It is straight forward to adapt the proof for finite 
-horizon MDPs.
-Using the "Monotone Convergence Theorem" this proofs that the fix point of $\mathcal{B}$ for the value function is the optimal value function.
+for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$. We want to find a policy $\pi^*$ for which the $Q$-function is maximal.
+\begin{equation}
+    Q^* = max_{\pi} \left[\mathbb{E}_{\tau \propto \p(\tau|\pi)} \left[ r + \gamma Q_{\pi} \right]\right]
+\end{equation}
+From the derivation \ref{contractor} we know we only need a monotonically increasing contactor to find the $Q^*$ and thus implcitly $\pi^*$.
+We can use a simlar contractor $\mathcal{B}_q$ as for the value iteration operator in \ref{contractor} where we update the Q-Value greedily:
+\begin{align}
+    q_{i+1}(s_t, a_t) = (\mathcal{B}_q q_i)(s_t, a_t) \\
+    =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + max_{a'} \left[ \gamma q_i(s_{t+1}, a_{t + 1}) \right]\right].
+\end{align}
+Like in \ref{contractor} this is guaranteed to find an optimal $Q$-value and thus an optimal policy $\pi^*$.
