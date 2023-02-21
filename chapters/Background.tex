@@ -65,8 +65,8 @@ The agent learns a policy $\pi: S \to A$ that maps states to actions, in order t
 \begin{equation}
     \label{rl_objective}
     \begin{aligned}
-    \pi^* &= \arg\max_{\pi} \mathbb{E}{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \
-    &\approx \pi' = \arg\max_{\pi} \frac{1}{N} \sum_{i=1}^N \left[ \sum_{t=0}^{T_i} \gamma^t r_{i,t} \right]
+    \pi^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \\
+    \approx \pi' = \arg\max_{\pi} \frac{1}{N} \sum_{i=1}^N \left[ \sum_{t=0}^{T_i} \gamma^t r_{i,t} \right]
     \end{aligned}
 \end{equation}
 
@@ -152,15 +152,15 @@ Value functions are a fundamental concept in reinforcement learning and are used
 The state-value function $v_{\pi}(s)$ is the expected return when starting in state $s$ and following policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
-v_{\pi}(s) = \mathbb{E}_{\pi}\left[G_t \mid S_t = s\right]
+    v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^T \gamma^t r_t \mid s_0 = s\right].
 \end{equation}
 
-where $G_t$ is the total discounted reward from time step $t$ onwards and $\mathbb{E}_{\pi}$ denotes the expected value under policy $\pi$.
+$\mathbb{E}_{\tau \propto \pi}$ denotes the expected value under policy $\pi$.
 
 The state-value function satisfies the Bellman equation, which expresses the relationship between the value of a state and the values of its successor states:
 
 \begin{equation}
-v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v_{\pi}(s')\right)
+    v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s) +  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \gamma v_{\pi}(s')\right]
 \end{equation}
 
 where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
@@ -173,7 +173,7 @@ The action-state value function, also known as the Q-function, is the expected r
 policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
-q_{\pi}(s,a) = \mathbb{E}_{\pi}\left[G_t \mid S_t = s, A_t = a\right]
+    q_{\pi}(s, a) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^T \gamma^t r_t \mid s_0 = s, a_0=a\right]
 \end{equation}
 
 where $A_t$ is the action taken at time step $t$.
@@ -181,9 +181,20 @@ where $A_t$ is the action taken at time step $t$.
 The action-state value function also satisfies the Bellman equation:
 
 \begin{equation}
-q_{\pi}(s,a) = \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma \sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s',a')\right)
+    \label{bmeq_q}
+    q_{\pi}(s,a) = r(s,a) + \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(\gamma \sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s',a')\right).
 \end{equation}
-.
+
+Both value functions can be expressed in terms of the respective other value function using the Bellman equation:
+\begin{equation}
+    q_{\pi}(s,a) = r(s,a) + \gamma \mathbb{E}_{s'\propto T(s,a,s')}\left[ v_{\pi}(s') \right]
+\end{equation}
+
+and 
+
+\begin{equation}
+    v_{\pi}(s) = \mathbb{E}_{a \propto \pi(\cdot|s)} \left[ q_\pi(s,a) \right]
+\end{equation}
 
 \section{Optimality}
 
@@ -201,20 +212,10 @@ The optimal action-state value function $q^*(s,a)$ is the maximum expected retur
 q_*(s,a) = \max_{\pi} (q_{\pi}(s,a))
 \end{equation}
 
-The optimal policy can be derived from the optimal value functions. For the state-value function, the optimal policy is to choose actions that 
-lead to the maximum expected return:
-
-\begin{equation}
-    \pi^*(a \mid s) = 
-    \begin{cases}
-        1 & \text{if } a = \operatorname{argmax}_{a' \in \mathcal{A}} \left(\sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left(r(s,a,s') + \gamma v^*(s')\right)\right) \\
-        0 & \text{otherwise}
-    \end{cases}
-\end{equation}
-
 For the action-state value function, the optimal policy is to choose actions that maximize the expected return:
 
 \begin{equation}
+    \label{impl_pi}
 \pi^*(a \mid s) = \begin{cases}
 1 & \text{if } a = {argmax}_{a' \in \mathcal{A}} \left( q^*(s,a') \right) \\
 0 & \text{otherwise}
@@ -224,8 +225,8 @@ For the action-state value function, the optimal policy is to choose actions tha
 The Bellman optimality equations describe the relationship between the optimal value functions and the optimal policy:
 
 \begin{align}
-v^*(s) &= \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v^*(s') \right] \\
-q^*(s,a) &=   r(s,a) + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \max_{a' \in \mathcal{A}}\left[ q^*(s',a')\right].
+v^*(s) &=  r(s,a = \pi^*(s)) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a = \pi^*(s)) v^*(s') \\
+q^*(s,a) &=   r(s,a = \pi^*(s)) + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a = \pi^*(s)) q^*(s',a').
 \end{align}
 \\ \\
 
@@ -297,7 +298,81 @@ $\mathcal{B}$ is a monoton increasing operator on $V$:
 As $V_n$ is monoton increasing and converges to a unique value, it will approach it's supremum. 
 For any practical application, this means it converges to it's maximum.
 
-\section{Actor-Critic Algorithm and Derivations}
+\section{Policy Gradient}
+The policy in \ref{impl_pi} is derived implicitly from the maximum over the $Q$-Value. This is unfeasable for large or continuous state/action spaces. 
+To approximate a policy $\pi^{\theta}$ a common approach is to use deep neural networks with parameters $\theta$. In this section we will derive a 
+common approach called REINFORCE to find a good parametrisation for the policy $\pi$ as it builds the foundation of parametrized reinforcement learning. 
+
+We start with the objective function for a policy $\pi$ as defined in Equation \ref{rl_objective}:
+\begin{equation}
+J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]
+\end{equation}
+where $\tau$ is a trajectory of state-action pairs, $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$.
+
+Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
+\begin{equation}
+    \label{nabla_reinforce}
+    \begin{aligned}
+        \nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot \sum_{t'=t}^T \gamma^{t'-t} r_{t'} \right]\\
+        = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]
+    \end{aligned}
+\end{equation}
+With $G_t = \sum_{t'=t}^T \gamma^t' r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
+$G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$.
+
+In practice we don't have access to the real expectation. Instead we sample n Trajectories and approximate the expectation.
+A common choice is to sample one trajectory per update step. 
+This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
+\begin{equation}
+\theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
+\end{equation}
+where $\alpha$ is the learning rate. This update rule is called the REINFORCE update, and it can be used to train a policy to maximize the expected reward over a set of trajectories.
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwIn{Policy function $\pi_{\theta}(a|s)$, learning rate $\alpha$}
+    \KwOut{Learned policy parameters $\theta$}
+    Initialize policy parameters $\theta$;
+    \While{not converged}{
+    Sample a trajectory $\tau = (s_1, a_1, r_2, \dots, s_{T-1}, a_{T-1}, r_T, s_T)$ by following the policy $\pi_{\theta}$:\\
+    \For{$t\leftarrow 1$ \KwTo $T$}{
+    Compute the return starting from time $t$: \\
+    $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ ;\\
+    Compute the gradient of the log probability of taking action $a_t$ in state $s_t$: \\
+    $\delta_{\pi(\theta)} = \nabla_{\theta}\log \pi_{\theta}(a_t|s_t)$; \\
+    Compute the gradient estimate for this time step: \\
+    $g_t \leftarrow G_t \delta_{\pi(\theta)}$;
+    Update policy parameters using the gradient estimate:
+    $\theta \leftarrow \theta + \alpha g_t$;
+    }
+    }
+    \caption{REINFORCE algorithm with one trajectory per update}
+\end{algorithm}
+    
+The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. The algorithm continues to collect more trajectories and update the policy until convergence.
+
+\section{Actor-Critic Algorithm}
+One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
+rule is off policy and has a high variance. An idea is to approximate the expectation over $G_t$ using another neural network.
+Revisiting \ref{nabla_reinforce}: 
+\begin{equation}
+    \begin{aligned}
+        \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]\\
+        = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
+            \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
+        \right]
+    \end{aligned}
+\end{equation}
+, where 
+\begin{equation}
+    \begin{align}
+        \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
+        = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
+        = q_{\pi}(s_{t},a_{t}).
+    \end{align}
+\end{equation}
+This shows the expectation over $G_t$ is the $q$-value as defined in \ref{bmeq_q}, adapted for the continuous case.
+
 The Bellman equation for $Q$-values is defined as:
 \begin{equation}
 q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
@@ -313,3 +388,12 @@ We can use a simlar contractor $\mathcal{B}_q$ as for the value iteration operat
     =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + max_{a'} \left[ \gamma q_i(s_{t+1}, a_{t + 1}) \right]\right].
 \end{align}
 Like in \ref{contractor} this is guaranteed to find an optimal $Q$-value and thus an optimal policy $\pi^*$.
+
+\subsection{Function Approximators}
+So far, $\pi$ was computed implicitly using $Q$ as shown in \ref{impl_pi}. For large or continuous observation and action spaces, this is not feasable. Instead,
+$\pi$ will be parametrized with parameters $\pi^{\theta}$, usually using deep neural networks. Similarely $Q$ is parametrized using parameters $Q^{\theta}$.
+The $Q$-value can be updated using a signal function is typically a residual $J$ between the current estimate of the respective 
+functions and a target y computed from the contractor $\mathcal{B}_q$ or $\mathcal{B}_v$ respectviely:
+\begin{equation}
+    J_Q(\theta_{i}) = \mathbb{E}_{s_t, a_t} \left[ (y_i(s_t) - Q_{\theta_i}())^2 \right]
+\end{equation}
