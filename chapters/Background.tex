@@ -143,16 +143,72 @@ for all time steps $t$, states $s_t$, and actions $a_t$, the following condition
     P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t)
 \end{equation}
 
+\section{Policy Gradient}
+There are numerous ways to arrive at a policy that maximizes the reinforcment learning objective \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
+to parametrize the policy using a differentiable function. In this thesis we will be using neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
+reward $J = E[\sum_{t} \gamma^t r_t]$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
+
+\begin{equation}
+J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]
+\end{equation}
+where $\tau$ is a trajectory of state-action pairs, $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$. 
+$T$ can either be finite or infinite. If $T$ is infinite, $\gamma$ must be smaller then 1.
+
+Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
+\begin{equation}
+    \label{nabla_reinforce}
+    \begin{aligned}
+        \nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot \sum_{t'=t}^T \gamma^{t'-t} r_{t'} \right]\\
+        = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]
+    \end{aligned}
+\end{equation}
+With $G_t = \sum_{t'=t}^T \gamma^t' r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
+$G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$.
+
+In practice we don't have access to the real expectation. Instead we sample n Trajectories and approximate the expectation.
+A common choice is to sample one trajectory per update step. 
+This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
+\begin{equation}
+\theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
+\end{equation}
+where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm:
+
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \KwIn{Policy function $\pi_{\theta}(a|s)$, learning rate $\alpha$}
+    \KwOut{Learned policy parameters $\theta$}
+    Initialize policy parameters $\theta$;
+    \While{not converged}{
+    Sample a trajectory $\tau = (s_1, a_1, r_2, \dots, s_{T-1}, a_{T-1}, r_T, s_T)$ by following the policy $\pi_{\theta}$:\\
+    \For{$t\leftarrow 1$ \KwTo $T$}{
+    Compute the return starting from time $t$: \\
+    $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ ;\\
+    Compute the gradient of the log probability of taking action $a_t$ in state $s_t$: \\
+    $\delta_{\pi(\theta)} = \nabla_{\theta}\log \pi_{\theta}(a_t|s_t)$; \\
+    Compute the gradient estimate for this time step: \\
+    $g_t \leftarrow G_t \delta_{\pi(\theta)}$;
+    Update policy parameters using the gradient estimate:
+    $\theta \leftarrow \theta + \alpha g_t$;
+    }
+    }
+    \caption{REINFORCE algorithm with one trajectory per update}
+\end{algorithm}
+    
+The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. The algorithm continues to collect more trajectories and update the policy until convergence.
+
+
 \section{Value Functions}
 
 Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in Markov decision processes (MDPs): state-value functions and action-value functions.
+To clean up the notation, we will use upper case letters for functions, if the argument 
+is implicit and lower case, if the argument is explicit.
 
 \subsection{State-Value Function}
 
 The state-value function $v_{\pi}(s)$ is the expected return when starting in state $s$ and following policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
-    v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^T \gamma^t r_t \mid s_0 = s\right].
+    v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right].
 \end{equation}
 
 $\mathbb{E}_{\tau \propto \pi}$ denotes the expected value under policy $\pi$.
@@ -160,12 +216,19 @@ $\mathbb{E}_{\tau \propto \pi}$ denotes the expected value under policy $\pi$.
 The state-value function satisfies the Bellman equation, which expresses the relationship between the value of a state and the values of its successor states:
 
 \begin{equation}
-    v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s) +  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \gamma v_{\pi}(s')\right]
+    \label{bootstrap_v}
+    \begin{aligned}
+        v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right] \\
+        = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s)  \\
+        + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \sum_{a' \in \mathcal{A}} \pi(a' \mid s') \left[ r(a',s') + \gamma ...\right] \right]\\
+        = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v_{\pi}(s')\right]
+    \end{aligned}
 \end{equation}
 
 where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
 from state $s$ to state $s'$ under action $a$, $r(s,a,s')$ is the reward received when transitioning from state $s$ to state $s'$ under 
-action $a$, and $\gamma \in [0,1]$ is the discount factor.
+action $a$, and $\gamma \in [0,1]$ is the discount factor. This derivation assumes a discrete action space,
+however it can be adapted for the continuous case by exchanging the summation with an integral over the probability density function.
 
 \section{Action-State Value Function}
 
@@ -187,6 +250,7 @@ The action-state value function also satisfies the Bellman equation:
 
 Both value functions can be expressed in terms of the respective other value function using the Bellman equation:
 \begin{equation}
+    \label{q_from_v}
     q_{\pi}(s,a) = r(s,a) + \gamma \mathbb{E}_{s'\propto T(s,a,s')}\left[ v_{\pi}(s') \right]
 \end{equation}
 
@@ -196,44 +260,74 @@ and
     v_{\pi}(s) = \mathbb{E}_{a \propto \pi(\cdot|s)} \left[ q_\pi(s,a) \right]
 \end{equation}
 
-\section{Optimality}
 
-Using the reinforcement learning objective \ref{rl_objective} we can find optimality conditions for state-value and action-state value functions.
 
-The optimal state-value function $v^*(s)$ is the maximum expected return that can be obtained from state $s$ under any policy:
-
+\section{Actor-Critic Algorithm}
+One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
+rule is off policy with high variance. An idea is to approximate the expectation over $G_t$ using another neural network, so that an update can be made after every step, 
+rather then after the whole trajectory. This approximation is referred to as a "critic" in the actor critic method.
+\subsection{Critic}
+In this section, we will derive an expression to aproximate $G_t$ by using an iterative update step with guaranteed convergence.
+Revisiting \ref{nabla_reinforce}: 
 \begin{equation}
-v_*(s) = \max_{\pi} (v_{\pi}(s))
+    \begin{aligned}
+        \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]\\
+        = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
+            \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
+        \right]
+    \end{aligned}
+\end{equation}
+, where 
+\begin{equation}
+    \begin{align}
+        \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
+        = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
+        = q_{\pi}(s_{t},a_{t}).
+    \end{align}
+\end{equation}
+This follows the derivation as in \ref{bootstrap_v} for the $Q$-value in the continuous case.
+
+Plugging in the defintion of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
+\begin{equation}
+q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
+\end{equation}
+for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.\\
+We want to find a policy $\pi^*$ for which the $Q$-function is maximal.
+\begin{equation}
+    Q^* = \max_{\pi} \left[\mathbb{E}_{\tau \propto \p(\tau|\pi)} \left[ r + \gamma Q_{\pi} \right]\right]
 \end{equation}
 
-The optimal action-state value function $q^*(s,a)$ is the maximum expected return that can be obtained from state $s$ and taking action $a$ under any policy:
-
+Updateing the $Q$-Value greedily by applying the operator $\mathcal{B}_q$ is guaranteed to converge to the optimal $Q$-Value (see section \ref{opt_contr}):
 \begin{equation}
-q_*(s,a) = \max_{\pi} (q_{\pi}(s,a))
+    \begin{aligned}
+        q_{i+1}(s_t, a_t) = (\mathcal{B}_q q_i)(s_t, a_t) \\
+        =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + \gamma  \max_{a'} \left[  q_i(s_{t+1}, a_{t + 1}) \right]\right].
+    \end{aligned}
 \end{equation}
 
-For the action-state value function, the optimal policy is to choose actions that maximize the expected return:
-
+We don't have access to the true expected value, but we can approximate it by using rollouts of our current policy, similar to the REINFORCE algorithm. As this introduces noice, 
+in temporal difference learning (TD-learning) we define a learning rate $\alpha$ to smooth the update of the $Q$-Value:
 \begin{equation}
-    \label{impl_pi}
-\pi^*(a \mid s) = \begin{cases}
-1 & \text{if } a = {argmax}_{a' \in \mathcal{A}} \left( q^*(s,a') \right) \\
-0 & \text{otherwise}
-\end{cases}
+    q_{i+1}(s_t, a_t) = q_i(s_t, a_t) + \alpha\left[r(s_t, a_t) + \gamma \left( \max_{a'} q(s_{t+1}, a')\right) - q_i(s_t, a_t) \right]
+\end{equation}
+It is prooven that for a sufficiently small $\alpha$ this update rule will converge to the optimum $Q$-value \cite{Watkins1992}. From this expression we can define a parametric update step by minimizing 
+the RSME $J_Q(\theta_{i})$ between $Q_{\pi_{\theta_{i-1}}}' = \mathcal{B}_q Q_{\pi_{\theta_{i-1}}}$ and $Q_{\pi_{\theta_i}}$:
+\begin{equation}
+    \begin{aligned}
+        J_Q(\theta_{i}) = \mathbb{E}\left[\left( Q_{\pi_{\theta_{i-1}}}' - Q_{\pi_{\theta_i}} \right)^2\right]\\
+        = \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \left( \max_{a'} q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right]
+    \end{aligned}
 \end{equation}
 
-The Bellman optimality equations describe the relationship between the optimal value functions and the optimal policy:
+We can now use this error to update the parameters of the $Q_{\theta}$-function:
+\begin{equation}
+    Q(\theta_{i+1}) : \theta_{i+1} = \theta_{i} - \alpha \nabla J_Q(\theta_{i})
+\end{equation}
+\subsubsection{Optimality}
+\label{opt_contr}
 
-\begin{align}
-v^*(s) &=  r(s,a = \pi^*(s)) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a = \pi^*(s)) v^*(s') \\
-q^*(s,a) &=   r(s,a = \pi^*(s)) + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a = \pi^*(s)) q^*(s',a').
-\end{align}
-\\ \\
-
-\textbf{Exisitens, Uniquness and Optimality:}\\
-We will briefly cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality.   
-The argument can be adapted straight forward for $q^*$. To clean up the notation, we will use upper case letters for functions, if the argument 
-is implicit and lower case, if the argument is explicit. Parts of this derivation follows \cite{optimality}.\\ \\
+We will cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality. The respective proofs for $q^*$ are analogous and can be found for example in \cite{Watkins1992}.
+Parts of this derivation follows \cite{optimality}.\\ \\
 
 \textbf{Definition:}\\
 Let $(X, d)$ be a complete metric space. A a map $T:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
@@ -247,7 +341,7 @@ Let (X,d) be a complete metric space and $T:X \leftarrow X$ a contractor.
 Then $T$ has a unique fixed point $x^* \in X$, s.t. $T(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}T^n(x)$ converges to $x^*$.\\ \\
 
 \textbf{Value Iteration}\\
-Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = max|X|$. \\
+Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = \max|X|$. \\
 The value iteration operator $\mathcal{B}$ is defined as:
 \begin{equation}
     (\mathcal{B}v)(s) = \max_{a \in \mathcal{A}} \left[  r(s,a) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left( v(s')\right) \right]
@@ -292,108 +386,86 @@ $\mathcal{B}$ is a monoton increasing operator on $V$:
 \begin{equation}
     \begin{align}
         \mathcal{B}v(s) = \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v(s')\right]\\
-        \geq r(s,a') + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a') v(s') |a' \in A
+        \geq r(s,a') + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a') v(s') |a' \in A.
     \end{align}
-\end{equation}.
+\end{equation}
 As $V_n$ is monoton increasing and converges to a unique value, it will approach it's supremum. 
 For any practical application, this means it converges to it's maximum.
 
-\section{Policy Gradient}
-The policy in \ref{impl_pi} is derived implicitly from the maximum over the $Q$-Value. This is unfeasable for large or continuous state/action spaces. 
-To approximate a policy $\pi^{\theta}$ a common approach is to use deep neural networks with parameters $\theta$. In this section we will derive a 
-common approach called REINFORCE to find a good parametrisation for the policy $\pi$ as it builds the foundation of parametrized reinforcement learning. 
-
-We start with the objective function for a policy $\pi$ as defined in Equation \ref{rl_objective}:
+\subsection{Actor}
+In the derivation of the Bellman operator update rule $\mathcal{B}_q$ we used the $\max$-operator to choose the best action to ensure a monoton increasing value estimate. In practice this is again unfeasable 
+for large or continuous action spaces, so we want a parametrized $\pi$ that computes an action. Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. One way to 
+achieve this is by minimizing the KL-Divergence between the softmax function of the $Q$-Value and the policy $\pi$. 
 \begin{equation}
-J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]
-\end{equation}
-where $\tau$ is a trajectory of state-action pairs, $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$.
-
-Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
-\begin{equation}
-    \label{nabla_reinforce}
+    \label{kl-obj}
     \begin{aligned}
-        \nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot \sum_{t'=t}^T \gamma^{t'-t} r_{t'} \right]\\
-        = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]
+        J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q^{\pi_{\phi_{i-1}}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q^{\pi_{\phi_{i-1}}}(a|s_t))} \right) \\
+        \pi_{\phi_{i}} = \underset{\pi' \in \Pi}{\arg\min} J_\pi(\phi_{i})
     \end{aligned}
 \end{equation}
-With $G_t = \sum_{t'=t}^T \gamma^t' r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
-$G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$.
-
-In practice we don't have access to the real expectation. Instead we sample n Trajectories and approximate the expectation.
-A common choice is to sample one trajectory per update step. 
-This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
+with the update rule
 \begin{equation}
-\theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
+    \pi_{\phi_{i}} : \phi_{i} = \phi_{i-1} - \alpha \nabla J_\pi(\phi_{i-1})
 \end{equation}
-where $\alpha$ is the learning rate. This update rule is called the REINFORCE update, and it can be used to train a policy to maximize the expected reward over a set of trajectories.
+, where $\Pi$ represents the class of all policies that can be parametrized using the respective architecture. In the paper "Soft Actor-Critic" by Haarnoja et al. \cite{haarnoja2018soft}, 
+Lemma 2 prooves the optimality and convergence of this approach. Note that the paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
 
-\begin{algorithm}[H]
-    \SetAlgoLined
-    \KwIn{Policy function $\pi_{\theta}(a|s)$, learning rate $\alpha$}
-    \KwOut{Learned policy parameters $\theta$}
-    Initialize policy parameters $\theta$;
-    \While{not converged}{
-    Sample a trajectory $\tau = (s_1, a_1, r_2, \dots, s_{T-1}, a_{T-1}, r_T, s_T)$ by following the policy $\pi_{\theta}$:\\
-    \For{$t\leftarrow 1$ \KwTo $T$}{
-    Compute the return starting from time $t$: \\
-    $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ ;\\
-    Compute the gradient of the log probability of taking action $a_t$ in state $s_t$: \\
-    $\delta_{\pi(\theta)} = \nabla_{\theta}\log \pi_{\theta}(a_t|s_t)$; \\
-    Compute the gradient estimate for this time step: \\
-    $g_t \leftarrow G_t \delta_{\pi(\theta)}$;
-    Update policy parameters using the gradient estimate:
-    $\theta \leftarrow \theta + \alpha g_t$;
-    }
-    }
-    \caption{REINFORCE algorithm with one trajectory per update}
-\end{algorithm}
-    
-The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. The algorithm continues to collect more trajectories and update the policy until convergence.
+\subsection{Soft Actor-Critic}
+Exploration vs. exploitation is a fundamental trade-off in reinforcement learning (RL). On the one hand, an agent must exploit the current knowledge to maximize the cumulative reward it receives 
+over the course of its interactions with the environment. On the other hand, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
+The balance between exploration and exploitation is crucial for the success of RL algorithms, and different methods aim to find a good compromise between them.
 
-\section{Actor-Critic Algorithm}
-One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
-rule is off policy and has a high variance. An idea is to approximate the expectation over $G_t$ using another neural network.
-Revisiting \ref{nabla_reinforce}: 
+The soft actor-critic (SAC) algorithm extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximizes a modified 
+version of the expected cumulative reward that takes into account both the expected reward and the entropy of the policy. The modified objective is given by:
+
 \begin{equation}
-    \begin{aligned}
-        \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]\\
-        = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
-            \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
-        \right]
-    \end{aligned}
+J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \mathcal{H}(\pi(\cdot|s_t))]
 \end{equation}
-, where 
+
+where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
+encourages the policy to be more stochastic and explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.
+
+To update the policy, the SAC algorithm uses a state value estimate $V$ similar to \ref{q_from_v}, but with an extra term for the entropy of the policy. 
+$V$ is learned learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ to minimize overestimation:
+
+\begin{equation}
+    V_{\theta(s_t)} = \mathbb{E}_{a_t \sim \pi_{\theta(a_t|s_t)}}[Q^\text{min}(s_t, a_t) - \alpha \log \pi_{\theta(a_t|s_t)}]
+\end{equation}
+
+Using this, the critics are trained with typical TD:
+
+\begin{equation}
+    \mathcal{L}(Q_i) = \frac{1}{2}\mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(Q_i(s_t,a_t) - y_t)^2]
+\end{equation}
+
+where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. The policy is updated to minimize the KL-Divergence to the normalized $Q$-Values as described in \ref{kl-obj}:
+\begin{equation}
+    \label{sac_pol_obj}
+    J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q^{min, \pi_{\phi_{i-1}}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\pi_{\phi_{i-1}}}(a|s_t))} \right).
+\end{equation}
+
+The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
+To approximate the derivative of \ref{sac_pol_obj}, the reparametrisation trick is used:
+
 \begin{equation}
     \begin{align}
-        \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
-        = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
-        = q_{\pi}(s_{t},a_{t}).
+        \nabla_{\phi}J_\pi(\phi_{i}) \approx \nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
+        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\pi_{\phi_{i}}}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)
     \end{align}
 \end{equation}
-This shows the expectation over $G_t$ is the $q$-value as defined in \ref{bmeq_q}, adapted for the continuous case.
 
-The Bellman equation for $Q$-values is defined as:
-\begin{equation}
-q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
-\end{equation}
-for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$. We want to find a policy $\pi^*$ for which the $Q$-function is maximal.
-\begin{equation}
-    Q^* = max_{\pi} \left[\mathbb{E}_{\tau \propto \p(\tau|\pi)} \left[ r + \gamma Q_{\pi} \right]\right]
-\end{equation}
-From the derivation \ref{contractor} we know we only need a monotonically increasing contactor to find the $Q^*$ and thus implcitly $\pi^*$.
-We can use a simlar contractor $\mathcal{B}_q$ as for the value iteration operator in \ref{contractor} where we update the Q-Value greedily:
-\begin{align}
-    q_{i+1}(s_t, a_t) = (\mathcal{B}_q q_i)(s_t, a_t) \\
-    =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + max_{a'} \left[ \gamma q_i(s_{t+1}, a_{t + 1}) \right]\right].
-\end{align}
-Like in \ref{contractor} this is guaranteed to find an optimal $Q$-value and thus an optimal policy $\pi^*$.
+To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. All algorithms discussed in this thesis will use a stochastic 
+actor and some kind of entropy regularisation.
+\subsection{PPO}
 
-\subsection{Function Approximators}
-So far, $\pi$ was computed implicitly using $Q$ as shown in \ref{impl_pi}. For large or continuous observation and action spaces, this is not feasable. Instead,
-$\pi$ will be parametrized with parameters $\pi^{\theta}$, usually using deep neural networks. Similarely $Q$ is parametrized using parameters $Q^{\theta}$.
-The $Q$-value can be updated using a signal function is typically a residual $J$ between the current estimate of the respective 
-functions and a target y computed from the contractor $\mathcal{B}_q$ or $\mathcal{B}_v$ respectviely:
-\begin{equation}
-    J_Q(\theta_{i}) = \mathbb{E}_{s_t, a_t} \left[ (y_i(s_t) - Q_{\theta_i}())^2 \right]
-\end{equation}
+\subsection{TQC}
+
+\section{Imitation Learning}
+
+\subsection{Behaviaroul Cloning}
+
+\subsection{Inverse Reinforcement Learning}
+
+\section{Partially Observable Markov Decision Processes}
+
+\subsection{Symmetry}
