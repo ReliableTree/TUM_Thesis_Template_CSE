@@ -169,28 +169,29 @@ In practice we don't have access to the real expectation. Instead we sample n Tr
 A common choice is to sample one trajectory per update step. 
 This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
 \begin{equation}
-\theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
+    \label{reinf_update}
+    \theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
 \end{equation}
 where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm:
 
 \begin{algorithm}[H]
     \SetAlgoLined
-    \KwIn{Policy function $\pi_{\theta}(a|s)$, learning rate $\alpha$}
-    \KwOut{Learned policy parameters $\theta$}
-    Initialize policy parameters $\theta$;
-    \While{not converged}{
-    Sample a trajectory $\tau = (s_1, a_1, r_2, \dots, s_{T-1}, a_{T-1}, r_T, s_T)$ by following the policy $\pi_{\theta}$:\\
-    \For{$t\leftarrow 1$ \KwTo $T$}{
-    Compute the return starting from time $t$: \\
-    $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ ;\\
-    Compute the gradient of the log probability of taking action $a_t$ in state $s_t$: \\
-    $\delta_{\pi(\theta)} = \nabla_{\theta}\log \pi_{\theta}(a_t|s_t)$; \\
-    Compute the gradient estimate for this time step: \\
-    $g_t \leftarrow G_t \delta_{\pi(\theta)}$;
-    Update policy parameters using the gradient estimate:
-    $\theta \leftarrow \theta + \alpha g_t$;
-    }
-    }
+        \KwIn{Policy function $\pi_{\theta}(a|s)$, learning rate $\alpha$}
+        \KwOut{Learned policy parameters $\theta$}
+        Initialize policy parameters $\theta$;
+        \While{not converged}{
+            Sample a trajectory $\tau = (s_1, a_1, r_2, \dots, s_{T-1}, a_{T-1}, r_T, s_T)$ by following the policy $\pi_{\theta}$:\\
+            \For{$t\leftarrow 1$ \KwTo $T$}{
+                Compute the return starting from time $t$: \\
+                $G_t = \sum_{k=t}^T \gamma^{k-t} r_k$ ;\\
+                Compute the gradient of the log probability of taking action $a_t$ in state $s_t$: \\
+                $\delta_{\pi(\theta)} = \nabla_{\theta}\log \pi_{\theta}(a_t|s_t)$; \\
+                Compute the gradient estimate for this time step: \\
+                $g_t \leftarrow G_t \delta_{\pi(\theta)}$;
+                Update policy parameters using the gradient estimate:
+                $\theta \leftarrow \theta + \alpha g_t$;
+            }
+        }
     \caption{REINFORCE algorithm with one trajectory per update}
 \end{algorithm}
     
@@ -230,7 +231,7 @@ from state $s$ to state $s'$ under action $a$, $r(s,a,s')$ is the reward receive
 action $a$, and $\gamma \in [0,1]$ is the discount factor. This derivation assumes a discrete action space,
 however it can be adapted for the continuous case by exchanging the summation with an integral over the probability density function.
 
-\section{Action-State Value Function}
+\subsection{Action-State Value Function}
 
 The action-state value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
 policy $\pi$ thereafter. It is defined as:
@@ -395,7 +396,7 @@ For any practical application, this means it converges to it's maximum.
 \subsection{Actor}
 In the derivation of the Bellman operator update rule $\mathcal{B}_q$ we used the $\max$-operator to choose the best action to ensure a monoton increasing value estimate. In practice this is again unfeasable 
 for large or continuous action spaces, so we want a parametrized $\pi$ that computes an action. Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. One way to 
-achieve this is by minimizing the KL-Divergence between the softmax function of the $Q$-Value and the policy $\pi$. 
+achieve this is by minimizing the KL-Divergence between the normalized $Q$-Value and the policy $\pi$. 
 \begin{equation}
     \label{kl-obj}
     \begin{aligned}
@@ -411,7 +412,8 @@ with the update rule
 Lemma 2 prooves the optimality and convergence of this approach. Note that the paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
 
 \subsection{Soft Actor-Critic}
-Exploration vs. exploitation is a fundamental trade-off in reinforcement learning (RL). On the one hand, an agent must exploit the current knowledge to maximize the cumulative reward it receives 
+In the paper "Soft Actor-Critic" from Tuomas Haarnoja, et al. \cite{haarnoja2018soft} anew approach for exploration is introduces. Exploration vs. exploitation 
+is a fundamental trade-off in reinforcement learning. On the one hand, an agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. On the other hand, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of RL algorithms, and different methods aim to find a good compromise between them.
 
@@ -425,41 +427,128 @@ J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \m
 where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
 encourages the policy to be more stochastic and explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.
 
-To update the policy, the SAC algorithm uses a state value estimate $V$ similar to \ref{q_from_v}, but with an extra term for the entropy of the policy. 
-$V$ is learned learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ to minimize overestimation:
+To update the policy, the SAC algorithm uses a state-action value estimate $Q$ which is learned using a state value estimate $V$ similar to \ref{q_from_v}, 
+but with an extra term for the entropy of the policy. $V$ is learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ 
+to minimize overestimation:
 
 \begin{equation}
-    V_{\theta(s_t)} = \mathbb{E}_{a_t \sim \pi_{\theta(a_t|s_t)}}[Q^\text{min}(s_t, a_t) - \alpha \log \pi_{\theta(a_t|s_t)}]
+    V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[Q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}]
 \end{equation}
 
 Using this, the critics are trained with typical TD:
 
 \begin{equation}
-    \mathcal{L}(Q_i) = \frac{1}{2}\mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(Q_i(s_t,a_t) - y_t)^2]
+    \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(Q_{\theta_i}(s_t,a_t) - y_t)^2]
 \end{equation}
 
 where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. The policy is updated to minimize the KL-Divergence to the normalized $Q$-Values as described in \ref{kl-obj}:
 \begin{equation}
     \label{sac_pol_obj}
-    J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q^{min, \pi_{\phi_{i-1}}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\pi_{\phi_{i-1}}}(a|s_t))} \right).
+    J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q_{min, {\theta_i}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\theta_i}(a|s_t))} \right).
 \end{equation}
 
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
-To approximate the derivative of \ref{sac_pol_obj}, the reparametrisation trick is used:
+To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrisation trick is used:
 
 \begin{equation}
     \begin{align}
-        \nabla_{\phi}J_\pi(\phi_{i}) \approx \nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
-        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\pi_{\phi_{i}}}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)
+        \nabla_{\phi}J_\pi(\phi_{i}) \approx \mathbb{E}_{\mathcal{D}} [\nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
+        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)]
     \end{align}
 \end{equation}
 
 To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. All algorithms discussed in this thesis will use a stochastic 
-actor and some kind of entropy regularisation.
+actor and entropy regularisation.
 \subsection{PPO}
+A motivation to develop Actor-Critic methods was the high variance of the cumlative reward $G_t$ used in the update step of the REINFORCE algorithm 
+\ref{reinf_update}. To further improve the stability of the gradient update, a common approach is to use the advantage function $A(s,a)$ instead of the 
+$Q$-value: 
+\begin{equation}
+    A(s,a) = Q(s,a) - V(s).
+\end{equation}
+Intuitively, the advantage $A$ is a measure for how good a specific action $a$ is compared to the average action taken by the current policy. 
+Plugging in the advantage estmiator into \ref{reinf_update} gives the update rule:
+\begin{equation}
+    \nabla_{\theta} J(\pi_{\theta}) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[\nabla_{\theta} log(\pi_{\theta}(a|s))A(s,a)]
+\end{equation}
+with the corresponding loss
+\begin{equation}
+    \label{LPG}
+    L^{PG}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[log(\pi_{\theta}(a|s))A(s,a)].
+\end{equation}
+
+The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman et al. 
+builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
+with respect to a KL divergence constraint:
+\begin{flalign}
+        \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
+        \text{subject to\ \ \ \ \ \ \ \ \ \ \ \ } \mathbb{E}_t[\text{KL}[ \pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_{\theta}(\cdot | s_t)] ] \leq \delta
+\end{flalign}
+The core idea is to place a constraint on the distance between the new policy and the old policy. By doing so, 
+too large update steps to the policy should be prevented, resulting in a more stable learning behaviour. Note that the logarithm is monton and 
+$\pi_{\theta_{old}}$ is constant w.r.t. $\pi_{\theta}$. That means optimizing the unconstrained TRPO objective opimizes $L^{PG}$, thus the optimality proof of 
+$L^{PG}$ holds for $L^{TRPO}$. A more general proof considering the stochasticity of the policy update is provided in the paper Trust Region Policy Optimization, 
+theorem 1 \cite{TRPO}. \\
+
+In TRPO, ensuring the KL constraint requires a second order approximation to it. PPO is an on-policy algorithm that uses only first order approximations, while 
+also making sure that the policy update does not change the policy too much. Instead of the hard KL constraint, it clips the gradient of the policy update within 
+an $\epsilon$ region around the old policy. This way, chainging the policy further does not improve the objective.\\
+Let
+\begin{equation}
+    r_t = \frac{\pi_{\theta}(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}
+\end{equation}
+
+\begin{equation}
+        L^{CLIP}(\theta) = {E}_t \left[ \min \left(r_t(\theta) {A}_t, \text{clip} \left(r_t(\theta), 1-\epsilon, 1+\epsilon \right) {A}_t \right) \right].
+\end{equation}
+The algorithm aims to minimize $L^{CLIP}(\theta)$ by doing gradient update steps:
+\begin{equation}
+    \theta_{i+1} = \theta_{i} + \alpha \nabla_{\theta} L^{CLIP}(\theta_i)
+\end{equation}
+The PPO algorithm follows the general actor critic scheme with an altered objective function.
+
+\begin{algorithm}[h]
+    \SetAlgoLined
+    \begin{algorithmic}
+    \For{$\text{iteration}=1,2,\dots$}{ \\
+        \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ timesteps\\
+        \State Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
+        \State Optimize surrogate $L$ with respect to $\theta$, with $K$ epochs and minibatch size $M \leq T$\\
+        \State $\theta_\text{old} \gets \theta$
+        }
+        
+    \end{algorithmic}
+    \caption{PPO, Actor-Critic Style}\label{ppo}
+\end{algorithm}
+
+Overall, PPO is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.
 
 \subsection{TQC}
+To derive TQC, we start with the distributional reinforcement learning algorithm (DRL) and build upon it to mitigate the overestimation bias. In DRL, the Q-value function is represented by a distribution $Z(s, a, z)$, where $s$ and $a$ denote the state and action, and $z$ denotes a sample from the distribution. The distribution is learned using a critic network that minimizes the Kullback-Leibler (KL) divergence between the true value distribution $Z^{\pi}(s,a)$ and the estimated distribution $\hat{Z}(s,a,z)$:
 
+$$\mathcal{L}(\theta) = \text{KL}(Z^{\pi}(s,a) || \hat{Z}(s,a,z; \theta)),$$
+
+where $\theta$ denotes the parameters of the critic network.
+
+To address the issue of overestimation bias, TQC introduces a truncated mixture of continuous distributions to estimate the upper bound of the Q-value distribution. The truncated mixture is defined as follows:
+
+$$Z_T(s, a, z) = \sum_{i=1}^{n}\alpha_i(s, a)Z_i(s, a, z),$$
+
+where $n$ denotes the number of mixture components, $\alpha_i(s, a)$ denotes the mixing coefficient of the $i$-th component, and $Z_i(s, a, z)$ denotes the distribution of the Q-value function for the $i$-th component. The mixing coefficients and the distributions are learned using the critic network.
+
+To truncate the upper bound of the distribution, TQC introduces a truncation function $\tau(s,a)$, which maps the upper bound of the distribution to a fixed value $T$. The truncated distribution is defined as follows:
+
+$$Z_T(s, a, z) = \min(Z(s, a, z), \tau(s,a)),$$
+
+where $\tau(s,a)$ is a learned function of the state and action.
+
+The loss function for TQC is similar to DRL, but it also includes a penalty term to encourage the critic network to learn a lower bound for the value distribution:
+
+$$\mathcal{L}(\theta) = \text{KL}(Z^{\pi}(s,a) || \hat{Z}T(s,a,z; \theta)) + \lambda \mathbb{E}{z\sim \hat{Z}_T(s,a,z; \theta)}[\max(0, V - z)],$$
+
+where $V$ denotes a fixed upper bound for the Q-value function, and $\lambda$ is a hyperparameter that controls the strength of the penalty term. The penalty term encourages the critic network to learn a lower bound for the Q-value function, which helps to further reduce the overestimation bias.
+
+In summary, TQC addresses the issue of overestimation bias in value-based reinforcement learning algorithms by introducing a truncated mixture of continuous distributions to estimate the upper bound of the Q-value distribution. The truncation function maps the upper bound to a fixed value, and a penalty term encourages the critic network to learn a lower bound for the Q-value distribution. TQC has shown promising results in various tasks and has the potential to improve the performance of value-based reinforcement learning algorithms.
 \section{Imitation Learning}
 
 \subsection{Behaviaroul Cloning}
