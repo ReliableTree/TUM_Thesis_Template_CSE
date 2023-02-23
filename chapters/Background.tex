@@ -396,20 +396,29 @@ For any practical application, this means it converges to it's maximum.
 \subsection{Actor}
 In the derivation of the Bellman operator update rule $\mathcal{B}_q$ we used the $\max$-operator to choose the best action to ensure a monoton increasing value estimate. In practice this is again unfeasable 
 for large or continuous action spaces, so we want a parametrized $\pi$ that computes an action. Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. One way to 
-achieve this is by minimizing the KL-Divergence between the normalized $Q$-Value and the policy $\pi$. 
+achieve this is by minimizing the Kullback-Leibler (KL) divergence between the normalized $Q$-Value and the policy $\pi$. 
 \begin{equation}
     \label{kl-obj}
     \begin{aligned}
         J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q^{\pi_{\phi_{i-1}}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q^{\pi_{\phi_{i-1}}}(a|s_t))} \right) \\
-        \pi_{\phi_{i}} = \underset{\pi' \in \Pi}{\arg\min} J_\pi(\phi_{i})
+        \pi_{new} = \underset{\pi' \in \Pi}{\arg\min} J_\pi(\phi_{i})
     \end{aligned}
 \end{equation}
 with the update rule
 \begin{equation}
     \pi_{\phi_{i}} : \phi_{i} = \phi_{i-1} - \alpha \nabla J_\pi(\phi_{i-1})
 \end{equation}
-, where $\Pi$ represents the class of all policies that can be parametrized using the respective architecture. In the paper "Soft Actor-Critic" by Haarnoja et al. \cite{haarnoja2018soft}, 
-Lemma 2 prooves the optimality and convergence of this approach. Note that the paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
+, where $\Pi$ represents the class of all policies that can be parametrized using the respective architecture. \\
+The KL divergence is a measure of the alikeness of two distributions $P(x)$ and $Q(x)$ over the same sample space $X$:
+\begin{equation}
+    \label{KL}
+    \mathrm{KL}(P\|Q) = \int_{x\in X} P(x) \log \frac{P(x)}{Q(x)} \mathrm{d}x
+\end{equation}
+It is non negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
+a common choice in deep learning applications.\\
+
+In the paper "Soft Actor-Critic" by Haarnoja et al. \cite{haarnoja2018soft}, 
+Lemma 2 prooves the optimality and convergence of this approach. The paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
 
 \subsection{Soft Actor-Critic}
 In the paper "Soft Actor-Critic" from Tuomas Haarnoja, et al. \cite{haarnoja2018soft} anew approach for exploration is introduces. Exploration vs. exploitation 
