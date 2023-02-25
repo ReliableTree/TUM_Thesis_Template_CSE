@@ -421,6 +421,7 @@ In the paper "Soft Actor-Critic" by Haarnoja et al. \cite{haarnoja2018soft},
 Lemma 2 prooves the optimality and convergence of this approach. The paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
 
 \subsection{Soft Actor-Critic}
+\label{SAC}
 In the paper "Soft Actor-Critic" from Tuomas Haarnoja, et al. \cite{haarnoja2018soft} anew approach for exploration is introduces. Exploration vs. exploitation 
 is a fundamental trade-off in reinforcement learning. On the one hand, an agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. On the other hand, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
@@ -480,12 +481,16 @@ Plugging in the advantage estmiator into \ref{reinf_update} gives the update rul
 \begin{equation}
     \nabla_{\theta} J(\pi_{\theta}) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[\nabla_{\theta} log(\pi_{\theta}(a|s))A(s,a)]
 \end{equation}
-with the corresponding loss
+with the corresponding loss:
 \begin{equation}
     \label{LPG}
-    L^{PG}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[log(\pi_{\theta}(a|s))A(s,a)].
+    L^{PG}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[-log(\pi_{\theta}(a|s))A(s,a)].
 \end{equation}
-
+Most common implementations of PPO use a stochastic policy, like in SAC, with the corresponding loss:
+\begin{equation}
+    \label{PPO_Loss_Reg}
+    L^{PG}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[-log(\pi_{\theta}(a|s))A(s,a)+\alpha log(\pi_{\theta}(a|s))].
+\end{equation}
 The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman et al. 
 builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
@@ -533,31 +538,83 @@ The PPO algorithm follows the general actor critic scheme with an altered object
 Overall, PPO is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.
 
 \subsection{TQC}
-To derive TQC, we start with the distributional reinforcement learning algorithm (DRL) and build upon it to mitigate the overestimation bias. In DRL, the Q-value function is represented by a distribution $Z(s, a, z)$, where $s$ and $a$ denote the state and action, and $z$ denotes a sample from the distribution. The distribution is learned using a critic network that minimizes the Kullback-Leibler (KL) divergence between the true value distribution $Z^{\pi}(s,a)$ and the estimated distribution $\hat{Z}(s,a,z)$:
+Controlling Overestimation Bias with Truncated Mixture of Continuous
+Distributional Quantile Critics \cite{TQC_Paper} is a paper describing an off policy algorithm that aims to minimize the over estimation bias.\\
+Emperically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
+two critics in the SAC algorithm \ref{SAC}. In the paper \cite{TQC_Paper} the authors cite a formal derivation of the over estimation bias by 
+Thrun and Schwartz (1993) \cite{thrun1993issues} stating:
+\begin{equation}
+    \begin{align}
+        \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left{Q(s,a) + U(a)\right}\right]
+    \end{align}
+\end{equation}
+, where $U(a)$ is action dependent random noise with zero mean. \\
+The main idea of the paper is to learn the probability distribution of the $Q$ value, rather then approximating the expectation of the $Q$ value. 
+It is then possible to drop the "right tail", that is the highest estimates for the $Q$ value, to lower the estimate.\\
+Formally, the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
+$Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantile regression loss.\\
+The kth $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the comulative distribution function crosses $k/q$:
+\begin{equation}
+    Pr[X \leq x] \leq k/M
+\end{equation}
+with $M$ total quatiles. The mean of all quantiles is the mean of the distribution.\\
+Quantile regression is used to learn the values of the $M$ quantiles:
+\begin{equation}
+    \label{rho}
+    \begin{align}
+    L^{\tau_m}_{QR}(\theta^m) := \mathbb{E}_{\tilde{Z}\sim Z}\left[\rho_{\tau_m}(\tilde{Z}-\theta^m)\right],\\
+    \quad \text{where} \quad \rho_{\tau_m}(u) = u({\tau_m} - I(u < 0)), \quad \forall u \in \mathbb{R}.
+    \end{align}
+\end{equation}
+with ${\tau_m = \frac{2m-1}{2M}}, m \in [1, ...., M]$.\\
+Let $\theta^m(s,a)$ be the approximation of the $m$-th quatile of $Q(s,a)$. The probability distribution $Z(s,a)$ can be approximated using $\theta^m$:
+\begin{equation}
+    Z_{\theta}(s,a) (v) = \frac{1}{M} \sum_{m=1}^M 1_{\theta^m(s,a) \geq v} | v\in\mathcal{R}.
+\end{equation}
+The temporal difference target can then be written as:
+\begin{equation}
+    y_i(s,a) := r(s,a) + \gamma \mathbb{E}_{s' \propto \mathcal{D}, a' \propto \pi(\cdot|s')}[\theta^i(s',a') - \alpha \log \pi_{\varphi}(a'|s')]
+\end{equation}
+with the tagret distribution
+\begin{equation}
+    Y(s,a)(v) = \frac{1}{N} \sum_{i=1}^N 1_{y_i(s,a) > v} | v \in \mathcal{R}
+\end{equation}
+, where only the lowest N quantiles were used. \\
+Finally this expression leads us to the loss functino for the quantiles $\theta_m^{\psi}$ of Y:
+\begin{equation}
+    L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right)
+\end{equation}
+, where $\psi$ deontes the parametrisation of $\theta$. Note that instead of the function $\rho_{\tau_m}(u)$ as described in \ref{rho}, they used the 
+1-Huber loss, which emperically got better results. \\
+From this we can find the entropy regularized policy loss function $J$:
+\begin{equation}
+    J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right]
+\end{equation}
+, similar to the PPO loss \ref{PPO_Loss_Reg}. In the paper, they use N critics $\psi_n$. To keep the notation clean, I derived the main ideas using only one. An 
+overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 
-$$\mathcal{L}(\theta) = \text{KL}(Z^{\pi}(s,a) || \hat{Z}(s,a,z; \theta)),$$
-
-where $\theta$ denotes the parameters of the critic network.
-
-To address the issue of overestimation bias, TQC introduces a truncated mixture of continuous distributions to estimate the upper bound of the Q-value distribution. The truncated mixture is defined as follows:
-
-$$Z_T(s, a, z) = \sum_{i=1}^{n}\alpha_i(s, a)Z_i(s, a, z),$$
-
-where $n$ denotes the number of mixture components, $\alpha_i(s, a)$ denotes the mixing coefficient of the $i$-th component, and $Z_i(s, a, z)$ denotes the distribution of the Q-value function for the $i$-th component. The mixing coefficients and the distributions are learned using the critic network.
-
-To truncate the upper bound of the distribution, TQC introduces a truncation function $\tau(s,a)$, which maps the upper bound of the distribution to a fixed value $T$. The truncated distribution is defined as follows:
-
-$$Z_T(s, a, z) = \min(Z(s, a, z), \tau(s,a)),$$
-
-where $\tau(s,a)$ is a learned function of the state and action.
-
-The loss function for TQC is similar to DRL, but it also includes a penalty term to encourage the critic network to learn a lower bound for the value distribution:
-
-$$\mathcal{L}(\theta) = \text{KL}(Z^{\pi}(s,a) || \hat{Z}T(s,a,z; \theta)) + \lambda \mathbb{E}{z\sim \hat{Z}_T(s,a,z; \theta)}[\max(0, V - z)],$$
-
-where $V$ denotes a fixed upper bound for the Q-value function, and $\lambda$ is a hyperparameter that controls the strength of the penalty term. The penalty term encourages the critic network to learn a lower bound for the Q-value function, which helps to further reduce the overestimation bias.
-
-In summary, TQC addresses the issue of overestimation bias in value-based reinforcement learning algorithms by introducing a truncated mixture of continuous distributions to estimate the upper bound of the Q-value distribution. The truncation function maps the upper bound to a fixed value, and a penalty term encourages the critic network to learn a lower bound for the Q-value distribution. TQC has shown promising results in various tasks and has the potential to improve the performance of value-based reinforcement learning algorithms.
+\begin{algorithm}
+    \caption{TQC Algorithm [\ref{algo:TQC}]}
+    \label{algo:TQC}
+    \begin{algorithmic}
+        \State Initialize policy $\pi_{\varphi}$, critics $Z_{\psi_n}$, $Z_{\psi_n}$ for $n \in [1..N]$\\
+        \State Set replay $D = \emptyset$, $\beta = 0.005$\\
+        \For{each iteration}{
+            \For{each environment step, until done}{
+                \State Collect transition $(s_t, a_t, r_t, s_{t+1})$ with policy $\pi_{\varphi}$ \\
+                \State $D \leftarrow D \cup {(s_t, a_t, r_t, s_{t+1})}$\\
+            \EndFor}
+            \For{each gradient step}{
+                \State Sample a batch from the replay $D$\\
+                \State $\varphi \leftarrow \varphi - \lambda{\pi} \hat{\nabla}{\varphi}J{\pi}(\varphi)$\\
+                \State $\psi_n \leftarrow \psi_n - \lambda_Z \hat{\nabla}{\psi_n}J_Z(\psi_n), \text{for } n \in [1..N]$\\
+                \State $ \overline{\psi_n} \leftarrow \beta \psi_n + (1 - \beta)\overline{\psi_n}, \text{for } n \in [1..N]$
+            \EndFor\\}
+        \EndFor\\}
+        \State \textbf{return} policy $\pi{\varphi}$, critics $Z_{\psi_n}$
+    \end{algorithmic}
+\end{algorithm}
+TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment.
 \section{Imitation Learning}
 
 \subsection{Behaviaroul Cloning}
