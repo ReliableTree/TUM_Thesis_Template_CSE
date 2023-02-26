@@ -5,6 +5,7 @@
 In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ to maximize the expectation of an objective function 
 ${g: X \times Y \to \mathbb{R}}$ using a signal function $g^*$, which is available during training time:
 \begin{equation}
+    \label{general_learning_paradigm}
     \begin{aligned}
         f^* &= \arg\max_{f} \mathbb{E}_{x \sim D}[g(x,f(x))] \\
         f^* &\approx f' = \arg\max_{f} \mathbb{E}_{x \sim D_{train}}[g^*(x,f(x))]
@@ -597,27 +598,74 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
     \caption{TQC Algorithm [\ref{algo:TQC}]}
     \label{algo:TQC}
     \begin{algorithmic}
-        \State Initialize policy $\pi_{\varphi}$, critics $Z_{\psi_n}$, $Z_{\psi_n}$ for $n \in [1..N]$\\
+        \State Initialize policy $\pi_{\phi}$, critics $Z_{\psi_n}$, $Z_{\psi_n}$ for $n \in [1..N]$\\
         \State Set replay $D = \emptyset$, $\beta = 0.005$\\
         \For{each iteration}{
             \For{each environment step, until done}{
-                \State Collect transition $(s_t, a_t, r_t, s_{t+1})$ with policy $\pi_{\varphi}$ \\
+                \State Collect transition $(s_t, a_t, r_t, s_{t+1})$ with policy $\pi_{\phi}$ \\
                 \State $D \leftarrow D \cup {(s_t, a_t, r_t, s_{t+1})}$\\
             \EndFor}
             \For{each gradient step}{
                 \State Sample a batch from the replay $D$\\
-                \State $\varphi \leftarrow \varphi - \lambda{\pi} \hat{\nabla}{\varphi}J{\pi}(\varphi)$\\
+                \State $\phi \leftarrow \phi - \lambda{\pi} \hat{\nabla}{\phi}J{\pi}(\phi)$\\
                 \State $\psi_n \leftarrow \psi_n - \lambda_Z \hat{\nabla}{\psi_n}J_Z(\psi_n), \text{for } n \in [1..N]$\\
                 \State $ \overline{\psi_n} \leftarrow \beta \psi_n + (1 - \beta)\overline{\psi_n}, \text{for } n \in [1..N]$
             \EndFor\\}
         \EndFor\\}
-        \State \textbf{return} policy $\pi{\varphi}$, critics $Z_{\psi_n}$
+        \State \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
     \end{algorithmic}
 \end{algorithm}
 TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment.
 \section{Imitation Learning}
+Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
+rather than by trial and error exploration. In this approach, the data distribution seen during test time is dependent on the learned policy, 
+breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
+learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
-\subsection{Behaviaroul Cloning}
+Formally, imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
+
+\begin{equation}
+    \pi^* = \underset{\pi}{\text{argmax}}\left[\mathbb{E} [\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]\right]
+\end{equation}
+
+where $s_t$ is the state at time step $t$, $a_t$ is the action taken by the agent at time step $t$, $r(s_t, a_t)$ is the reward received for taking action $a_t$ in state $s_t$, and $\gamma \in [0,1]$ is the discount factor.
+
+Returning to our general learning paradigm \ref{general_learning_paradigm}, $g^*$ has access to expert Data $D_{\text{expert}}$, but the challenge of imitation learning 
+opposed to the general supervised learning paradigm is, that the data disctibution during test time depends on the learned policy $\pi_{\text{imitaion}}$:
+\begin{align}
+    \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \ propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \quad \text{in general}
+\end{align}
+\\ \\
+The goal of imitation learning is to learn a policy that performs as well as the expert demonstrations in a new, unseen environment, despite 
+the potential for distributional shift. This approach has been applied successfully in a variety of domains, including robotics, video games, 
+and natural language processing.
+
+
+\subsection{Behavioral Cloning for Stochastic Policies}
+Behavioral cloning for stochastic policies is a variant of behavioral cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
+A common choice to achieve this is to minimze the KL divergence between the expert policy and the trained policy.
+
+Formally, let 
+
+\begin{center}
+    \pi_{\text{expert}}(a|s) = 
+        \begin{cases}
+            1 \ |\ (a|s)\in \mathcal{D}_{\text{expert}}\\
+            0, \text{else}
+        \end{cases}
+
+\end{center}
+
+be the probability of the expert selecting action $a$ in state $s$, and let $\pi_{\theta}(a|s)$ be the probability of the learned policy. Then the KL divergence can be approximated by
+\begin{equation}
+    D_{KL}(\pi_{\text{expert}} || \pi_{\theta}) \approx \sum_{a,s \in \mathcal{D}_{\text{expert}}} \pi_{\text{expert}}(a,s) log\left(\frac{\pi_{\text{expert}}(a,s)}{\pi_{\theta}(a|s)}\right)
+\end{equation}
+
+Differentiating the KL divergence with respect to $\theta$ gives:
+\begin{equation}
+    \nabla_{\theta} D_{KL}(\pi_{\text{expert}} || \pi_{\theta}) \approx \nabla_{\theta} (-log\left({\pi_{\theta}(a|s)}\right))
+\end{equation}
+, as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
 
 \subsection{Inverse Reinforcement Learning}
 
