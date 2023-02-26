@@ -616,9 +616,10 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
     \end{algorithmic}
 \end{algorithm}
 TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment.
+
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
-rather than by trial and error exploration. In this approach, the data distribution seen during test time is dependent on the learned policy, 
+rather than by trial and error exploration \cite{IL}. In this approach, the data distribution seen during test time is dependent on the learned policy, 
 breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
@@ -639,6 +640,19 @@ opposed to the general supervised learning paradigm is, that the data disctibuti
 The goal of imitation learning is to learn a policy that performs as well as the expert demonstrations in a new, unseen environment, despite 
 the potential for distributional shift. This approach has been applied successfully in a variety of domains, including robotics, video games, 
 and natural language processing.
+
+\subsection{Behavioral Cloning}
+Behavioral cloning is a popular technique used in imitation learning, where the goal is to learn a policy that mimics the expert behavior seen in 
+the training data. In behavioral cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
+actions predicted by the learned policy. Formally, let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
+predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
+
+\begin{equation}
+\min_{\theta} \mathbb{E}{(s, a{\text{expert}}) \sim D_{\text{expert}}} [d(a_{\text{expert}}, a_{\text{imitation}})]
+\end{equation}
+
+where $d(\cdot, \cdot)$ is a distance metric, and $\theta$ are the parameters of the learned policy. The distance metric could be, for example, the mean 
+squared error or the cross-entropy loss.
 
 
 \subsection{Behavioral Cloning for Stochastic Policies}
