@@ -681,8 +681,99 @@ Differentiating the KL divergence with respect to $\theta$ gives:
 \end{equation}
 , as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
 
-\subsection{Inverse Reinforcement Learning}
+\section{Inverse Reinforcement Learning}
+Inverse reinforcement learning (IRL) describes a class of algorithms that are provided with an incomplete MDP $\text{MDP}_{\bar{\text{R}}}$, 
+where the reward function is not given. Instead an expert policy provides optimal behaviour. The goal of IRL is to recover the reward function from the 
+expert behaviour to train a policy that imitates the expert policy. This is close to imitation learning, with the difference that the learned reward 
+function can be used to train a policy on additional interactions with the environment, 
+while imitation learning only acts on the provided expert trajectories. 
+Formally, let $r'$ be a reward function and $\pi_{r'}^*$ be defined as:
+\begin{equation}
+    \pi_{r'}^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
+\end{equation}
+be the optimal policy under the reward function $r'$. We now want to invert this equation, such that we find the reward function $r_{inv} = r'$ for which the 
+actions under the policy $\pi_{r'}^*$ are optimal:
+\begin{equation}
+    r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
+\end{equation}
+This equation is not convex and there is not unique solutoin for $r_{\text{inv}}$. It can be easily understood by the following example: \\
+Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
+There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning \cite{GAIL}, 
+which we will develop in the next section.
 
+\subsection{Generative Adversarial Imitation Learning}
+To disambuguate the reward signal, we want every other policy but the expert policy to have a lower expected reward under our inverse reward function. Moreover, 
+maximum causal entropy IRL \cite{max_cause_ent_IRL} has been a popular choice to regularize the policies. The idea is to choose the reward function, for 
+which the optimal policy has the highest entropy with respect to the action distribution. This allows us to choose a policy that is "no more comitted to any 
+particular path" \cite[p.2]{max_cause_ent_IRL}, then necessary. Combining these two ideas gives us the objective:
+\begin{equation}
+    \underset{r \in R}{\text{minimize}} \left( \max_{\pi \in \Pi} \mathbb{H}(\pi) + \mathbb{E}_{\pi}[r(s, a)] \right) - \mathbb{E}_{\pi_{r'}^*}[r(s,a)]
+\end{equation}
+, with the discounted causal entropy 
+\begin{equation}
+    \mathbb{H}(\pi) = \mathbb{E}_{s_0, a_0} \left(\mathbb{H}_{\pi}(a_{0...\infty}, s_{0,...\infty})\right) = \mathbb{E}_{\pi}\left[\sum_{t=0}^\infty -\gamma^t log \pi(a_t|s_t)\right]
+\end{equation}
+\cite{InfCausalEnt}. Here $\pi_{r'}^*$ denotes the expert policy. In pratice we don't have access to the expecation $\mathbb{E}_{\pi_{r'}^*}[r(s,a)]$, so we approximate it with N 
+trajectories including the state action pair $(s,a)$
+\begin{equation}
+    \mathbb{E}_{\pi_{r'}^*}[r(s,a)] \approx \frac{1}{N} \sum_N \sum_t \gamma^t r(s_t,a_t) \delta_{s_t=s, a_t=a}.
+\end{equation}
+
+In a similar way, we approximate $\mathbb{H}(\pi) + \mathbb{E}_{\pi}[r(s, a)]$.\\
+In the paper Generative Adversarial Imitation Learning (GAIL) \cite{GAIL} the authors suggest a second convex regularizor 
+$$\psi : \mathcal{R}^{\mathcal{S} X \mathcal{A}}\rightarrow \mathcal{R}$$ for the cost function. Moreover, instead of maximizing the expected reward they find a cost function, under which 
+the expected cost in the RL phase is minimized. The cost function $c$ could simply be $-r$, but it implies a natural maximum at $c_{max} = 0$.
+The new IRL objective can be written as:
+\begin{equation}
+    c^* \in \text{IRL}_{\psi}(\pi_{r'}^*) = \{\underset{c}{\text{arg max}} -\psi(c) + \left(
+        \min_{\pi} - \mathbb{H}(\pi) + \mathbb{E}_{\pi}[c(s,a)] \right) - 
+        \mathbb{E}_{\pi_{r'}^*}[c(s,a)] \}
+\end{equation}
+with the corresponding reinforcement learning problem $\pi_{\text{inv}} = \underset{\pi}{\text{arg min}} (- \mathbb{H}(\pi) + \mathbb{E}_{\pi}[c(s,a)])$.\\
+Using the notion of an occupancy measure $\rho_{\pi}$, which indicates how often a certain state and action is visited by a policy $\pi$, defined as:
+\begin{equation}
+    \rho_{\pi}(s, a) = \pi(a|s) \sum_{t=0}^{\infty} \gamma^{t} P(st = s | \pi)
+\end{equation}
+the expectation can be rewritten as:
+\begin{equation}
+    \mathbb{E}_{\pi}[c(s,a)] = \sum_{s,a} \rho_{\pi}(s,a) c(s,a).
+\end{equation}
+This is useful, as it allows us to rewrite the reinforcement learning problem as the dual of the regularisation function $\psi$:
+\begin{align}
+    \pi_{\text{inv}} = \arg\min_{\pi \in \Pi} -H(\pi) + \psi^*(\rho_{\pi} - \rho_{\pi_{r'}^*})
+\end{align}
+, where $\psi^*$ is the convex conjugate of $\psi$. 
+In the GAIL paper, the regularizor $\psi$ is chosen such that  $\psi^*_{\text{GA}}(\rho_{\pi} - \rho_{\pi^E}) - \lambda H(\pi) = \text{D}_{JS}(\rho_{\pi}, \rho_{\pi_{r'}^*}) - \lambda H(\pi)$.\\
+Here GA stands for generative adverserial, because the paper proposes a generative adverserial algorithm to find the policy $\pi$ that minimizes $\psi^*$ with the maximum possible $\psi^*$:
+\begin{equation}
+    \underset{\pi}{\text{argmin}} \left( \underset{D}{\text{argmax}} (\mathbb{E}_{\pi}[\log(D(s,a))] + \mathbb{E}_{\pi_{r'}^*}[\log(1-D(s,a))] - \lambda H(\pi)) \right)
+\end{equation}
+, where $D$ is the discriminator used is $\psi^*$.
+Tian Xu, et al. proved in the paper Error Bounds of Imitating Policies and Environments \cite{error_imitation} that if a policy $\pi$ minimizes a 
+distance measure  $\text{D}_{JS}$ between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalisation error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
+$V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalisation error of behavioral cloning is bound by 
+$V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$. This implies better performance for GAIL in long horizon tasks.\\
+The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{r'}^*$ be the expert policy, which reward function $r'$ we want to imitate. 
+\begin{algorithm}
+    \caption{Generative adversarial imitation learning}
+    \label{GAIL_Algo}
+    \begin{algorithmic}
+    \Require Expert trajectories $\tau_E \sim \pi_E$, initial policy and discriminator parameters $\theta_0$, $w_0$\\
+    \For{$i = 0, 1, 2, \dots$}{\\
+        \State Sample trajectories $\tau_i \sim \pi_{\theta_i}$\\
+        \State Update the discriminator parameters from $w_i$ to $w_{i+1}$ with the gradient\\
+            \begin{equation}
+            \hat{\mathbb{E}}_{\tau_i} [\nabla_w \log D_w(s, a)] + \hat{\mathbb{E}}_{\tau_E} [\nabla_w \log(1 - D_w(s, a))]
+            \end{equation}
+        \State Take a policy step from $\theta_i$ to $\theta_{i+1}$, using the TRPO rule with cost function $\log D_{w_{i+1}}(s, a)$.\\
+        Specifically, take a KL-constrained natural gradient step with\\
+        \begin{equation}
+        \hat{\mathbb{E}}_{\tau_i} [\nabla\theta \log \pi_\theta(a|s)Q(s, a)] - \lambda \nabla_\theta H(\pi_\theta),
+        \end{equation}
+        where $Q(\bar{s}, \bar{a}) = \hat{\mathbb{E}}_{\tau_i} [\log D{w_{i+1}}(s, a) | s_0 = \bar{s}, a_0 = \bar{a}]$\\
+    \EndFor}
+    \end{algorithmic}
+    \end{algorithm}
 \section{Partially Observable Markov Decision Processes}
 
 \subsection{Symmetry}
