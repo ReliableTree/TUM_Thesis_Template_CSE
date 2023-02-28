@@ -144,6 +144,42 @@ for all time steps $t$, states $s_t$, and actions $a_t$, the following condition
     P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t)
 \end{equation}
 
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[node distance=2cm]
+        font=\fontsize{20};
+        % Define nodes
+        \node (s1) [circle, draw, fill = green!30] {$s_1$};
+        \node (t1_2) [rectangle, draw, right of=s1, xshift=1.5cm] {$T(s_2|s_1, a_1)$};
+        \node (s2) [circle, draw, fill = green!30, right of = t1_2, xshift=1.5cm] {$s_2$};
+        \node (t2_3) [rectangle, draw, right of=s2, xshift=1.5cm] {$T(s_3|s_2, a_2)$};
+        \node (s3) [circle, draw, fill = green!30, right of = t2_3, xshift=1.5cm] {$s_3$};
+        \node (r_1) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t1_2] {$R(s_1, a_1)$};
+        \node (r_2) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t2_3] {$R(s_2, a_2)$};
+
+        \node (policy_1) [diamond, draw, fill = yellow!30, above of = s1, yshift=1.5cm] {$\pi$};
+        \node (policy_2) [diamond, draw, fill = yellow!30, above of = s2, yshift=1.5cm] {$\pi$};
+        \node (policy_3) [diamond, draw, fill = yellow!30, above of = s3, yshift=1.5cm] {$\pi$};
+
+        \draw [->, black!50, line width=2pt] (s1) -- node[midway, above] {} (policy_1);
+        \draw [->, black!50, line width=2pt] (s2) -- node[midway, above] {} (policy_2);
+        \draw [->, black!50, line width=2pt] (s3) -- node[midway, above] {} (policy_3);
+
+        \draw [->, black!50, line width=2pt] (s1) -- node[midway, above] {} (t1_2);
+        \draw [->, black!50, line width=2pt] (s2) -- node[midway, above] {} (t2_3);
+
+
+        \draw [->, black!50, line width=2pt] (policy_1) -- node[black!100, midway, below] {$a_1$} (t1_2);
+        \draw [->, black!50, line width=2pt] (policy_2) -- node[black!100, midway, below] {$a_2$} (t2_3);
+
+        \draw [->, black!50, line width=2pt] (t1_2) -- node[midway, left] {} (s2);
+        \draw [->, black!50, line width=2pt] (t2_3) -- node[midway, left] {} (s3);
+
+        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
+        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
+    \end{tikzpicture}
+  \caption{A MDP diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
+\end{figure}
 \section{Policy Gradient}
 There are numerous ways to arrive at a policy that maximizes the reinforcment learning objective \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function. In this thesis we will be using neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
@@ -721,7 +757,7 @@ trajectories including the state action pair $(s,a)$
 
 In a similar way, we approximate $\mathbb{H}(\pi) + \mathbb{E}_{\pi}[r(s, a)]$.\\
 In the paper Generative Adversarial Imitation Learning (GAIL) \cite{GAIL} the authors suggest a second convex regularizor 
-$$\psi : \mathcal{R}^{\mathcal{S} X \mathcal{A}}\rightarrow \mathcal{R}$$ for the cost function. Moreover, instead of maximizing the expected reward they find a cost function, under which 
+$$\psi : \mathcal{R}^{\mathcal{S} \times \mathcal{A}}\rightarrow \mathcal{R}$$ for the cost function. Moreover, instead of maximizing the expected reward they find a cost function, under which 
 the expected cost in the RL phase is minimized. The cost function $c$ could simply be $-r$, but it implies a natural maximum at $c_{max} = 0$.
 The new IRL objective can be written as:
 \begin{equation}
@@ -775,5 +811,93 @@ The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{r'}^*$ be the 
     \end{algorithmic}
     \end{algorithm}
 \section{Partially Observable Markov Decision Processes}
+So far we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
+transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
+is only partially observable, which violates the assumption. Those dynamics are captured in a Partially Observable Markov Decision Processes (POMDPs).
 
+A POMDP is defined as a tuple:
+
+\begin{itemize}
+\item $\mathcal{S}$: a finite set of states.
+\item $\mathcal{A}$: a finite set of actions.
+\item $\mathcal{O}$: a finite set of observations.
+\item $\mathcal{T}$: the transition function $\mathcal{T}: \mathcal{S} \times \mathcal{A} \times \mathcal{S} \rightarrow [0, 1]$, which gives the probability of transitioning from state $s \in \mathcal{S}$ to state $s' \in \mathcal{S}$ after taking action $a \in \mathcal{A}$, i.e., $\mathcal{T}(s, a, s') = \mathbb{P}(s_{t+1} = s' \mid s_t = s, a_t = a)$.
+\item $\mathcal{R}$: the reward function $\mathcal{R}: \mathcal{S} \times \mathcal{A} \rightarrow \mathbb{R}$, which gives the reward received after taking action $a \in \mathcal{A}$ in state $s \in \mathcal{S}$, i.e., $\mathcal{R}(s, a)$.
+\item $\mathcal{Z}$: the observation function $\mathcal{Z}: \mathcal{S} \times \mathcal{O} \rightarrow [0, 1]$, which gives the probability of observing $o \in \mathcal{O}$ in state $s \in \mathcal{S}$, i.e., $\mathcal{Z}(s, o) = \mathbb{P}(o_{t} = o \mid s_t = s)$.
+\item $\gamma$: the discount factor $\gamma \in [0, 1)$.
+\end{itemize}
+
+The key difference between MDPs and POMDPs is that in a POMDP, the agent only observes a noisy or partial signal of the underlying state.
+
+To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states given the history of actions and observations. Formally, a belief state $b_t$ at time $t$ is a probability distribution over the state space $\mathcal{S}$, and is updated recursively using Bayes' rule:
+
+\begin{equation}
+    \label{pomdp_bayes}
+b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+\end{equation}
+
+where $a_t$ is the action taken at time $t$, $o_{t+1}$ is the observation received at time $t+1$, and $s'$ is the resulting state after taking action $a_t$ in state $s$.
+
+While the transition probability $\mathcal{T}$ only depends on the last state $s_t$ and the last action $a_t$ 
+in \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}(s)$.
+This means an optimal policy has to know the history of the mdp: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, which is an exponentially harder problem. \\
+Technically, you can restore on MDP from a POMDP by stacking all previous observations $\pi(a_t|o_{0:t-1}, a_{0:t-1}) = \pi(a_t|o'_{t-1}, a'_{t-1})$ 
+with $o'_{t-1} = o_{0:t-1}$ and $a'_{t-1} = a_{0:t-1}$, but this approach has a downside. If you use a neural network to parametrize $\pi$, you have 
+a fixed input size, which is not ideal, if your observation and action input size depends on the timestep. To solve this problem, sequence networks like 
+recurrent neural networks are usually used model $\pi$. One example is the recurrent implementation of PPO called Recurrent Proximal Policy Optimization (RPPO) 
+\cite{RPPO} with the new loss function:
+\begin{equation}
+    LC_t(\theta) = \widehat{\mathbb{E}}_t\big[\min\big(q_t(\theta)\widehat{A}_t, \text{clip}\big(q_t(\theta), 1 - \epsilon, 1 + \epsilon\big)\widehat{A}_t\big)\big] \tag{1}
+\end{equation}
+\begin{equation*}
+    \text{with ratio} \quad q_t(\theta) = \frac{\pi_{\theta}(a_t \vert o_t, h_t)}{\pi_{\theta \text{old}}(a_t \vert o_t, h_t)}
+\end{equation*}
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}[node distance=2cm]
+        font=\fontsize{20};
+        % Define nodes
+        \node (s1) [circle, draw, fill = green!30] {$s_1$};
+        \node (t1_2) [rectangle, draw, right of=s1, xshift=1.5cm] {$T(s_2|s_1, a_1)$};
+        \node (s2) [circle, draw, fill = green!30, right of = t1_2, xshift=1.5cm] {$s_2$};
+        \node (t2_3) [rectangle, draw, right of=s2, xshift=1.5cm] {$T(s_3|s_2, a_2)$};
+        \node (s3) [circle, draw, fill = green!30, right of = t2_3, xshift=1.5cm] {$s_3$};
+        \node (o1) [rectangle, draw, fill = blue!50, above of = s1, yshift=1.5cm] {$o_1 \propto z_1$};
+        \node (o2) [rectangle, draw, fill = blue!50, above of = s2, yshift=1.5cm] {$o_2 \propto z_2$};
+        \node (o3) [rectangle, draw, fill = blue!50, above of = s3, yshift=1.5cm] {$o_3 \propto z_3$};
+        \node (policy_1) [diamond, draw, fill = yellow!30, above of = o1, yshift=1.5cm] {$\pi$};
+        \node (policy_2) [diamond, draw, fill = yellow!30, above of = o2, yshift=1.5cm] {$\pi$};
+        \node (policy_3) [diamond, draw, fill = yellow!30, above of = o3, yshift=1.5cm] {$\pi$};
+        \node (r_1) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t1_2] {$R(s_1, a_1)$};
+        \node (r_2) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t2_3] {$R(s_2, a_2)$};
+
+
+        \draw [->, green!50!black, line width=2pt] (s1) -- node[midway, above] {} (o1);
+        \draw [->, green!50!black, line width=2pt] (s2) -- node[midway, above] {} (o2);
+        \draw [->, green!50!black, line width=2pt] (s3) -- node[midway, above] {} (o3);
+
+        \draw [->, black!50, line width=2pt] (s1) -- node[midway, above] {} (t1_2);
+        \draw [->, black!50, line width=2pt] (s2) -- node[midway, above] {} (t2_3);
+
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_1);
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_2);
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_3);
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_2);
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_3);
+        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o3) -- node[midway, above] {} (policy_3);
+
+        \draw [->, color={rgb,255:red,130;green,130;blue,0}, line width=2pt] (policy_1) -- node[color={rgb,255:red,30;green,30;blue,0}, midway, below] {$a_1$} (t1_2);
+        \draw [->, color={rgb,255:red,130;green,130;blue,0}, line width=2pt] (policy_2) -- node[color={rgb,255:red,30;green,30;blue,0}, midway, below] {$a_2$} (t2_3);
+
+        \draw [->, black!50, line width=2pt] (t1_2) -- node[midway, left] {} (s2);
+        \draw [->, black!50, line width=2pt] (t2_3) -- node[midway, left] {} (s3);
+
+        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
+        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
+    \end{tikzpicture}
+  \caption{A POMDP diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
+
+\end{figure}
+Dies ist ein Test, wie das jetzt aussihet
 \subsection{Symmetry}
