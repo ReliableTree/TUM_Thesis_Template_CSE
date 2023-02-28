@@ -474,8 +474,8 @@ J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \m
 where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
 encourages the policy to be more stochastic and explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.
 
-To update the policy, the SAC algorithm uses a state-action value estimate $Q$ which is learned using a state value estimate $V$ similar to \ref{q_from_v}, 
-but with an extra term for the entropy of the policy. $V$ is learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ 
+To update the policy, the SAC algorithm uses a state-action value estimate $Q$ which is learned using a state value estimate $V$ like in \ref{q_from_v}. 
+$V$ is learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ 
 to minimize overestimation:
 
 \begin{equation}
