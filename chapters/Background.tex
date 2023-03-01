@@ -335,10 +335,10 @@ We want to find a policy $\pi^*$ for which the $Q$-function is maximal.
     Q^* = \max_{\pi} \left[\mathbb{E}_{\tau \propto \p(\tau|\pi)} \left[ r + \gamma Q_{\pi} \right]\right]
 \end{equation}
 
-Updateing the $Q$-Value greedily by applying the operator $\mathcal{B}_q$ is guaranteed to converge to the optimal $Q$-Value (see section \ref{opt_contr}):
+Updateing the $Q$-Value greedily by applying the operator $\mathcal{T}_Q^*$ is guaranteed to converge to the optimal $Q$-Value (see section \ref{opt_contr}):
 \begin{equation}
     \begin{aligned}
-        q_{i+1}(s_t, a_t) = (\mathcal{B}_q q_i)(s_t, a_t) \\
+        q_{i+1}(s_t, a_t) = (\mathcal{T}_Q^* q_i)(s_t, a_t) \\
         =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + \gamma  \max_{a'} \left[  q_i(s_{t+1}, a_{t + 1}) \right]\right].
     \end{aligned}
 \end{equation}
@@ -348,12 +348,12 @@ in temporal difference learning (TD-learning) we define a learning rate $\alpha$
 \begin{equation}
     q_{i+1}(s_t, a_t) = q_i(s_t, a_t) + \alpha\left[r(s_t, a_t) + \gamma \left( \max_{a'} q(s_{t+1}, a')\right) - q_i(s_t, a_t) \right]
 \end{equation}
-It is prooven that for a sufficiently small $\alpha$ this update rule will converge to the optimum $Q$-value \cite{Watkins1992}. From this expression we can define a parametric update step by minimizing 
-the RSME $J_Q(\theta_{i})$ between $Q_{\pi_{\theta_{i-1}}}' = \mathcal{B}_q Q_{\pi_{\theta_{i-1}}}$ and $Q_{\pi_{\theta_i}}$:
+It is prooven that for a sufficiently small $\alpha$ this update rule will converge to the optimal $Q$-value \cite{Watkins1992}. From this expression we can define a parametric update step by minimizing 
+the RSME $J_Q(\theta_{i})$ between $Q(\theta_{i-1})' = \mathcal{T}_Q^* Q(\theta_{i-1})$ and $Q(\theta_i)$:
 \begin{equation}
     \begin{aligned}
-        J_Q(\theta_{i}) = \mathbb{E}\left[\left( Q_{\pi_{\theta_{i-1}}}' - Q_{\pi_{\theta_i}} \right)^2\right]\\
-        = \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \left( \max_{a'} q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right]
+        J_Q(\theta_{i}) = \mathbb{E}\left[\left( Q(\theta_{i-1})' - (\theta_i) \right)^2\right]\\
+        = \alpha \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \left( \max_{a'} q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right]
     \end{aligned}
 \end{equation}
 
@@ -361,38 +361,39 @@ We can now use this error to update the parameters of the $Q_{\theta}$-function:
 \begin{equation}
     Q(\theta_{i+1}) : \theta_{i+1} = \theta_{i} - \alpha \nabla J_Q(\theta_{i})
 \end{equation}
+
 \subsubsection{Optimality}
 \label{opt_contr}
 
-We will cover the proof of the existens and uniqueness of $v^*$. Then we will show it's optimality. The respective proofs for $q^*$ are analogous and can be found for example in \cite{Watkins1992}.
+We will cover the proof of the existens and uniqueness of $V^*$. Then we will show it's optimality. The respective proofs for $Q^*$ are analogous and can be found for example in \cite{Watkins1992}.
 Parts of this derivation follows \cite{optimality}.\\ \\
 
 \textbf{Definition:}\\
-Let $(X, d)$ be a complete metric space. A a map $T:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
+Let $(X, d)$ be a complete metric space. A a map $\mathcal{T}:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
 \begin{equation}
-    d(T(x), T(y)) \leq \gamma \cdot d(x,y) | x,y \in X.
+    d(\mathcal{T}(x), \mathcal{T}(y)) \leq \gamma \cdot d(x,y) | x,y \in X.
 \end{equation}
 \\ \\
 
 \textbf{Banach Fixed Point Theorem:}\\
-Let (X,d) be a complete metric space and $T:X \leftarrow X$ a contractor. 
-Then $T$ has a unique fixed point $x^* \in X$, s.t. $T(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}T^n(x)$ converges to $x^*$.\\ \\
+Let (X,d) be a complete metric space and $\mathcal{T}:X \leftarrow X$ a contractor. 
+Then $\mathcal{T}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{T}(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}\mathcal{T}^n(x)$ converges to $x^*$.\\ \\
 
 \textbf{Value Iteration}\\
 Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = \max|X|$. \\
 The value iteration operator $\mathcal{B}$ is defined as:
 \begin{equation}
-    (\mathcal{B}v)(s) = \max_{a \in \mathcal{A}} \left[  r(s,a) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left( v(s')\right) \right]
+    (\mathcal{T}_{V}v)(s) = \max_{a \in \mathcal{A}} \left[  r(s,a) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left( v(s')\right) \right]
 \end{equation}
 \textbf{Assertion}\\
 
-$\mathcal{B}$ is a contrator under the $\infty$-norm.\\ \\
+$\mathcal{T}_{V}$ is a contrator under the $\infty$-norm.\\ \\
 
 \textbf{Proof:}\\
-Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{B}$ the value iteration operator, then:
+Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{T}_{V}$ the value iteration operator, then:
 \begin{equation}
     \label{contractor}
-||\mathcal{B}V_1(s) - \mathcal{B}V_2(s)||_{\infty, s} = 
+||\mathcal{T}_{V}V_1(s) - \mathcal{T}_{V}V_2(s)||_{\infty, s} = 
 \end{equation}
 \begin{equation}
     \left|\left| \max_a \left[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) v_1(s')\right] - \max_{a'}\left[ r(s,a') + \gamma \sum_{s'} p(s' \mid s,a') v_2(s') \right] \right|\right|_{\infty, s}
@@ -420,10 +421,10 @@ Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \le
 \end{equation}
 
 This leaves us to show, that the fix point $V_n$ under the value iteration operator is also the maximum of the value function $V$.\\
-$\mathcal{B}$ is a monoton increasing operator on $V$: 
+$\mathcal{T}_{V}$ is a monoton increasing operator on $V$: 
 \begin{equation}
     \begin{align}
-        \mathcal{B}v(s) = \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v(s')\right]\\
+        \mathcal{T}_{V}v(s) = \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v(s')\right]\\
         \geq r(s,a') + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a') v(s') |a' \in A.
     \end{align}
 \end{equation}
@@ -431,35 +432,44 @@ As $V_n$ is monoton increasing and converges to a unique value, it will approach
 For any practical application, this means it converges to it's maximum.
 
 \subsection{Actor}
-In the derivation of the Bellman operator update rule $\mathcal{B}_q$ we used the $\max$-operator to choose the best action to ensure a monoton increasing value estimate. In practice this is again unfeasable 
-for large or continuous action spaces, so we want a parametrized $\pi$ that computes an action. Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. One way to 
-achieve this is by minimizing the Kullback-Leibler (KL) divergence between the normalized $Q$-Value and the policy $\pi$. 
+In the derivation of the Bellman operator update rule $\mathcal{T}_{V}$ we used the $\max$-operator to choose the best action to ensure a monoton increasing 
+value estimate. In practice this is again unfeasable for large or continuous action spaces. Instead, we want a parametrized $\pi$ that computes an action. 
+Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. It can be shown that with sufficiently small scheduled update 
+steps $\alpha(i)$, monoton stochasitc improvement is guaranteed for the update step:
 \begin{equation}
-    \label{kl-obj}
+    \pi_{\phi_{i+1}}: \phi_{i+1} \leftarrow \phi_i + \alpha(i) \left(
+        \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
+            \sum_{t=0}^{T} \nabla_t \pi_{\phi_i} \right]
+    \right)
+\end{equation}
+\begin{equation*}
+    \text{with} \quad \nabla_t \pi_{\phi_i} = \nabla_{\theta} log \left( \pi_{\phi_i}(a_t|s_t)\right) \mathbb{E}_{a_t, s_t...a_T, s_T \propto \pi} \left[ Q_{\pi_{\phi_i}} \right] 
+\end{equation*}
+, where $Q_{\pi_{\phi}}$ is the fix point of the Bellman operator $\mathcal{T}_{Q_{\pi_{\phi}}}$:
+
+\begin{equation}
+    Q_{\pi_{\phi}} = \lim_{n \to \infty} Q^n_{\pi_{\phi}}
+\end{equation}
+
+\begin{equation*}
+    \text{with}\quad q^{n+1}(s,a) = \mathcal{T}_{Q_{\pi_{\phi}}}q^n(s,a) = r(s,a) + \gamma \mathbb{E}_{\tau \propto {\pi_{\phi}}}[q^n(s_{t+1}, a_{t+1})]
+\end{equation*}
+with corresponding temporal difference term:
+\begin{equation}
     \begin{aligned}
-        J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q^{\pi_{\phi_{i-1}}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q^{\pi_{\phi_{i-1}}}(a|s_t))} \right) \\
-        \pi_{new} = \underset{\pi' \in \Pi}{\arg\min} J_\pi(\phi_{i})
+        J_{Q_{\pi_{\phi_i}}}(\theta_{i}) = \mathbb{E}\left[\left({Q_{\pi_{\phi_i}}}(\theta_{i-1})' - Q_{\pi_{\phi_i}}(\theta_{i}) \right)^2\right]\\
+        = \alpha \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \mathbb[E]_{a' \propto \pi_{\phi_i}}\left( q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right].
     \end{aligned}
 \end{equation}
-with the update rule
-\begin{equation}
-    \pi_{\phi_{i}} : \phi_{i} = \phi_{i-1} - \alpha \nabla J_\pi(\phi_{i-1})
-\end{equation}
-, where $\Pi$ represents the class of all policies that can be parametrized using the respective architecture. \\
-The KL divergence is a measure of the alikeness of two distributions $P(x)$ and $Q(x)$ over the same sample space $X$:
-\begin{equation}
-    \label{KL}
-    \mathrm{KL}(P\|Q) = \int_{x\in X} P(x) \log \frac{P(x)}{Q(x)} \mathrm{d}x
-\end{equation}
-It is non negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
-a common choice in deep learning applications.\\
-
-In the paper "Soft Actor-Critic" by Haarnoja et al. \cite{haarnoja2018soft}, 
-Lemma 2 prooves the optimality and convergence of this approach. The paper deals with a slightly altered stochasitc formulation of the actor critic paradigm, however the Lemma is generally applicable.
+This defines two update steps, one for the policy and one for the critic. Some algorithms don't use the $Q$ value for the update step of the policy, but a closely 
+related value, called the advantage $A_t$ defined as $A_t = -V(s_t) + r_t + \gamma r_{t+1} + \cdots + \gamma^{T-t+1} r_{T-1} + \gamma^{T-t} V(s_T)$ \cite{A2C}. For the one step 
+unroll of the rewards, this value becomes $A_t = Q(a_t, s_t) - V(s_t)$. 
+Intuitively, the advantage $A$ is a measure for how good a specific action $a$ is compared to the average action taken by the current policy. 
+A proof for the convergence and optimality of this estimator can be found in \cite{proof_A}.
 
 \subsection{Soft Actor-Critic}
 \label{SAC}
-In the paper "Soft Actor-Critic" from Tuomas Haarnoja, et al. \cite{haarnoja2018soft} anew approach for exploration is introduces. Exploration vs. exploitation 
+In the paper "Soft Actor-Critic" from Tuomas Haarnoja, et al. \cite{haarnoja2018soft} a new approach for exploration is introduces. Exploration vs. exploitation 
 is a fundamental trade-off in reinforcement learning. On the one hand, an agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. On the other hand, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of RL algorithms, and different methods aim to find a good compromise between them.
@@ -474,46 +484,54 @@ J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \m
 where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
 encourages the policy to be more stochastic and explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.
 
-To update the policy, the SAC algorithm uses a state-action value estimate $Q$ which is learned using a state value estimate $V$ like in \ref{q_from_v}. 
-$V$ is learned with the minimum of two separate critics $Q_1^\theta(s,a)$ and $Q_2^\phi(s,a)$ 
-to minimize overestimation:
+in the original mplementation, SAC uses two $Q$ value estimates and a $V$ value estimate. The V value is learned by 
 
 \begin{equation}
-    V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[Q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}]
+    V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}]
 \end{equation}
-
-Using this, the critics are trained with typical TD:
+, with the minimum value of the two $Q$ critics $Q_\text{min}$ to decrease the overestimation bias of critics in actor critic algorithms. 
+Using this, the $Q$ values are trained with typical TD:
 
 \begin{equation}
-    \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(Q_{\theta_i}(s_t,a_t) - y_t)^2]
+    \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(q_{\theta_i}(s_t,a_t) - y_t)^2]
 \end{equation}
 
-where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. The policy is updated to minimize the KL-Divergence to the normalized $Q$-Values as described in \ref{kl-obj}:
+where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. 
+
+The policy is updated to minimize the Kullback-Leibler (KL) divergence to the normalized $Q$-Values:
 \begin{equation}
     \label{sac_pol_obj}
     J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q_{min, {\theta_i}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\theta_i}(a|s_t))} \right).
 \end{equation}
 
+The KL divergence is a measure of the alikeness of two distributions $P(x)$ and $Q(x)$ over the same sample space $X$:
+\begin{equation}
+    \label{KL}
+    \mathrm{KL}(P\|Q) = \int_{x\in X} P(x) \log \frac{P(x)}{Q(x)} \mathrm{d}x
+\end{equation}
+It is non negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
+a common choice in deep learning applications.\\
+
+This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper. \\
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
 To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrisation trick is used:
 
 \begin{equation}
     \begin{align}
         \nabla_{\phi}J_\pi(\phi_{i}) \approx \mathbb{E}_{\mathcal{D}} [\nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
-        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)]
+        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)].
     \end{align}
 \end{equation}
+
+
 
 To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. All algorithms discussed in this thesis will use a stochastic 
 actor and entropy regularisation.
 \subsection{PPO}
-A motivation to develop Actor-Critic methods was the high variance of the cumlative reward $G_t$ used in the update step of the REINFORCE algorithm 
-\ref{reinf_update}. To further improve the stability of the gradient update, a common approach is to use the advantage function $A(s,a)$ instead of the 
-$Q$-value: 
+Recall the advantage estimator was defined as:
 \begin{equation}
     A(s,a) = Q(s,a) - V(s).
 \end{equation}
-Intuitively, the advantage $A$ is a measure for how good a specific action $a$ is compared to the average action taken by the current policy. 
 Plugging in the advantage estmiator into \ref{reinf_update} gives the update rule:
 \begin{equation}
     \nabla_{\theta} J(\pi_{\theta}) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[\nabla_{\theta} log(\pi_{\theta}(a|s))A(s,a)]
@@ -627,7 +645,7 @@ From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right]
 \end{equation}
-, similar to the PPO loss \ref{PPO_Loss_Reg}. In the paper, they use N critics $\psi_n$. To keep the notation clean, I derived the main ideas using only one. An 
+, similar to the PPO loss \ref{PPO_Loss_Reg}. In the paper, they use N critics $\psi_n$. To keep the notation clean, we derived the main ideas using only one. An 
 overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 
 \begin{algorithm}
@@ -651,7 +669,8 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
         \State \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
     \end{algorithmic}
 \end{algorithm}
-TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment.
+TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
+for off policy learning, in contrast to PPO, which wsa designed for on policy uodate steps.
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
@@ -899,5 +918,4 @@ recurrent neural networks are usually used model $\pi$. One example is the recur
   \caption{A POMDP diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
 
 \end{figure}
-Dies ist ein Test, wie das jetzt aussihet
 \subsection{Symmetry}
