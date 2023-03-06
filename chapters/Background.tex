@@ -829,7 +829,10 @@ The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{r'}^*$ be the 
     \EndFor}
     \end{algorithmic}
     \end{algorithm}
+
+
 \section{Partially Observable Markov Decision Processes}
+\label{POMDP}
 So far we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
 transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
 is only partially observable, which violates the assumption. Those dynamics are captured in a Partially Observable Markov Decision Processes (POMDPs).
@@ -916,6 +919,207 @@ recurrent neural networks are usually used model $\pi$. One example is the recur
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
   \caption{A POMDP diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
-
 \end{figure}
-\subsection{Symmetry}
+
+\subsection{Curse Of Dimensionality}
+\label{COD}
+The curse of dimensionality describes how the volume of a distribution increases exponentially with the dimension of that distribution. That means in general, 
+that you need exponentially many observations from a distribution to get sufficient evidence for a model. One way to deal with this is to propose a 
+factorisation of the distribution. Let's assume we want to train a probability model on n dimensions. \\
+One way to motivate this is by assuming a simple 
+discrete probability distribution for a two class classifier on n dimensions with two values per dimension:
+\begin{equation}
+    p(C=i|x_1, ..., x_n)  = \theta_{i,j} | i \in \{0, 1\}, j \ in \{0, ..., 2^n\}
+\end{equation}
+, as there are $2^n$ possible values for $x_1, ..., x_n$ and two values for the class label. This gives a total of $2*(2^n-1)$ cases, where the $-1$ comes from using 
+the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empiciral distribution 
+with $\sigma_{\theta_{i,j}} \propto \frac{1}{N}$ and thus the standard deviation scales with $\frac{1}{\sqrt{N}}$, where N is the number of samples 
+for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon$, you get
+\begin{equation}
+    N_{i,j} > \left(\frac{1}{\epsilon}\right)^2
+\end{equation}
+and $N = \sum_{i, j} N_{i, j} = 2 (2^n-1) N_{i,j}$. While this example uses discrete distributions, continuous distributions also empirically follow a similar 
+power law.\\
+This can be explained, for example, by using the bayesian information criterion (BIC), assuming the parameter number increases linearly with the dimension 
+of the problem, which is a natural assumption given that for each degree of freedom, you need at least one parameter. 
+The BIC links the evidence for a model to the number of parameteres in that model, \cite[chapter 12.2.8]{https://www.stat.cmu.edu/~larry/=sml/Bayes.pdf}.
+The idea behind the BIC is to model the posterior distribution $p(\mathcal{M}|\mathcal{D})$ as a functino of the number of parameters of $\mathcal{M}$. 
+Let $\mathcal{L}_n(\theta_j) = p(\mathcal{D}_n|\mathcal{M}_j, \theta_{j})$ with the model $\mathcal{M}_j$ and its parameter values $\theta_j$ be the likelihood 
+of measuring some data $\mathcal{D}_n$ under the assumption of model $\mathcal{M}_j$ with parameters $\theta_j$. The BIC is defined as:
+\begin{equation}
+    BIC(M_j) = \text{log}(\mathcal{L}_n(\theta_j)) - \frac{d}{2} \text{log}(n)
+\end{equation}
+, with $d$ the number of parameters of $\mathcal{M}$ and n the number of samples in the dataset $D_n$.
+It can be shown that, under certain regularity conditions of $D_n$ and $\mathcal{M}_j$, the posterior probability of model $\mathcal{M}_j$ can be approximated by:
+\begin{equation}
+    p(\mathcal{M_j}|\mathcal{D}_n) \approx \frac{\text{exp}(BIC(\mathcal{M}_j))}{\sum_{i=i}^K(\text{exp}(BIC(\mathcal{M}_i)))}
+\end{equation}
+, which is exponential in the number of parameters $d$.
+In summary, evidence for a model is approximately inverse proportional to the exponent of the number of dimension of the dataset it is trained on.
+
+
+\section{Sequence Models}
+A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same lenght. For exmaple, 
+a sequence model could take as input a sequence of n observations and return one action. Sequence models are a natural choice to model POMDPs, as mentioned in 
+\ref{POMDP}.\\ 
+Naviely, the input sequence of n tokens with dimension d could be modeled by stacking the n inputs together and use the stacked obersvation sequence as one 
+input to a model. The dimension of the input then scales linear with the sequence length. As motivated in \ref{COD}, this means exponentially more evedience is 
+needed to achieve the same confidence with the sequence lenght n. Such approaches are sometimes called frame stacking and can solve a POMDP 
+\cite{https://wandb.ai/sb3/no-vel-envs/reports/PPO-vs-RecurrentPPO-aka-PPO-LSTM-on-environments-with-masked-velocity-SB3-Contrib---VmlldzoxOTI4NjE4}, though 
+their performance decreases with the number of frames needed to accuraltely represent the POMDP. \\
+Frame stacking handels the input sequence uniformely without regard for structure of the input data. We know however, that consecutive observations share a common 
+structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
+sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically in %\cite{https://www-i6.informatik.rwth-aachen.de/publications/download/843/SundermeyerMartinOparinIlyaGauvainJean-LucFreibergBenSchl%7Bu%7DterRalfNeyHermann--ComparisonofFeedforwardRecurrentNeuralNetworkLanguageModels--2013.pdf}. 
+Currently there are two types of squence models widely used:
+\begin{itemize}
+    \item Recurrent Neural Networks
+    \item Attention Based Neural Networks
+\end{itemize}
+.
+
+\subsection{Recurrent Neurall Networks}
+Recurrent neural networks (RNNs) are a type of neural network, where the previous outputs are fed back as inputs to the current computation. A diagram of a 
+recurrent neural network is depicted in \ref{RNN_diag}.
+RNNs have been successfully used in various applications, such as natural language processing, speech recognition, and image captioning. 
+However, traditional RNNs suffer from the problem of vanishing gradients, where the gradients become extremely small as they propagate back in time, 
+leading to slow learning and difficulty in capturing long-term dependencies.
+For a traditional neural network, suppose the activation of a hidden state at time t+1 depends on the hidden state at time t like:
+\begin{equation}
+    h_{t+1} = \sigma(\omega h_t)
+\end{equation}
+, where we ignored an input term and a bias term for ease of annotation. Now the update rule after t timesteps is:
+\begin{align*}
+        \frac{\partial h_t}{\partial h_1} \approx \Pi_{t'=1}^t \omega \sigma'(\omega h_{t'}) \\
+        = \omega^{t} \Pi_{t'=1}^t \sigma'(\omega h_{t'}).
+\end{align*}
+If $\omega != 1$, this becomes zero (vanishing gradient) or infinity (exploding gradient) exponentially quickly in t.
+To address this issue, Long Short-Term Memory (LSTM) and Gated Recurrent Units (GRU) were proposed as more effective RNN variants. 
+LSTMs introduce a memory cell that can selectively store and erase information, and a set of gates to control the flow of information. 
+GRUs simplify the LSTM architecture by introducing only two gates, the reset gate and update gate, while also allowing the cell to learn when to reset its state. 
+GRUs have been emirically shown to have comparable performance to LSTMs \cite{https://arxiv.org/pdf/2107.02248.pdf}.
+
+\begin{figure}
+    \label{RNN_diag}
+    \centering
+    \begin{tikzpicture}[scale=0.6]
+        font=\fontsize{20};
+        % Define nodes
+        \node (o0) [] {};
+        \node (o1) [circle, draw, fill = green!30, right of = o0, xshift=2.5cm] {$o_1$};
+        \node (o2) [circle, draw, fill = green!30, right of = o1, xshift=2.5cm] {$o_2$};
+        \node (o3) [circle, draw, fill = green!30, right of = o2, xshift=2.5cm] {$o_3$};
+        \node (o4) [right of = o3, xshift=2.5cm] {};
+
+        \node (RNN_0) [above of = o0, yshift=1cm] {};
+        \node (RNN_1) [diamond, draw, fill = yellow!30, above of = o1, yshift=1cm] {RNN};
+        \node (RNN_2) [diamond, draw, fill = yellow!30, above of = o2, yshift=1cm] {RNN};
+        \node (RNN_3) [diamond, draw, fill = yellow!30, above of = o3, yshift=1cm] {RNN};
+        \node (RNN_4) [above of = o4, yshift=1cm] {};
+
+        \node (y_1) [above of = RNN_1, yshift=1cm] {};
+        \node (y_2) [above of = RNN_2, yshift=1cm] {};
+        \node (y_3) [above of = RNN_3, yshift=1cm] {};
+
+
+        \draw [->, black!50, line width=2pt] (o1) -- node[midway, above] {} (RNN_1);
+        \draw [->, black!50, line width=2pt] (o2) -- node[midway, above] {} (RNN_2);
+        \draw [->, black!50, line width=2pt] (o3) -- node[midway, above] {} (RNN_3);
+
+        \draw [->, black!50, line width=2pt] (RNN_0) -- node[midway, above] {$h_0$} (RNN_1);
+        \draw [->, black!50, line width=2pt] (RNN_1) -- node[midway, above] {$h_1$} (RNN_2);
+        \draw [->, black!50, line width=2pt] (RNN_2) -- node[midway, above] {$h_2$} (RNN_3);
+        \draw [->, black!50, line width=2pt] (RNN_3) -- node[midway, above] {$h_3$} (RNN_4);
+
+        \draw [->, black!50, line width=2pt] (RNN_1) -- node[midway, left] {$y_1$} (y_1);
+        \draw [->, black!50, line width=2pt] (RNN_2) -- node[midway, left] {$y_2$} (y_2);
+        \draw [->, black!50, line width=2pt] (RNN_3) -- node[midway, left] {$y_3$} (y_3);
+
+
+
+    \end{tikzpicture}
+  \caption{A Recurrent Neural Network with input observations $o_n$, hidden activations $h_n$ and outputs $y_n$.}
+\end{figure}
+
+
+The update equations for the GRU cell can be written as follows:
+
+\begin{align}
+    u_t = \sigma(W_u x_t + R_u h_{t-1} + b_u)\\
+    r_t = \sigma(W_r x_t + R_r h_{t-1} + b_r)\\
+    \tilde{h}_t = \tanh(W_h x_t + (r_t \odot h_{t-1})R_h + b_h)\\
+    h_t = (1 - u_t) \odot h_{t-1} + u_t \tilde{h}_t\\
+    y_t = \sigma(W_y h_t + b_y)
+\end{align}
+
+
+
+where $h_{t-1}$ is the previous hidden state, $x_t$ is the current input, $r_t$ and $z_t$ are the reset and update gates, respectively, $\tilde{h}_t$ is the new candidate hidden state, and $h_t$ is the updated hidden state.
+
+While it can be shown that GRUs still have vanishing gradients, they cannot have exploding gradients, which stabilizes the training process \cite{https://arxiv.org/pdf/2107.02248.pdf}.
+
+Overall, LSTMs and GRUs are two popular types of recurrent neural networks that address the exploding gradients problem by introducing gating mechanisms to 
+selectively store and erase information. 
+
+\subsection{Attention Based Sequence Models}
+
+While RNNs are a popular choice for sequence modeling, they have some limitations such as difficulties in capturing long-term dependencies and parallelization.
+Attention based sequence models, on the other hand, allow parallel processing of the input sequence and can selectively focus on relevant parts of the 
+input sequence. \\
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\textwidth]{images/TF_Encoder.png}
+
+      \caption{Overview Transformer Encoder.}
+      \label{fig:encoder}
+    \end{subfigure}
+    \hspace{0.1\textwidth}
+    \begin{subfigure}{0.3\textwidth}
+        \includegraphics[width=\textwidth]{images/AttentionHead.png}
+        \caption{Attention Mechanism.}
+      \label{fig:selfattention}
+    \end{subfigure}
+    \caption{Transformer Encoder Architecture \cite{transformer}.}
+    \label{fig:main}
+  \end{figure}
+
+The idea of attention can be explained as follows: given a set of inputs, the model learns to assign a weight to each input based on its relevance to the 
+task at hand.
+This weighted sum of inputs is then used as a representation of the input sequence. This mechanism allows the model to focus on the most important 
+parts of the input sequence while ignoring the rest.
+
+One of the most successful architectures for attention based sequence models is the Transformer \cite{vaswani2017attention}. In the original paper, the transformer 
+consists of an encoder and a decoder. For the purpose of this thesis, we are only interested in the encoder \ref{fig:encoder}, as it captures all functionality of attention based 
+algorithms for sequence generation. 
+The Transformer is a self-attention based model that can be used for a variety of sequence-to-sequence tasks such as machine translation,
+text summarization, and language modeling.
+
+The Transformer architecture consists of an encoder and a decoder, each containing multiple layers of self-attention and feedforward neural networks. 
+The self-attention layer computes the weighted sum of all input tokens, where the weights are computed based on the similarity between the query, key and value
+vectors \ref{fig:selfattention}.
+The feedforward layer applies a point-wise feedforward transformation to each token separately.
+
+In the self-attention layer, each input token is transformed into a query, key, and value vector.
+These vectors are used to compute the attention weights between each pair of input tokens.
+The resulting weighted sum of value vectors is used as the output of the self-attention layer.
+The attention weights are computed as follows:
+\begin{equation}
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V,
+\end{equation}
+where $Q$, $K$, and $V$ are the query, key, and value vectors, respectively, and $d_k$ is the dimensionality of the key vectors.
+The softmax function normalizes the dot product of $Q$ and $K$, which represents the similarity between the query and key vectors.
+The attention weights represent the importance of each value vector in the weighted sum.\\
+The vectors $Q$, $K$ and $V$ are computed using a position wise feed forward network with ReLU activation:
+\begin{equation}
+    QKV = \text{ReLU}(x \ W_1 + b1)W_2 + b_2
+\end{equation}
+, where the same weights $W_n$ and biases $b_n$ are used for every input $x$ of the sequence. This is expected to be an advantage following the BIC argument from \ref{COD}.  
+However with this setup, the model has no way to encode the relative position of the tokens, which is why a positional encoding is added along the sequence dimension, 
+using sin and cosin functions, to break the symmetry. \\
+One advantage of the Transformer architecture is that it does not suffer from the problem of vanishing or exploding gradients.
+This is because the self-attention mechanism allows the model to directly access any input token, without the need for recurrent connections.
+Thus, the Transformer can process input sequences in parallel and does not suffer from the long-term dependencies problem that plagues RNNs. Self attention type 
+architectures have been shown to outperform recurrent networks on a number of sequence based tasks. For example they are used in the GPT-3 architecture, which has 
+shown impressive results the natural language prediction \cite{https://arxiv.org/abs/2005.14165}. While they were developed for natural language tasks, they have 
+shown promising results in a multitude of areas, including image generation, image classification, imitation learning and reinforcement learning.
