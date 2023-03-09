@@ -54,8 +54,51 @@ tasks, which greatly outperforms a baseline using an end to end RNN model with $
     \label{lang_imi_expl}
 \end{figure}
 
-
-
 \section{Fine Tuning}
-\subsection{Sparse Rewards in MDPs}
+Fine-tuning in RL refers to the process of adapting a pre-trained RL model to a new task or environment. In this thesis, fine tuning is done by using behavioural 
+cloning on an expert dataset with n trajectories. In the fine tuning phase, the pretrained policy is used in the environment of the task and adiitional feedback 
+like sparese rewards are used to enhance the performance of the policy. Fine tuning is a common approach to overcome the exploration problem of high dimensional 
+spaces.
+\subsection{Sparse Rewards in MDPs with Expert Demonstrations}
+In the paper Leveraging Demonstrations for Deep Reinforcement Learning on Robotics Problems with Sparse Rewards \cite{LDDRLP} the authors describe a priority 
+sampling algorithm in combination with the deep deterministic policy gradient (DDPG) algorithm as described in \ref{AC-Alg}. The probability with which a 
+training sample is chosen from the replay buffer is described as:
+\begin{equation}
+    P(i) = \frac{p_i^\alpha}{\sum\limits_{k} p_k^\alpha}
+\end{equation}
+with 
+\begin{equation}
+    p_i = \delta_{i}^2 + \lambda \lvert \nabla_a Q(s_i, a_i \vert \theta_Q) \rvert^2 + \epsilon + \epsilon_{D}.
+\end{equation}
+Here $\delta_{i}$ is the temporal difference error, $\lambda$ is used to weigh the importance of the sample i with respect to the loss of the actor, 
+$\epsilon$ is a small constant to ensure every transition is chosen with probability $p_i > 0$ and $\epsilon_D$ is a positive constant aplied for expert transitions.\\
+The idea behind this importance sampling algorithm is to amment the priority experience replay probability as developed in \cite{https://arxiv.org/pdf/1511.05952.pdf} 
+with a constant $\epsilon_{D}$ for expert demonstrations to make the policy converge faster to the expert behaviour. In priority experience replay, more rare 
+experiences are chosen more likely to use the data in the replay buffer more efficiently. Moreover, they use a combination between $n=1$ temporal difference and 
+$n=N > 1$ temporal difference to get better estimations for rewards that are in the distant future, as they assume sparse rewards.\\
+The effectiveness of the approach is demonstrated by comparing the performance of their importance sampling algorithm with sparse rewards to a standard DDPG 
+implementation using no expert demonstration but dense reward. The authors find that their approach can learn faster then standard DDPG with 100 expert 
+demonstrations on a challenging robotic insertion task.\\ 
+A problem with this approach is, that the critic assumes the demporal difference error approximates the distribution induced by the policy $\pi_{\theta}$, but by 
+mixing in expert demonstrations, the expected $Q$ value will be higher, then that of the policy $\pi_{\theta}$. This overestimation can lead to poor performance. 
+The authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversly proportinal to the 
+probability of choosing a transition and thus counter acts the improvement rate towards expert behaviour.
 \subsection{GAIL in POMDPs}
+Recall that GAIL optimized the objective
+\begin{equation*}
+    \min_{\theta} \max_{\omega} \mathbb{E}_{(s,a)\sim \pi_{\theta}, \mathcal{T}} [\log(1 - D_{\omega}(s,a))] + \mathbb{E}_{(s,a)\sim \mathcal{M}_{\text{E}}} [\log D_{\omega}(s,a)]
+\end{equation*}
+as derived in \ref{GAIL_Obj}, where $\mathbb{E}_{(s,a)\sim \mathcal{M}_{\text{E}}}$ denotes the expected distribution of the expert policy and 
+$\mathbb{E}_{(s,a)\sim \pi, \mathcal{T}}$ denotes the expected distribution of the learned policy $\pi$, $D_{\omega}$ is the discriminator measuring how likely a state 
+action pair was induced by the expert policy or the learned policy $\pi_{\theta}$. The paper "Learning Belief Representations for Imitation Learning in POMDPs" \cite{https://arxiv.org/pdf/1906.09510.pdf} 
+extends the GAIL paradigm to work on POMDPs. To do so, they intorduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
+representation of the beliefe state $b_t$ \ref{pomdp_bayes}, which forms a sufficient statistic for the POMDP 
+$p(s_t|o_{\leq t}, a_{\leq t}) = p(s_t|b_t) \approx p(s_t|b_{t, \phi})$. Using $b_{\phi}$ instead of $s$ the new objective is:
+\begin{equation}
+    \min_{\phi,\theta}\max_{\tilde{\omega}} &\mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\log(1-D_{\tilde{\omega}}(b_{\phi},a))]
+\end{equation}
+. The authors include three regularisation losses to improve the expressiveness of $b_{\phi}$ of the form 
+\begin{equation}
+    \mathcal{L}^f(\phi) = \mathbb{E}_{\mathcal{R}} ||f_{\text{goal}}(t, k) - g(b_t^\phi, \text{input}_{t, k})||_2^2
+\end{equation}, 
+where they un

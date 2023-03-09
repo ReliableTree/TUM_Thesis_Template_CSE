@@ -301,6 +301,7 @@ and
 
 
 \section{Actor-Critic Algorithm}
+\label{AC-Alg}
 One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
 rule is off policy with high variance. An idea is to approximate the expectation over $G_t$ using another neural network, so that an update can be made after every step, 
 rather then after the whole trajectory. This approximation is referred to as a "critic" in the actor critic method.
@@ -461,7 +462,7 @@ with corresponding temporal difference term:
         = \alpha \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \mathbb[E]_{a' \propto \pi_{\phi_i}}\left( q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right].
     \end{aligned}
 \end{equation}
-This defines two update steps, one for the policy and one for the critic. Some algorithms don't use the $Q$ value for the update step of the policy, but a closely 
+This defines two update steps, one for the policy and one for the critic. Commonly this approach is called deep deterministic policy gradient or DDPG \cite{https://arxiv.org/pdf/1509.02971.pdf}. Some algorithms don't use the $Q$ value for the update step of the policy, but a closely 
 related value, called the advantage $A_t$ defined as $A_t = -V(s_t) + r_t + \gamma r_{t+1} + \cdots + \gamma^{T-t+1} r_{T-1} + \gamma^{T-t} V(s_T)$ \cite{A2C}. For the one step 
 unroll of the rewards, this value becomes $A_t = Q(a_t, s_t) - V(s_t)$. 
 Intuitively, the advantage $A$ is a measure for how good a specific action $a$ is compared to the average action taken by the current policy. 
@@ -801,6 +802,7 @@ This is useful, as it allows us to rewrite the reinforcement learning problem as
 In the GAIL paper, the regularizor $\psi$ is chosen such that  $\psi^*_{\text{GA}}(\rho_{\pi} - \rho_{\pi^E}) - \lambda H(\pi) = \text{D}_{JS}(\rho_{\pi}, \rho_{\pi_{r'}^*}) - \lambda H(\pi)$.\\
 Here GA stands for generative adverserial, because the paper proposes a generative adverserial algorithm to find the policy $\pi$ that minimizes $\psi^*$ with the maximum possible $\psi^*$:
 \begin{equation}
+    \label{GAIL_Obj}
     \underset{\pi}{\text{argmin}} \left( \underset{D}{\text{argmax}} (\mathbb{E}_{\pi}[\log(D(s,a))] + \mathbb{E}_{\pi_{r'}^*}[\log(1-D(s,a))] - \lambda H(\pi)) \right)
 \end{equation}
 , where $D$ is the discriminator used is $\psi^*$.
