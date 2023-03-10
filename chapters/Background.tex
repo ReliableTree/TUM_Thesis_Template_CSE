@@ -763,54 +763,89 @@ maximum causal entropy IRL \cite{max_cause_ent_IRL} has been a popular choice to
 which the optimal policy has the highest entropy with respect to the action distribution. This allows us to choose a policy that is "no more comitted to any 
 particular path" \cite[p.2]{max_cause_ent_IRL}, then necessary. Combining these two ideas gives us the objective:
 \begin{equation}
-    \underset{r \in R}{\text{minimize}} \left( \max_{\pi \in \Pi} \mathbb{H}(\pi) + \mathbb{E}_{\pi}[r(s, a)] \right) - \mathbb{E}_{\pi_{r'}^*}[r(s,a)]
+    \label{proto_inf_ler}
+    \underset{r_{\text{inv}} \in \mathcal{R}}{\text{minimize}} \left( \max_{\pi \in \Pi} \left( - \text{H}(\pi) + \mathbb{E}_{\pi}[r_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{r'}^*}[r_{\text{inv}}(s,a)] \right)
 \end{equation}
-, with the discounted causal entropy 
+, with the discounted reward expectation
+\begin{equation*}
+    \mathbb{E}_{\pi}[r(s, a)] =
+    \mathbb{E}_{(s,a,t) \propto \pi}[\gamma^t r(s,a)] = 
+    \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^\infty \gamma^t r_t \right]
+\end{equation*}
+\\
+and the discounted causal entropy:
+\begin{equation*}
+    \mathbb{H}(\pi) = \mathbb{E}_{s_0, a_0} \left(\text{H}_{\pi}(a_{0...\infty}, s_{0,...\infty})\right) = \mathbb{E}_{\pi}\left[\sum_{t=0}^\infty -\gamma^t log \pi(a_t|s_t)\right]
+\end{equation*}
+\cite{InfCausalEnt}. Here $\pi_{r'}^*$ denotes the expert policy. We wrote $\pi_{r'}^*$ to indicate that the expert policy is assumed to maximize a true 
+reward function ${r'}$. From now, we will refer to the expert policy as $\pi_{\text{E}}$, as it is more in line with the common choice found in 
+literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for reinforcement learning. In the GAIL paper, 
+the authors use a cost function $c$, which should be minimized, instead of a reward function, which sould be maxmized. This choice does not make a profound 
+mathematical difference, but it gives a more natural way to interpret the inverse objective. $c=0$ can be naturally defined as the optimal cost value, while a reward function has 
+no natural upper bound. For this pratical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimisation in 
+\ref{proto_inf_ler} becomes a maximisation and vise versa:
 \begin{equation}
-    \mathbb{H}(\pi) = \mathbb{E}_{s_0, a_0} \left(\mathbb{H}_{\pi}(a_{0...\infty}, s_{0,...\infty})\right) = \mathbb{E}_{\pi}\left[\sum_{t=0}^\infty -\gamma^t log \pi(a_t|s_t)\right]
-\end{equation}
-\cite{InfCausalEnt}. Here $\pi_{r'}^*$ denotes the expert policy. In pratice we don't have access to the expecation $\mathbb{E}_{\pi_{r'}^*}[r(s,a)]$, so we approximate it with N 
-trajectories including the state action pair $(s,a)$
-\begin{equation}
-    \mathbb{E}_{\pi_{r'}^*}[r(s,a)] \approx \frac{1}{N} \sum_N \sum_t \gamma^t r(s_t,a_t) \delta_{s_t=s, a_t=a}.
+    \label{proto_inf_ler_c}
+    \pi_{\text{inv}}^* = \underset{c_{\text{inv}} \in \mathcal{C}}{\text{max}} \left( \min_{\pi \in \Pi} \left(- \text{H}(\pi) + \mathbb{E}_{\pi}[c_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{\text{E}}}[c_{\text{inv}}(s,a)] \right)
 \end{equation}
 
-In a similar way, we approximate $\mathbb{H}(\pi) + \mathbb{E}_{\pi}[r(s, a)]$.\\
-In the paper Generative Adversarial Imitation Learning (GAIL) \cite{GAIL} the authors suggest a second convex regularizor 
-$$\psi : \mathcal{R}^{\mathcal{S} \times \mathcal{A}}\rightarrow \mathcal{R}$$ for the cost function. Moreover, instead of maximizing the expected reward they find a cost function, under which 
-the expected cost in the RL phase is minimized. The cost function $c$ could simply be $-r$, but it implies a natural maximum at $c_{max} = 0$.
-The new IRL objective can be written as:
+The key insight of the paper is, that this optimisation problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
+induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the MDP. If two policies visit the same 
+states and choose the same actions, they are similar to each other.\\
+Formally, the occupancy measure is defined as 
+\begin{equation*}
+    \rho_{\pi}:\mathcal{S} \times \mathcal{A} \rightarrow \mathbb{R} = \pi(a|s)\sum_{t=0}^\infty \gamma^tP(s_t=s|\pi)
+\end{equation*}
+. With this, the discounted reward expectation can be written as:
 \begin{equation}
-    c^* \in \text{IRL}_{\psi}(\pi_{r'}^*) = \{\underset{c}{\text{arg max}} -\psi(c) + \left(
-        \min_{\pi} - \mathbb{H}(\pi) + \mathbb{E}_{\pi}[c(s,a)] \right) - 
-        \mathbb{E}_{\pi_{r'}^*}[c(s,a)] \}
+    \mathbb{E}_\pi[c(s,a)] = \sum_{s,a} \rho_\pi(s,a) c(s,a)
 \end{equation}
-with the corresponding reinforcement learning problem $\pi_{\text{inv}} = \underset{\pi}{\text{arg min}} (- \mathbb{H}(\pi) + \mathbb{E}_{\pi}[c(s,a)])$.\\
-Using the notion of an occupancy measure $\rho_{\pi}$, which indicates how often a certain state and action is visited by a policy $\pi$, defined as:
+and \ref{proto_inf_ler_c} can be written as:
 \begin{equation}
-    \rho_{\pi}(s, a) = \pi(a|s) \sum_{t=0}^{\infty} \gamma^{t} P(st = s | \pi)
+    \label{occ_meas_obj}
+    \pi_{\text{inv}}^* = \max_{c_{\text{inv}} \in \mathcal{C}} \left( \min_{\rho_\pi \propto \pi \in \Pi} \left(- \bar{\text{H}}(\rho_\pi) + \sum_{s,a} \rho_\pi(s,a) c(s,a) \right) - \sum_{s,a} \rho_{\text{E}}(s,a) c(s,a) \right)
 \end{equation}
-the expectation can be rewritten as:
+
+. It can be shown that a policy is uniquely identified with its occupancy measure $\rho_{\pi} \propto \pi$. With this in mind, we want to rewrite \ref{proto_inf_ler_c} as a constrained satisfaction problem
 \begin{equation}
-    \mathbb{E}_{\pi}[c(s,a)] = \sum_{s,a} \rho_{\pi}(s,a) c(s,a).
+    \label{const_sat_gail}
+    \pi_{\text{inv}}^* = \min_{\pi \propto \rho_{\pi}} - \bar{\text{H}}(\rho_{\pi})\quad \text{subject to }\quad \rho_{\pi}(s,a) = \rho_{\text{E}}(s,a) \quad \forall s \in \mathcal{S}, \forall a \in \mathcal{A}
 \end{equation}
-This is useful, as it allows us to rewrite the reinforcement learning problem as the dual of the regularisation function $\psi$:
-\begin{align}
-    \pi_{\text{inv}} = \arg\min_{\pi \in \Pi} -H(\pi) + \psi^*(\rho_{\pi} - \rho_{\pi_{r'}^*})
-\end{align}
-, where $\psi^*$ is the convex conjugate of $\psi$. 
-In the GAIL paper, the regularizor $\psi$ is chosen such that  $\psi^*_{\text{GA}}(\rho_{\pi} - \rho_{\pi^E}) - \lambda H(\pi) = \text{D}_{JS}(\rho_{\pi}, \rho_{\pi_{r'}^*}) - \lambda H(\pi)$.\\
-Here GA stands for generative adverserial, because the paper proposes a generative adverserial algorithm to find the policy $\pi$ that minimizes $\psi^*$ with the maximum possible $\psi^*$:
+, where $\bar{\text{H}}$ is the occupancy measure equvivalenz for the discounted causal entropy $\text{H}$. In this sense, equation \ref{proto_inf_ler_c} is the dual problem of equation \ref{const_sat_gail}. 
+This optimisation is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practive we only have a small smaple size of this set, which would mean setting 
+the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intendet optimum. Instead, the objective \ref{const_sat_gail} is relaxed in the form
 \begin{equation}
-    \label{GAIL_Obj}
-    \underset{\pi}{\text{argmin}} \left( \underset{D}{\text{argmax}} (\mathbb{E}_{\pi}[\log(D(s,a))] + \mathbb{E}_{\pi_{r'}^*}[\log(1-D(s,a))] - \lambda H(\pi)) \right)
+    \label{dist_opt}
+    \pi_{\text{inv}}^* = \min_{\pi} d_{\psi}(\rho_{\pi_{\text{E}}}, \rho_{\pi}) - \text{H}(\pi)
 \end{equation}
-, where $D$ is the discriminator used is $\psi^*$.
+such that $d_{\psi}$ becomes small, when $\pi_{\text{E}}$ and $\rho_{\pi}$ become similar. To do this, we can introduce an additional regularizor $\psi$ to equation \ref{occ_meas_obj}:
+
+\begin{equation}
+    \label{proto_inf_ler_c_reg}
+    \pi_{\text{inv}}^* = \max_{c_{\text{inv}} \in \mathcal{C}} \left(-\psi(c) \ \min_{\rho_\pi \propto \pi \in \Pi} \left(- \bar{\text{H}}(\rho_\pi) + \sum_{s,a} \rho_\pi(s,a) c(s,a) \right) - \sum_{s,a} \rho_{\text{E}}(s,a) c(s,a) \right)
+\end{equation}
+\begin{equation*}
+    = \min_{\rho_\pi \propto \pi \in \Pi}- \bar{\text{H}}(\rho_\pi) + \max_{c_{\text{inv}} + \in \mathcal{C}} -\psi(c) \sum_{s,a} \left( \rho_\pi(s,a) - \rho_{\text{E}}(s,a)\right) c(s,a)
+\end{equation*}
+\begin{equation*}
+    = \min_{\rho_\pi \propto \pi \in \Pi}- \bar{\text{H}}(\rho_\pi) + \psi^*(\rho_\pi(s,a) - \rho_{\text{E}}(s,a))
+\end{equation*}
+, where $\psi^*$ is the complex conjugate of $\psi$. With this, we can identify $d_{\psi} = \psi^*$.\\
+
+What is left now is to find a $\psi$ s.t. minimizing \ref{dist_opt} ensures $\rho_{\pi} \sim \rho_{\test{E}}$. The paper finds a $\psi_{\text{GA}}$, which complex conjugate $\psi^*_{\text{GA}}$ becomes 
+\begin{equation}
+    \psi^*_{\text{GA}} = \max_{D\in(0,1)^{\mathcal{S} \times \mathcal{A}}} \mathbb{E}_{\pi}\left[ \text{log}(D(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D(s,a))\right]
+\end{equation}
+. In this formulation, the objective \ref{proto_inf_ler_c_reg} minimzes the Jensen Shannon divergence ($D_{JS}$) between $\rho_\pi$ and $\rho_{\text{E}}$. The whole objective can then be written as:
+\begin{equation}
+    
+\end{equation}
+
 Tian Xu, et al. proved in the paper Error Bounds of Imitating Policies and Environments \cite{error_imitation} that if a policy $\pi$ minimizes a 
 distance measure  $\text{D}_{JS}$ between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalisation error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
 $V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalisation error of behavioral cloning is bound by 
 $V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$. This implies better performance for GAIL in long horizon tasks.\\
-The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{r'}^*$ be the expert policy, which reward function $r'$ we want to imitate. 
+The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{\text{E}}$ be the expert policy, which reward function $r'$ we want to imitate. 
 \begin{algorithm}
     \caption{Generative adversarial imitation learning}
     \label{GAIL_Algo}
