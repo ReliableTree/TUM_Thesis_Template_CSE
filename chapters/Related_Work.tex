@@ -97,8 +97,22 @@ $p(s_t|o_{\leq t}, a_{\leq t}) = p(s_t|b_t) \approx p(s_t|b_{t, \phi})$. Using $
 \begin{equation}
     \min_{\phi,\theta}\max_{\tilde{\omega}} &\mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\log(1-D_{\tilde{\omega}}(b_{\phi},a))]
 \end{equation}
-. The authors include three regularisation losses to improve the expressiveness of $b_{\phi}$ of the form 
+with the correpsonding imitation loss 
+$\mathcal{L}^{\text{IM}}(\phi) := D_{\text{JS}}(\theta,\phi) \approx \tilde{E}_{(h,a)\sim \mathcal{M}_\text{E}}[\log D^*(b_\phi(h),a)] + \tilde{E}_{(h,a)\sim \pi_\theta(a|b_\phi(h)),\mathcal{T}}[\log(1 - D^*(b_\phi(h),a))]$, 
+where $D^*$ denotes the optimal discriminator. 
+The authors include three regularisation losses to improve the expressiveness of $b_{\phi}$. For example:
 \begin{equation}
-    \mathcal{L}^f(\phi) = \mathbb{E}_{\mathcal{R}} ||f_{\text{goal}}(t, k) - g(b_t^\phi, \text{input}_{t, k})||_2^2
-\end{equation}, 
-where they un
+    \mathcal{L}^f(\phi) = \mathbb{E}|| o_{t+k} - g(b_t^\phi, a_{t:t+k-1})||_2^2
+\end{equation}
+, where g is a learned stochastic unimodal gaussion with learned mean and fixed variance. Intuitively, this term seeks to impose, that the beliefe state $b_t$ is indeed a suffiecient statistic for the 
+POMDP, by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $f$ of the regularisation loss means forward. 
+In a similar way, there is an inverse regularisation $i$, which looks k steps into the past. Additionally, the authors propose an action regularisation $a$ which tries to reproduce the actions that were 
+taken, given the initial beliefe state and the subsequent observations. With all three regularisation losses, the total loss function for the believe module is:
+\begin{equation}
+    L(\phi) = L^\text{IM} + \lambda_1 L^\text{f} + \lambda_2 L^\text{i} + \lambda_3 L^\text{a}
+\end{equation}
+, where $\lambda_i$ are the weights for the respective regularizors. \\
+The approach is superior to GAIL with frame stacking and can also improve upon GAIL with recurrent networks for the discriminator and the actor, though the margins are small in some cases. The advantage 
+of their approach is, that the believe state representation will be expressive following their regularizors. However, they use an l2 error between the predictions and the observations. In most environments, 
+the observations are high dimensional and include redundant or unnecessary information that will be hard to learn. This forces the network to allocate capacity that is not directly used to 
+optimize the overall objective. 

@@ -836,13 +836,27 @@ What is left now is to find a $\psi$ s.t. minimizing \ref{dist_opt} ensures $\rh
 \begin{equation}
     \psi^*_{\text{GA}} = \max_{D\in(0,1)^{\mathcal{S} \times \mathcal{A}}} \mathbb{E}_{\pi}\left[ \text{log}(D(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D(s,a))\right]
 \end{equation}
-. In this formulation, the objective \ref{proto_inf_ler_c_reg} minimzes the Jensen Shannon divergence ($D_{JS}$) between $\rho_\pi$ and $\rho_{\text{E}}$. The whole objective can then be written as:
+. In this formulation, the objective \ref{proto_inf_ler_c_reg} minimzes the Jensen Shannon divergence ($D_{JS}$) between $\rho_\pi$ and $\rho_{\text{E}}$. If we treat the entropy constraint as a regularisation with 
+parameter $\lambda$, the whole objective can then be written as:
 \begin{equation}
-    
+    J(\rho_{\pi_{\theta}}, D_{\omega}) = \lambda \left(- \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right] \right)
 \end{equation}
+, where $\omega$ and $\theta$ denote the parametrisation of the discriminator $D$ and the policy $\pi$. Identifying the discounted reward as $Q = \mathbb{E}_{\pi}(r_t) = \mathbb{E}_{\pi}\left[-\text{log}(D_{\omega}(s,a))\right]$ and unsing the policy 
+gradient theorem, we get the policy update rule:
+\begin{equation}
+    \label{GAIL_update_policy}
+    \nabla_{\theta} J(\rho_{\pi_{\theta}}, D_{\omega}) = \mathbb{E}_{\tau \propto \pi}\left[ \nabla_{\theta}\text{log}\pi_{\theta}(a|s) Q(s,a) -\lambda \nabla_{\theta}\bar{\text{H}}(\rho_{\pi_{\theta}} )  \right]
+\end{equation}
+and the discrimnator update rule as:
+\begin{equation}
+    \label{eq_GAIL_disc}
+    \nabla_{\omega} J(\rho_{\pi_{\theta}}, D_{\omega}) = \mathbb{E}_{\tau \propto \pi} [\nabla_w \log(D_w(s,a))] + {E}_{\tau_E} [\nabla_w \log(1 - D_w(s,a))]
+\end{equation}
+. Note that, because we use cost $c$ instead of reward $r$, in \ref{GAIL_update_policy} we use gradient descent as we want to miminize the cost and in \ref{eq_GAIL_disc} we 
+use gradient ascent, as we want to maximize the discrimnative power of $D$. \\ \\
 
-Tian Xu, et al. proved in the paper Error Bounds of Imitating Policies and Environments \cite{error_imitation} that if a policy $\pi$ minimizes a 
-distance measure  $\text{D}_{JS}$ between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalisation error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
+Tian Xu, et al. proved in the paper Error Bounds of Imitating Policies and Environments \cite{error_imitation} that if a policy $\pi$ minimizes the $DJ$ distance 
+$\text{D}_{JS}$ between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalisation error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
 $V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalisation error of behavioral cloning is bound by 
 $V^{{\pi^*}} - V^{\{\pi}} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$. This implies better performance for GAIL in long horizon tasks.\\
 The algorithm is summarized in \ref{GAIL_Algo}. Let $\pi_E = \pi_{\text{E}}$ be the expert policy, which reward function $r'$ we want to imitate. 
