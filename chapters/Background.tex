@@ -237,7 +237,7 @@ The algorithm collects 1 trajectory, computes the gradient estimate, and updates
 
 \section{Value Functions}
 
-Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in Markov decision processes (MDPs): state-value functions and action-value functions.
+Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in MDPs: state-value functions and action-value functions.
 To clean up the notation, we will use upper case letters for functions, if the argument 
 is implicit and lower case, if the argument is explicit.
 
@@ -257,16 +257,15 @@ The state-value function satisfies the Bellman equation, which expresses the rel
     \label{bootstrap_v}
     \begin{aligned}
         v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right] \\
-        = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s)  \\
-        + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \sum_{a' \in \mathcal{A}} \pi(a' \mid s') \left[ r(a',s') + \gamma ...\right] \right]\\
+        = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s)  + \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \sum_{a' \in \mathcal{A}} \pi(a' \mid s') \left[ r(a',s') + \gamma ...\right] \right]\\
         = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ r(a,s) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v_{\pi}(s')\right]
     \end{aligned}
 \end{equation}
 
 where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
-from state $s$ to state $s'$ under action $a$, $r(s,a,s')$ is the reward received when transitioning from state $s$ to state $s'$ under 
-action $a$, and $\gamma \in [0,1]$ is the discount factor. This derivation assumes a discrete action space,
-however it can be adapted for the continuous case by exchanging the summation with an integral over the probability density function.
+from state $s$ to state $s'$ under action $a$, $r(s,a)$ is the reward received in state $s$ with action $a$, and $\gamma \in [0,1]$ is the discount factor. 
+This formulation assumes a discrete action space,
+however it can be adapted for the continuous case by chainging the summation with an integral over the probability density function.
 
 \subsection{Action-State Value Function}
 
@@ -276,8 +275,7 @@ policy $\pi$ thereafter. It is defined as:
 \begin{equation}
     q_{\pi}(s, a) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^T \gamma^t r_t \mid s_0 = s, a_0=a\right]
 \end{equation}
-
-where $A_t$ is the action taken at time step $t$.
+.
 
 The action-state value function also satisfies the Bellman equation:
 
@@ -298,7 +296,84 @@ and
     v_{\pi}(s) = \mathbb{E}_{a \propto \pi(\cdot|s)} \left[ q_\pi(s,a) \right]
 \end{equation}
 
+\subsection{Temporal Difference Learning}
+Temporal Difference (TD) learning is a paradigm that learns the value function from experience by updating its value based on the difference between the predicted reward and the actual reward received at each time step.
 
+The update rule for TD learning is derived from the Bellman equation\\ 
+${V(s) = \sum_{a}\pi(a|s)\sum_{s',r}p(s',r|s,a)\left[r + \gamma V(s')\right]}$ as stated in \ref{bootstrap_v}.
+
+The idea behind TD learning is to update the value function V(s) iteratively based on the difference between the predicted reward and the actual reward received at each time step t. This difference is known as the temporal difference error $\delta$:
+\begin{equation}
+    \label{TD_update}
+    \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
+\end{equation}
+. The update rule for the value function in TD learning is:
+$$V(s_t) \leftarrow V(s_t) + \alpha \delta_t$$
+
+where $\alpha (0 < \alpha \leq 1)$ is the learning rate, which determines the weight given to new information relative to old information. TD learning for the $Q$ 
+value is analogous. Recursively plugging in the temporal difference error n times is referred to as n-step TD learning. For example, 2-step TD learning can be written as 
+$\delta_t = r_t + \gamma (r_{t+1} + \gamma V(s_{t+2}) - V(s_{t+1})  ) - V(s_t)$.\\
+
+Iterating the value function estimate according to the update rule \ref{TD_update} is guaranteed to converge to the real value function of $\pi$. To see this, 
+let $V$ be the value function estimate and $V_{\pi}$ be the true value function for policy $\pi$ as defined in \ref{bootstrap_v}. Also let $T$ be the 
+Bellman update operator defined as:
+
+\begin{equation}
+    (T V)(s) = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right)
+\end{equation}
+. From this equation, we can see, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
+\begin{equation}
+    \label{TD_update_BM}
+    \delta_t = (T V)(s_t) - V(s_t)
+\end{equation} 
+. We want to show that $V$ converges to $V_{\pi}$ under the action of the update operator $T$. We will do this in two steps:
+\begin{enumerate}
+    \item Show that $T$ is a contraction mapping
+    \item Show that the unique fixpoint of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
+\end{enumerate}
+\\ \\
+
+\textbf{Step 1:} Contraction property\\
+\textbf{Definition:}\\
+Let $(X, d)$ be a complete metric space. A map $\mathcal{B}:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
+\begin{equation}
+    d(\mathcal{B}(x), \mathcal{B}(y)) \leq \gamma d(x,y) \quad \forall x,y \in X.
+\end{equation}
+\\ \\
+
+\textbf{Banach Fixed Point Theorem:}\\
+Let (X,d) be a complete metric space and $\mathcal{B}:X \rightarrow X$ a contractor. 
+Then $\mathcal{B}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{B}(x^*) = x^*$. The sequence $\text{lim}_{n \rightarrow \infty}\mathcal{B}^n(x)$ converges to $x^*$.\\ \\
+
+We will first show that $T$ is a contraction mapping with respect to the infinity norm. Let $V$ and $W$ be two value function estimates. Then we have:
+
+\begin{equation}
+    |(TV)(s) - (TW)(s)|_\infty =  
+\end{equation}
+\begin{equation*}
+    \max_{s \in S}\left|E_{\tau \propto \pi}\left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right) -E_{\tau \propto \pi}\left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) W(s')\right)\right| 
+\end{equation*}
+\begin{equation*}
+    &= \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) |V(s') - W(s')| 
+\end{equation*}
+\begin{equation*}
+    &\leq \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) \max_{s'' \in S}|V(s'') - W(s'')| 
+\end{equation*}
+\begin{equation*}
+    &= \gamma |V - W|_\infty
+\end{equation*}
+
+where the last equality comes from the fact that probability distributions are normalized: $\sum_{s' \in S} p(s' \mid s,a) = 1$ and 
+$|V(s'') - W(s'')|$ is independent of $s'$.
+
+Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
+
+\textbf{Step 2:} Unique fixpoint\\
+By the Banach fixed point theorem, $T$ has a fixed point $TV^* = V^*$. 
+We see, that this fixpoint satisfies the Bellman equation \ref{bootstrap_v} with 
+$$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right)$$.
+As the fixpoint is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it can be shown that for small enough 
+update rates $\alpha$, TD learning converges to the true value function. A simular proof can be found for TD learning of the $Q$ value function.
 
 \section{Actor-Critic Algorithm}
 \label{AC-Alg}
@@ -309,10 +384,11 @@ rather then after the whole trajectory. This approximation is referred to as a "
 In this section, we will derive an expression to aproximate $G_t$ by using an iterative update step with guaranteed convergence.
 Revisiting \ref{nabla_reinforce}: 
 \begin{equation}
+    \label{ac policy update}
     \begin{aligned}
-        \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]\\
+        \nabla_{\theta} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[ \sum_{t=0}^T \nabla_{\phi} \log \pi(a_t|s_t;\phi) \cdot  G_t\right]\\
         = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
-            \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
+            \sum_{t=0}^{T}\nabla_{\phi} log \pi_{\phi}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
         \right]
     \end{aligned}
 \end{equation}
@@ -324,144 +400,31 @@ Revisiting \ref{nabla_reinforce}:
         = q_{\pi}(s_{t},a_{t}).
     \end{align}
 \end{equation}
-This follows the derivation as in \ref{bootstrap_v} for the $Q$-value in the continuous case.
 
 Plugging in the defintion of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
 \begin{equation}
 q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
 \end{equation}
 for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.\\
-We want to find a policy $\pi^*$ for which the $Q$-function is maximal.
-\begin{equation}
-    Q^* = \max_{\pi} \left[\mathbb{E}_{\tau \propto \p(\tau|\pi)} \left[ r + \gamma Q_{\pi} \right]\right]
-\end{equation}
 
-Updateing the $Q$-Value greedily by applying the operator $\mathcal{T}_Q^*$ is guaranteed to converge to the optimal $Q$-Value (see section \ref{opt_contr}):
+One way to approximate the $Q$ value using a neural network with parameters $\theta$ is to use the temporal difference term as defined in \ref{TD_update_BM}, but for the $Q$ value:
 \begin{equation}
-    \begin{aligned}
-        q_{i+1}(s_t, a_t) = (\mathcal{T}_Q^* q_i)(s_t, a_t) \\
-        =\mathbb{E}_{s_{t+1} \propto p(s_{t+1}|s_t, a_t)} \left[r(s_t, a_t) + \gamma  \max_{a'} \left[  q_i(s_{t+1}, a_{t + 1}) \right]\right].
-    \end{aligned}
+    \label{Q-ValueTD}
+    \delta_t = (T Q_{\theta})(s_t) - Q_{\theta}(s_t) = r_t + \gamma Q_{\theta}(s_{t+1}, a_{t+1}) - Q_{\theta}(s_{t}, a_{t})
 \end{equation}
-
-We don't have access to the true expected value, but we can approximate it by using rollouts of our current policy, similar to the REINFORCE algorithm. As this introduces noice, 
-in temporal difference learning (TD-learning) we define a learning rate $\alpha$ to smooth the update of the $Q$-Value:
+. Using the mean squared error MSE as a loss function we get the update:
 \begin{equation}
-    q_{i+1}(s_t, a_t) = q_i(s_t, a_t) + \alpha\left[r(s_t, a_t) + \gamma \left( \max_{a'} q(s_{t+1}, a')\right) - q_i(s_t, a_t) \right]
+    \nabla_{\theta} J(\theta) = \nabla_{\theta} \mathbb{E}_{\tau \propto \pi}((T Q_{\theta})(s_t, a_t) - Q_{\theta}(s_t, a_t))^2
 \end{equation}
-It is prooven that for a sufficiently small $\alpha$ this update rule will converge to the optimal $Q$-value \cite{Watkins1992}. From this expression we can define a parametric update step by minimizing 
-the RSME $J_Q(\theta_{i})$ between $Q(\theta_{i-1})' = \mathcal{T}_Q^* Q(\theta_{i-1})$ and $Q(\theta_i)$:
-\begin{equation}
-    \begin{aligned}
-        J_Q(\theta_{i}) = \mathbb{E}\left[\left( Q(\theta_{i-1})' - (\theta_i) \right)^2\right]\\
-        = \alpha \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \left( \max_{a'} q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right]
-    \end{aligned}
-\end{equation}
-
-We can now use this error to update the parameters of the $Q_{\theta}$-function:
-\begin{equation}
-    Q(\theta_{i+1}) : \theta_{i+1} = \theta_{i} - \alpha \nabla J_Q(\theta_{i})
-\end{equation}
-
-\subsubsection{Optimality}
-\label{opt_contr}
-
-We will cover the proof of the existens and uniqueness of $V^*$. Then we will show it's optimality. The respective proofs for $Q^*$ are analogous and can be found for example in \cite{Watkins1992}.
-Parts of this derivation follows \cite{optimality}.\\ \\
-
-\textbf{Definition:}\\
-Let $(X, d)$ be a complete metric space. A a map $\mathcal{T}:X \rightarrow X$ is called a contractor if there exists a factor $\gamma \in [0, 1)$ s.t.
-\begin{equation}
-    d(\mathcal{T}(x), \mathcal{T}(y)) \leq \gamma \cdot d(x,y) | x,y \in X.
-\end{equation}
-\\ \\
-
-\textbf{Banach Fixed Point Theorem:}\\
-Let (X,d) be a complete metric space and $\mathcal{T}:X \leftarrow X$ a contractor. 
-Then $\mathcal{T}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{T}(x^*) = x^*$. The sequence $lim_{n \leftarrow \infty}\mathcal{T}^n(x)$ converges to $x^*$.\\ \\
-
-\textbf{Value Iteration}\\
-Let $X : v(s) \in \mathcal{R}$ and $d = ||X||_{\infty} = \max|X|$. \\
-The value iteration operator $\mathcal{B}$ is defined as:
-\begin{equation}
-    (\mathcal{T}_{V}v)(s) = \max_{a \in \mathcal{A}} \left[  r(s,a) +  \gamma \sum_{s' \in \mathcal{S}} p(s' \mid s,a) \left( v(s')\right) \right]
-\end{equation}
-\textbf{Assertion}\\
-
-$\mathcal{T}_{V}$ is a contrator under the $\infty$-norm.\\ \\
-
-\textbf{Proof:}\\
-Let $V_1$, $V_2$ be two value functions $V : S \times A \to \mathcal{R}$, $0 \leq \gamma < 1$ and $\mathcal{T}_{V}$ the value iteration operator, then:
-\begin{equation}
-    \label{contractor}
-||\mathcal{T}_{V}V_1(s) - \mathcal{T}_{V}V_2(s)||_{\infty, s} = 
-\end{equation}
-\begin{equation}
-    \left|\left| \max_a \left[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) v_1(s')\right] - \max_{a'}\left[ r(s,a') + \gamma \sum_{s'} p(s' \mid s,a') v_2(s') \right] \right|\right|_{\infty, s}
-\end{equation}
-\begin{equation}
-    \leq \left|\left|\max_a \left[ r(s,a) + \gamma \sum_{s'} p(s' \mid s,a) v_1(s') - r(s,a) - \gamma \sum_{s'} p(s' \mid s,a) v_2(s')\right]\right|\right|_{\infty, s}
-\end{equation}
-\begin{equation}
-= \gamma \left|\left|\max_a \left[ \sum_{s'} p(s' \mid s,a) (v_1(s') -v_2(s'))\right]\right|\right|_{\infty, s}
-\end{equation}
-\begin{equation}
-\leq \gamma \left|\left|\max_a \left[ \sum_{s'} p(s' \mid s,a) \cdot \max_{s''} (v_1(s'') -v_2(s''))\right]\right|\right|_{\infty, s}
-\end{equation}
-
-\begin{equation}
-= \gamma \left|\left|\max_{s''} \left[ (v_1(s'') - v_2(s''))\right]\right|\right|_{\infty, s}
-\end{equation}
-
-\begin{equation}
-= \gamma \left|\left|(v_1(s'') - v_2(s''))\right|\right|_{\infty, s''}
-\end{equation}
-
-\begin{equation}
-= \gamma \left|\left|(v_1(s) - v_2(s))\right|\right|_{\infty, s}.
-\end{equation}
-
-This leaves us to show, that the fix point $V_n$ under the value iteration operator is also the maximum of the value function $V$.\\
-$\mathcal{T}_{V}$ is a monoton increasing operator on $V$: 
-\begin{equation}
-    \begin{align}
-        \mathcal{T}_{V}v(s) = \max_{a \in \mathcal{A}} \left[ r(s,a) + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a) v(s')\right]\\
-        \geq r(s,a') + \gamma  \sum_{s' \in \mathcal{S}} p(s' \mid s,a') v(s') |a' \in A.
-    \end{align}
-\end{equation}
-As $V_n$ is monoton increasing and converges to a unique value, it will approach it's supremum. 
-For any practical application, this means it converges to it's maximum.
+and we can update the $Q$ function using the learning rate $\alpha$ with $\theta_{i+1} = \theta_i + \alpha \nabla_{\theta} J(\theta)$. As shown for the value 
+function, this update rule is guaranteed to converge to $Q_{\pi}$ with sufficiently small $\alpha$.
 
 \subsection{Actor}
-In the derivation of the Bellman operator update rule $\mathcal{T}_{V}$ we used the $\max$-operator to choose the best action to ensure a monoton increasing 
-value estimate. In practice this is again unfeasable for large or continuous action spaces. Instead, we want a parametrized $\pi$ that computes an action. 
-Note that we only need a monoton increasing value estimate to guarantee asymptotic convergence. It can be shown that with sufficiently small scheduled update 
-steps $\alpha(i)$, monoton stochasitc improvement is guaranteed for the update step:
+Once we have an estimate of the state value function, we can use policy gradient to update our policy $\pi_{\phi}$ with parametrs $\phi$:
 \begin{equation}
-    \pi_{\phi_{i+1}}: \phi_{i+1} \leftarrow \phi_i + \alpha(i) \left(
-        \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
-            \sum_{t=0}^{T} \nabla_t \pi_{\phi_i} \right]
-    \right)
-\end{equation}
-\begin{equation*}
-    \text{with} \quad \nabla_t \pi_{\phi_i} = \nabla_{\theta} log \left( \pi_{\phi_i}(a_t|s_t)\right) \mathbb{E}_{a_t, s_t...a_T, s_T \propto \pi} \left[ Q_{\pi_{\phi_i}} \right] 
-\end{equation*}
-, where $Q_{\pi_{\phi}}$ is the fix point of the Bellman operator $\mathcal{T}_{Q_{\pi_{\phi}}}$:
-
-\begin{equation}
-    Q_{\pi_{\phi}} = \lim_{n \to \infty} Q^n_{\pi_{\phi}}
+    \nabla_{\phi} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta}(a_t, s_t) \right]
 \end{equation}
 
-\begin{equation*}
-    \text{with}\quad q^{n+1}(s,a) = \mathcal{T}_{Q_{\pi_{\phi}}}q^n(s,a) = r(s,a) + \gamma \mathbb{E}_{\tau \propto {\pi_{\phi}}}[q^n(s_{t+1}, a_{t+1})]
-\end{equation*}
-with corresponding temporal difference term:
-\begin{equation}
-    \begin{aligned}
-        J_{Q_{\pi_{\phi_i}}}(\theta_{i}) = \mathbb{E}\left[\left({Q_{\pi_{\phi_i}}}(\theta_{i-1})' - Q_{\pi_{\phi_i}}(\theta_{i}) \right)^2\right]\\
-        = \alpha \mathbb{E}_{s_t, a_t}\left[\left( r(s_t, a_t) + \gamma \mathbb[E]_{a' \propto \pi_{\phi_i}}\left( q_{\theta_{i-1}}(s_{t+1}, a')\right) - q_{\theta_{i}}(s_t, a)\right)^2\right].
-    \end{aligned}
-\end{equation}
 This defines two update steps, one for the policy and one for the critic. Commonly this approach is called deep deterministic policy gradient or DDPG \cite{https://arxiv.org/pdf/1509.02971.pdf}. Some algorithms don't use the $Q$ value for the update step of the policy, but a closely 
 related value, called the advantage $A_t$ defined as $A_t = -V(s_t) + r_t + \gamma r_{t+1} + \cdots + \gamma^{T-t+1} r_{T-1} + \gamma^{T-t} V(s_T)$ \cite{A2C}. For the one step 
 unroll of the rewards, this value becomes $A_t = Q(a_t, s_t) - V(s_t)$. 
@@ -483,21 +446,22 @@ J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \m
 \end{equation}
 
 where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
-encourages the policy to be more stochastic and explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.
+encourages the policy to explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.\\
 
-in the original mplementation, SAC uses two $Q$ value estimates and a $V$ value estimate. The V value is learned by 
+In the original implementation, SAC uses two $Q$ value estimates and a $V$ value estimate. The V value is learned by 
 
 \begin{equation}
     V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}]
 \end{equation}
 , with the minimum value of the two $Q$ critics $Q_\text{min}$ to decrease the overestimation bias of critics in actor critic algorithms. 
-Using this, the $Q$ values are trained with typical TD:
+The $Q$ values are trained with typical TD:
 
 \begin{equation}
     \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(q_{\theta_i}(s_t,a_t) - y_t)^2]
 \end{equation}
 
-where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. 
+where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. This is the same update rule as derived in \ref{Q-ValueTD}, 
+considering the identity \ref{q_from_v}.
 
 The policy is updated to minimize the Kullback-Leibler (KL) divergence to the normalized $Q$-Values:
 \begin{equation}
@@ -513,7 +477,7 @@ The KL divergence is a measure of the alikeness of two distributions $P(x)$ and 
 It is non negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
 a common choice in deep learning applications.\\
 
-This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper. \\
+This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper \cite{haarnoja2018soft}. \\
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
 To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrisation trick is used:
 
@@ -526,9 +490,23 @@ To approximate the derivative of \ref{sac_pol_obj} given limited sample size, th
 
 
 
-To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. All algorithms discussed in this thesis will use a stochastic 
-actor and entropy regularisation.
+To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. It outperforms non stochastic 
+policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces, which are hard to explore.
+
 \subsection{PPO}
+The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman et al. 
+builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
+with respect to a KL divergence constraint:
+\begin{flalign}
+        \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
+        \text{subject to\ \ \ \ \ \ \ \ \ \ \ \ } \mathbb{E}_t[\text{KL}[ \pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_{\theta}(\cdot | s_t)] ] \leq \delta
+\end{flalign}
+The core idea is to place a constraint on the distance between the new policy and the old policy. By doing so, 
+too large update steps to the policy should be prevented, resulting in a more stable learning behaviour. Note that the logarithm is monton and 
+$\pi_{\theta_{old}}$ is constant w.r.t. $\pi_{\theta}$. That means optimizing the unconstrained TRPO objective opimizes $L^{PG}$, thus the optimality proof of 
+$L^{PG}$ holds for $L^{TRPO}$. A more general proof considering the stochasticity of the policy update is provided in the paper Trust Region Policy Optimization, 
+theorem 1 \cite{TRPO}. \\
+
 Recall the advantage estimator was defined as:
 \begin{equation}
     A(s,a) = Q(s,a) - V(s).
@@ -547,18 +525,6 @@ Most common implementations of PPO use a stochastic policy, like in SAC, with th
     \label{PPO_Loss_Reg}
     L^{PG}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[-log(\pi_{\theta}(a|s))A(s,a)+\alpha log(\pi_{\theta}(a|s))].
 \end{equation}
-The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman et al. 
-builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
-with respect to a KL divergence constraint:
-\begin{flalign}
-        \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
-        \text{subject to\ \ \ \ \ \ \ \ \ \ \ \ } \mathbb{E}_t[\text{KL}[ \pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_{\theta}(\cdot | s_t)] ] \leq \delta
-\end{flalign}
-The core idea is to place a constraint on the distance between the new policy and the old policy. By doing so, 
-too large update steps to the policy should be prevented, resulting in a more stable learning behaviour. Note that the logarithm is monton and 
-$\pi_{\theta_{old}}$ is constant w.r.t. $\pi_{\theta}$. That means optimizing the unconstrained TRPO objective opimizes $L^{PG}$, thus the optimality proof of 
-$L^{PG}$ holds for $L^{TRPO}$. A more general proof considering the stochasticity of the policy update is provided in the paper Trust Region Policy Optimization, 
-theorem 1 \cite{TRPO}. \\
 
 In TRPO, ensuring the KL constraint requires a second order approximation to it. PPO is an on-policy algorithm that uses only first order approximations, while 
 also making sure that the policy update does not change the policy too much. Instead of the hard KL constraint, it clips the gradient of the policy update within 
@@ -575,29 +541,29 @@ The algorithm aims to minimize $L^{CLIP}(\theta)$ by doing gradient update steps
 \begin{equation}
     \theta_{i+1} = \theta_{i} + \alpha \nabla_{\theta} L^{CLIP}(\theta_i)
 \end{equation}
-The PPO algorithm follows the general actor critic scheme with an altered objective function.
-
+. The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \begin{algorithm}[h]
     \SetAlgoLined
     \begin{algorithmic}
     \For{$\text{iteration}=1,2,\dots$}{ \\
         \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ timesteps\\
         \State Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
-        \State Optimize surrogate $L$ with respect to $\theta$, with $K$ epochs and minibatch size $M \leq T$\\
+        \State Optimize surrogate $L^{CLIP}$ with respect to $\theta$, with $K$ epochs and minibatch size $M \leq T$\\
         \State $\theta_\text{old} \gets \theta$
         }
         
     \end{algorithmic}
-    \caption{PPO, Actor-Critic Style}\label{ppo}
-\end{algorithm}
+    \caption{PPO, Actor-Critic Style}
+    \label{ppo_algo}
 
+\end{algorithm}
 Overall, PPO is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.
 
 \subsection{TQC}
 Controlling Overestimation Bias with Truncated Mixture of Continuous
-Distributional Quantile Critics \cite{TQC_Paper} is a paper describing an off policy algorithm that aims to minimize the over estimation bias.\\
+Distributional Quantile Critics (TQC) \cite{TQC_Paper} is a paper describing an off policy algorithm that aims to minimize the over estimation bias.\\
 Emperically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
-two critics in the SAC algorithm \ref{SAC}. In the paper \cite{TQC_Paper} the authors cite a formal derivation of the over estimation bias by 
+two critics in the SAC algorithm \ref{SAC}. In the TQC paper \cite{TQC_Paper} the authors cite a formal derivation of the over estimation bias by 
 Thrun and Schwartz (1993) \cite{thrun1993issues} stating:
 \begin{equation}
     \begin{align}
@@ -609,11 +575,11 @@ The main idea of the paper is to learn the probability distribution of the $Q$ v
 It is then possible to drop the "right tail", that is the highest estimates for the $Q$ value, to lower the estimate.\\
 Formally, the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
 $Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantile regression loss.\\
-The kth $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the comulative distribution function crosses $k/q$:
+The kth $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the comulative distribution function crosses $k/M$:
 \begin{equation}
     Pr[X \leq x] \leq k/M
 \end{equation}
-with $M$ total quatiles. The mean of all quantiles is the mean of the distribution.\\
+with $M$ total quatiles. \\
 Quantile regression is used to learn the values of the $M$ quantiles:
 \begin{equation}
     \label{rho}
@@ -635,13 +601,13 @@ with the tagret distribution
 \begin{equation}
     Y(s,a)(v) = \frac{1}{N} \sum_{i=1}^N 1_{y_i(s,a) > v} | v \in \mathcal{R}
 \end{equation}
-, where only the lowest N quantiles were used. \\
+$N<M$, where only the lowest N quantiles were used. \\
 Finally this expression leads us to the loss functino for the quantiles $\theta_m^{\psi}$ of Y:
 \begin{equation}
     L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right)
 \end{equation}
 , where $\psi$ deontes the parametrisation of $\theta$. Note that instead of the function $\rho_{\tau_m}(u)$ as described in \ref{rho}, they used the 
-1-Huber loss, which emperically got better results. \\
+1-Huber loss, which got better results emperically. \\
 From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right]
@@ -670,8 +636,9 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
         \State \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
     \end{algorithmic}
 \end{algorithm}
-TQC achieves state of the art performance in a wide variety of chllenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
-for off policy learning, in contrast to PPO, which wsa designed for on policy uodate steps.
+TQC achieves state of the art performance in a wide variety of challenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
+for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps. In this sense, it is a successor to the 
+SAC algorithm, where the overestimation problem in off policy learning was the main focus.
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 

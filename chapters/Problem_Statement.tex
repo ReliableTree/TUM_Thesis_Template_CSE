@@ -1,4 +1,13 @@
 % !TEX root = ../main.tex
 \chapter{Problem Statement}
 \label{chapter:Problem}
-asd
+The focus of this thesis is to find an algorithm that uses expert trajectories in single observation POMDPs together with sparse reward reinforcement learning 
+as efficient as possible. 
+Formal Definition - singe observation - given goal encoding, but obscure goal state.
+Applications of this setup are --quick motions, limited data, limited compute
+The algorithm that we found can be relaxed to use dense lookup in POMDPs and MDPs and shows superior performance in some cases, though future work is needed, 
+as the current method is slow in some cases.
+While GAIL with recurrent networks and GAIL in POMDPs performs good with respect to the amount of expert trajectories needed, it is not sample efficient in terms of  
+environment interactions needed. Direct methods like BC with RPPO don't need environment interactions, but suffer from bad asymptotic performance given a number of 
+expert trajectories. We aim to make optimal use of the expert demonstrations given by explicitly using the knowledge, that we do not have additional observations 
+during training. We also want to use additional trajectories from environment interaction with the policy, where we only have sparse reward. 
