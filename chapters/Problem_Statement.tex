@@ -1,13 +1,44 @@
 % !TEX root = ../main.tex
 \chapter{Problem Statement}
 \label{chapter:Problem}
-The focus of this thesis is to find an algorithm that uses expert trajectories in single observation POMDPs together with sparse reward reinforcement learning 
-as efficient as possible. 
-Formal Definition - singe observation - given goal encoding, but obscure goal state.
-Applications of this setup are --quick motions, limited data, limited compute
-The algorithm that we found can be relaxed to use dense lookup in POMDPs and MDPs and shows superior performance in some cases, though future work is needed, 
-as the current method is slow in some cases.
-While GAIL with recurrent networks and GAIL in POMDPs performs good with respect to the amount of expert trajectories needed, it is not sample efficient in terms of  
-environment interactions needed. Direct methods like BC with RPPO don't need environment interactions, but suffer from bad asymptotic performance given a number of 
-expert trajectories. We aim to make optimal use of the expert demonstrations given by explicitly using the knowledge, that we do not have additional observations 
-during training. We also want to use additional trajectories from environment interaction with the policy, where we only have sparse reward. 
+In this thesis, we consider the problem of developing an algorithm for solving a single observation partially observable Markov decision process (POMDP) with sparse reward and fixed horizon. In this setup, we assume that the agent receives a single initial observation and a fixed time horizon $T$, and must select a sequence of actions to maximize the expected cumulative reward over a single trajectory of length $T$. We also assume that the reward is sparse, i.e., the agent receives a reward of zero at each time step except for the final time step, where the reward is either zero or one depending on whether the goal state is reached.
+
+Formally, we define a single observation POMDP as a tuple $<S,A,T,O,R,\gamma>$, where $S$ is the set of states, $A$ is the set of actions, $T$ is the fixed 
+time horizon, $O$ is the observation space, $R$ is the reward function, and $\gamma$ is the discount factor (in this case, $\gamma=1$). 
+At each time step $t=1,...,T$, the agent has access to the observation observation $o_0\in O$ and selects an action $a_t\in A$, and receives a 
+reward $r_t\in {0,1}$, where $r_{t<T} = 0$, $r_T=1$ if the goal state is reached and $r_T=0$ otherwise.
+
+The goal of our algorithm is to learn a policy $\pi(a_t|o_0, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
+some expert trajectories $D_{\text{expert}}$. 
+That is, we seek to solve the following optimization problem:
+
+\begin{equation}
+\max_{\pi} \mathbb{E}_{\pi}[r_T]\quad \text{given}\quad D_{\text{expert}}
+\end{equation}
+
+where the expectation is taken over trajectories of length $T$ induced by the policy\\ $\pi(a_t|o_0, a_0, ..., a_{t-1})$.\\
+
+Furthermore, we aim to design an algorithm that is sample efficient, i.e., requires a small number of expert trajectories and environment interactions 
+during the reinforcement phase, to address scenarios where environment interactions are expensive, thus the reinforcement phase should be as short as possible. 
+The single observation setup is important for environments, where observations are slow with respect to the performed actions. \\
+
+For example, consider a factory that processes fruits. The objective could be to cut away bad parts of a fruit with high speed. This could be accomplished by 
+taking a foto of the fruit, planning a trajectory for a blade to cut it and then performing the cut. In general, there are plenty of tasks, where the actions are 
+performed very quickly with respect to the time it takes to analyze an action. In the fruit cutting example environment, interactions are costly, as cutting 
+the fruit wrongly will produce waste. 
+In other applications, the processed parts may be even more expensive, for example if the robot performs some correcting action on industrial products like 
+electronics. Relying solely on simulation is not always viable, as there is a distribution shift between simulation and real world application, which has to be 
+corrected. Also, some scenarios might be prohibitly expensive to simulate, for example if the input image contains a complex and highly variable scene.\\
+In these scenarios, the goal state is implicitly given with the initial observation $o_0$, 
+but there is not necessarily direct mapping from the implicit representation to a goal state, which sorts out the approach discussed in HER. 
+An example of a goal description that cannot be mapped to a final goal state is given in "Language-Conditioned Imitation Learning for Robot Manipulation Tasks", 
+where the goal is defined by natural language and an imput image, which does not imply the exact goal observation, nor can we inferr the input, that implies a 
+goal observation. \\
+While approaches exist to make efficient use of expert demonstrations like GAIL or "Learning Belief Representations for Imitation Learning in POMDPs", 
+those methods suffer from poor sample efficiency in terms of environment interactions. Direct behavioural cloning with a recurrent actor as presented in 
+"Language-Conditioned Imitation Learning for Robot Manipulation Tasks" does not need additional environment interaction, but suffers from poor asymptotical 
+performance with respect to the number of expert trajectories, because of the quardratic error resulting from the compounding error problem in behavioural cloning. 
+To our knowledge, there is no method that tackles this setup specifily commonly found in industrial applications. \\
+As the single observatino sparse reward setup only provides very limited amount of feedback, the reinforcement phase is inherently a fine tuning phase, with 
+small changes to improve the policy performance. To summarize, we seek to find an algorithm that is efficient in both the required amount of expert demonstratnions 
+and the required amount of additinal environment interaction in the single observation, sparse reward setup.

@@ -2,4 +2,19 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
-Dies ist ein Test, ob man jetzt hier einfach so schreiben kann?
+First, frame the curse of dim. for this setup
+Make the observation, that with deterministic policy and sequence encoding, principially the wohle informationmoght be in one observation.
+State that we call this strong inductive bias. 
+Give the policy this inherent strucuter, but the ability to see what it did before
+AC - actor with positional encoding and not autoregressive
+Improve performacne? Lets revisit (SAC).
+Variacne in estimate because 
+-overestimation (TQC)
+-Iteration Error
+
+New Approach: AC
+No overestimation, No Iteration Error
+Stabe update to the actor by Imitation setup from newly found correct trajectories
+explain L2-problem and solution
+Critic learns implicit believe representation for value equvialent MDPs, directly task oriented. (Equivalence of MDPs) (https://proceedings.neurips.cc/paper/2020/file/3bb585ea00014b0e3ebe4c6dd165a358-Paper.pdf)
+State whole algorithm.
