@@ -2,6 +2,124 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
+We identify two main challenges with the single observation sparse reward setup. \\
+\textbf{Curse of Dimensionality}:\\
+As introduces in \ref{COD}, the evidence for a model scales approximately inversly proportinal to the exponent of the dimension on which it acts. In MDPs, the 
+actor $\pi$ acts on the observation space and returns an action from the action space. A probabalistic actor defines a probability distribution on the set 
+of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. 
+Thus the dimension on which the actor acts on, is $n \times m$ with $\pi:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$.\\
+Similarely, the critic $Q$ usually defines a function on $\mathcal{A}$ and $\mathcal{O}$ to the comulative discounted expected value 
+$Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$, while TQC defines the critic as a quantile distribution: 
+$Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}^k$ with $k$ quantiles.\\
+We have shown in \ref{POMDP}, that in a POMDP, the observation space grows linear in time. Together with the result from \ref{COD} we conclude, that we have 
+exponentially less evidence with sequence length $T$ for our model in the POMDP setting.\\
+To counter this problem, we want to get rid of the time dependency of the belief state. To do this, 
+we make the observation, that our case with the single observation at the beginning is a special case of a POMDP. Usually, 
+we need to know all previous obervsations, as they can give us additional information about the believe state. However, as we don't have subsequent information 
+after the initial observation, the only knowledge we have to include to calculate our believe state are the actions, that the policy took. As introduced in \ref{pomdp_bayes}, the optimal believe state 
+update in the general POMDP case using bayes theorem is given by:
+\begin{equation}
+    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+\end{equation}
+. In our case, we can rewrite this as:
+\begin{equation}
+    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{0}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(s'', o_{0}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+\end{equation}
+. $\mathcal{Z}(s'', o_{0})$ is constant for $t>0$, so we get:
+\begin{equation}
+    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s) \quad | t > 0
+\end{equation}
+\begin{equation*}
+    b_{0}(s') \propto \mathcal{Z}(s', o_{0})
+\end{equation*}
+. If we assume a deterministic policy $\pi(a|b) \rightarrow a_{\pi}(b)$, the update step can be written as:
+\begin{equation}
+    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_{\pi}(b_t), s') b_t(s)
+\end{equation}
+. By using this update step recursively until we get to $b_{0}$, we see, that the believe state at time $t$ only depends on the initial observation $o_0$
+the transition probability $\mathcal{T}$ and the number of recursion steps $t$. Using this insight, we can rewrite the belief state at timestep $t$ like:
+\begin{equation}
+    b_{t+1}(s') \propto \mathcal{Z}(s_0, o_{0}) \mathcal{T}(s_0, s', t)_{\pi}
+\end{equation}
+, where $\mathcal{T}(s_0, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
+With this formulation, we can rewrite the policy 
+
+\begin{equation}
+    \pi(a|b) : \mathcal{R}^m \times \mathcal{R}^{n T} = \pi(a|o_0, t): \mathcal{R}^m \times \mathcal{R}^{n} \times 1.
+\end{equation}
+We call this a strong inductive belief state bias for the single observatino POMDP, as it forces the assumption of a deterministic and constant policy $\pi$. 
+In our method, we implement a weak inductive bias, which is motivated by this observation: We use transformer encoder type architecture, which inputs are 
+the repeated initial observation plus a positional encoding. We then use a single pass through the network, which means it does not work autoregressively and 
+relies less on former actions to determin action at time point $t$. We test this hypothesis by using baselines that have the strong inductive bias, as well as 
+using the transformer in autoregressive mode. \\
+
+\textbf{Iteration Error}:\\
+All parametrized actor critic mehtods are tecnically speaking off policy, as the critic value is bootstrapped with former estimates. Once the actor is updated, the 
+critic target moved, on which the actor was updated. Intuitively, when the policy is changed to choose a different action at time point $t$, it might also change 
+the policy to choose different actions at 
+all subsequent time points, which changes the value function. This leads to unstable update behaviour and is the main reason, why algorithms like PPO try to 
+make sure, that changes to the policy are limited. This update instability is specifically challenging in our one observation environment, as the policy does not 
+get updates of the state of the environment it is currently in. \\
+Formally, let's define the objective function $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$ for actor critic methods as the function we whish to optimize to learn the optimal policy. 
+A policy update step will be given by the derivative of $J$: $\phi_{i+1} = \phi_{i} + \nabla_{\phi}J(\phi_{i}, Q_{\theta(\phi_i)})$. $Q_{\theta(\phi_i)}$ indicates the $Q$ 
+function for policy $\pi_{\phi_{i}}$ parametrized by parameters 
+$\theta(\phi_i)$. For example, DDPGs policy update rule \ref{AC_general_update} is written as:
+\begin{equation}
+    \nabla_{\phi} J(\phi, Q(\theta(\phi))) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta, \pi_\phi}(a_t, s_t) \right].
+\end{equation}
+. Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward, but less readable. We want 
+to estimate the update error of the update of the objective $J$. The proper derivative is given by:
+\begin{equation}
+    \nabla_{\phi} J(\phi, \theta(\phi)) = \frac{J(\phi + \delta \phi, \theta(\phi + \delta \phi)) - J(\phi, \theta(\phi))}{\delta \phi} + \mathcal{O}(\delta^2)
+\end{equation}
+with 
+\begin{equation}
+    J(\phi + \delta \phi, \theta(\phi + \delta \phi)) = J(\phi, \theta(\phi)) + \left[ 
+        \frac{\partial J}{\partial \phi} + \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi}
+    \right] \delta \phi  + \mathcal{O}(\delta^2)
+\end{equation}
+, where we used the chain rule and taylor's theorem. In actor critic policy updates, $\theta$ is assumed a constant, thus the actor derivative 
+$\widetilde{\nabla}_\phi J$ of $J$ is given by:
+\begin{equation}
+    \widetilde{\nabla}_\phi J(\phi, \theta) =  \frac{J(\phi + \delta \phi, \theta) - J(\phi, \theta)}{\delta \phi} + \mathcal{O}(\delta^2)
+\end{equation}
+. We can now derive the update error in the actor update:
+\begin{equation}
+    \nabla_{\phi} J(\phi, \theta(\phi)) - \widetilde{\nabla}_\phi J(\phi, \theta) = \delta \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi} + \mathcal{O}(\delta^2)
+\end{equation}
+. Recall that $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$, so the partial derivative $\frac{\partial J}{\partial \theta} = 1$, 
+as the expectation commutes with the derivative. This leaves us with estimating $\delta \frac{\partial \theta}{\partial \phi}$. Again using taylor's theorem, we get 
+\begin{equation}
+    \delta \frac{\partial \theta}{\partial \phi} = \theta(\phi + \delta) - \theta(\phi) + \mathcal{O}(\delta^2).
+\end{equation}
+This means, the error of the update of $\pi$ is proportinal to the change in the expected value of $\pi$. 
+
+Instead use TQC error bound (https://arxiv.org/pdf/1502.05477.pdf) (8). 
+Say, that ising old data has high KL divergence and not using old data means less data efficient. also, mention quadratic error from imitation and 
+distribution shift (high KL divergence) between current policy and expert policy.
+KL constrain only for one step update, as rho must be reevaluated -> not data efficient. 
+Active Critic with whole sequence prediction
+
+Value equivalent MDP, usually only few steps, because compounding errors, but in our case, we only have one observation, so we can know all actions from observation 0. 
+
+Actor is learned to minimize quadratic error of trajectories, what if two different trj. but middle is not good? inverse plan
+
+Abbildung whole algorithm
+Meta code whole algorithm.
+
+
+The SAC update rule in \ref{SAC_update_rule}. We will restate the DDPG update rule, to 
+\ref{NEURIPS2020_b5c01503}, theorem 1, states:
+
+We can see this with the example of the SAC objective \ref{sac_pol_obj}, but the argument holds in general for actor critic methods.  
+\begin{equation}
+    \label{AC_general_update}
+    \nabla_{\phi} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta}(a_t, s_t) \right]
+\end{equation}
+
+
+
+
 First, frame the curse of dim. for this setup
 Make the observation, that with deterministic policy and sequence encoding, principially the wohle informationmoght be in one observation.
 State that we call this strong inductive bias. 

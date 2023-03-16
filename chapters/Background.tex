@@ -422,6 +422,7 @@ function, this update rule is guaranteed to converge to $Q_{\pi}$ with sufficien
 \subsection{Actor}
 Once we have an estimate of the state value function, we can use policy gradient to update our policy $\pi_{\phi}$ with parametrs $\phi$:
 \begin{equation}
+    \label{AC_general_update}
     \nabla_{\phi} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta}(a_t, s_t) \right]
 \end{equation}
 
@@ -482,6 +483,7 @@ The policy is inherently stochastic and returns an action according to a spheric
 To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrisation trick is used:
 
 \begin{equation}
+    \label{SAC_update_rule}
     \begin{align}
         \nabla_{\phi}J_\pi(\phi_{i}) \approx \mathbb{E}_{\mathcal{D}} [\nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
         + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)].
@@ -869,18 +871,26 @@ A POMDP is defined as a tuple:
 
 The key difference between MDPs and POMDPs is that in a POMDP, the agent only observes a noisy or partial signal of the underlying state.
 
-To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states given the history of actions and observations. Formally, a belief state $b_t$ at time $t$ is a probability distribution over the state space $\mathcal{S}$, and is updated recursively using Bayes' rule:
-
+To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states given the history of 
+actions and observations. Formally, a belief state $b_t(s)$ at time $t$ is the probability over the state space $\mathcal{S}$ of the system to be in state $s$, 
+given action $a$, observation $o$ and belief state distribution $b_{t-1}$
+\begin{equation*}
+    b_{t+1}(s) = p(s|a,o,b_{t}) = 
+\end{equation*}
+\begin{equation*}
+    \frac{p(o|s) p(s|a,b_{t})}{p(o|a,b_{t})}
+\end{equation*}
+. Using the definitions from the POMDP tuple, this gives us the update rule:
 \begin{equation}
     \label{pomdp_bayes}
-b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
 \end{equation}
 
 where $a_t$ is the action taken at time $t$, $o_{t+1}$ is the observation received at time $t+1$, and $s'$ is the resulting state after taking action $a_t$ in state $s$.
 
 While the transition probability $\mathcal{T}$ only depends on the last state $s_t$ and the last action $a_t$ 
 in \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}(s)$.
-This means an optimal policy has to know the history of the mdp: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, which is an exponentially harder problem. \\
+This means an optimal policy has to know the history of the mdp: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$. Thus the observation space grows linear in time. \\
 Technically, you can restore on MDP from a POMDP by stacking all previous observations $\pi(a_t|o_{0:t-1}, a_{0:t-1}) = \pi(a_t|o'_{t-1}, a'_{t-1})$ 
 with $o'_{t-1} = o_{0:t-1}$ and $a'_{t-1} = a_{0:t-1}$, but this approach has a downside. If you use a neural network to parametrize $\pi$, you have 
 a fixed input size, which is not ideal, if your observation and action input size depends on the timestep. To solve this problem, sequence networks like 
