@@ -84,6 +84,7 @@ mixing in expert demonstrations, the expected $Q$ value will be higher, then tha
 The authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversly proportinal to the 
 probability of choosing a transition and thus counter acts the improvement rate towards expert behaviour.
 \subsection{GAIL in POMDPs}
+\label{GAIL_POMDPS}
 Recall that GAIL optimized the objective
 \begin{equation*}
     \min_{\theta} \max_{\omega} \mathbb{E}_{(s,a)\sim \pi_{\theta}, \mathcal{T}} [\log(1 - D_{\omega}(s,a))] + \mathbb{E}_{(s,a)\sim \mathcal{M}_{\text{E}}} [\log D_{\omega}(s,a)]

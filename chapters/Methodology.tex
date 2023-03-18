@@ -3,7 +3,7 @@
 \chapter{Methodology}
 \label{chapter:Methodology}
 We identify two main challenges with the single observation sparse reward setup. \\
-\textbf{Curse of Dimensionality}:\\
+\section{Curse of Dimensionality}
 As introduces in \ref{COD}, the evidence for a model scales approximately inversly proportinal to the exponent of the dimension on which it acts. In MDPs, the 
 actor $\pi$ acts on the observation space and returns an action from the action space. A probabalistic actor defines a probability distribution on the set 
 of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. 
@@ -53,24 +53,29 @@ the repeated initial observation plus a positional encoding. We then use a singl
 relies less on former actions to determin action at time point $t$. We test this hypothesis by using baselines that have the strong inductive bias, as well as 
 using the transformer in autoregressive mode. \\
 
-\textbf{Iteration Error}:\\
-All parametrized actor critic mehtods are tecnically speaking off policy, as the critic value is bootstrapped with former estimates. Once the actor is updated, the 
+\section{Update Error}
+As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. In \cite{NEURIPS2020_b5c01503} 
+it has been shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
+However, we identify that this challange also grants us a unique improvement over previous actor critic methods. By predicting whole sequences of actions at once, 
+we show that we can eliminate errors in the update step of the actor.\\
+All parametrized actor critic mehtods are technically speaking off policy, as the critic value is bootstrapped with former estimates. Once the actor is updated, the 
 critic target moved, on which the actor was updated. Intuitively, when the policy is changed to choose a different action at time point $t$, it might also change 
 the policy to choose different actions at 
 all subsequent time points, which changes the value function. This leads to unstable update behaviour and is the main reason, why algorithms like PPO try to 
 make sure, that changes to the policy are limited. This update instability is specifically challenging in our one observation environment, as the policy does not 
 get updates of the state of the environment it is currently in. \\
 Formally, let's define the objective function $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$ for actor critic methods as the function we whish to optimize to learn the optimal policy. 
-A policy update step will be given by the derivative of $J$: $\phi_{i+1} = \phi_{i} + \nabla_{\phi}J(\phi_{i}, Q_{\theta(\phi_i)})$. $Q_{\theta(\phi_i)}$ indicates the $Q$ 
-function for policy $\pi_{\phi_{i}}$ parametrized by parameters 
+$Q_{\theta(\phi_i)}$ indicates the $Q$ function for policy $\pi_{\phi_{i}}$ parametrized by parameters 
 $\theta(\phi_i)$. For example, DDPGs policy update rule \ref{AC_general_update} is written as:
 \begin{equation}
     \nabla_{\phi} J(\phi, Q(\theta(\phi))) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta, \pi_\phi}(a_t, s_t) \right].
 \end{equation}
-. Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward, but less readable. We want 
-to estimate the update error of the update of the objective $J$. The proper derivative is given by:
+. Note that generally, we do not have access to $\theta(\phi)$, but only an approximation given the limited data we have collected. Let us denote the actual 
+$Q$ function we have as $Q(\theta(\phi) + \epsilon)$, where $\epsilon$ indicates an error between the optimal parameters and the actual parameters.
+Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward, but less readable. We want 
+to estimate the update error to $\pi$ from the objective $J$. The proper derivative is given by:
 \begin{equation}
-    \nabla_{\phi} J(\phi, \theta(\phi)) = \frac{J(\phi + \delta \phi, \theta(\phi + \delta \phi)) - J(\phi, \theta(\phi))}{\delta \phi} + \mathcal{O}(\delta^2)
+    \nabla_{\phi} J(\phi, \theta(\phi)) = \frac{J(\phi + \delta \phi, \theta(\phi + \delta \phi)) - J(\phi, \theta(\phi))}{\delta \phi} + \mathcal{O}(\delta)
 \end{equation}
 with 
 \begin{equation}
@@ -78,21 +83,114 @@ with
         \frac{\partial J}{\partial \phi} + \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi}
     \right] \delta \phi  + \mathcal{O}(\delta^2)
 \end{equation}
-, where we used the chain rule and taylor's theorem. In actor critic policy updates, $\theta$ is assumed a constant, thus the actor derivative 
+, where we used the chain rule and taylor's theorem. 
+We can express this in terms of the parametrs $\theta(\phi) + \epsilon$:
+\begin{equation}
+    \nabla_{\phi} J(\phi, \theta(\phi)) = \nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \nabla_{\phi} J(\phi, \theta(\phi)) + \nabla_{\phi} J(\phi, \theta(\phi))
+\end{equation}
+\begin{equation*}
+    = \nabla_{\phi} J(\phi, \theta(\phi)) + \epsilon_{\nabla_{\theta}}
+\end{equation*}
+. Note that $\nabla_{\phi} J(\phi, \theta(\phi) + \epsilon)$ is not a properly defined derivative. To rigorously capture the stochastic dependence of $\theta(\phi)$ 
+given a dataset $\mathcal{D}^n$ with $n$ transitions, 
+we could formulate $\theta(\phi)|\mathcal{D}_n$ as n boundary conditions. Together with a suitable regularizor, we can then find $\theta_{\epsilon, n}(\phi)$. We omit 
+this step, as we are only interested in the fact that there is an error, not the exact value of it.\\
+In actor critic policy updates, $\theta$ is assumed a constant, thus the actor derivative 
 $\widetilde{\nabla}_\phi J$ of $J$ is given by:
 \begin{equation}
-    \widetilde{\nabla}_\phi J(\phi, \theta) =  \frac{J(\phi + \delta \phi, \theta) - J(\phi, \theta)}{\delta \phi} + \mathcal{O}(\delta^2)
+    \widetilde{\nabla}_\phi J(\phi, \theta) =  \frac{J(\phi + \delta \phi, \theta) - J(\phi, \theta)}{\delta \phi} + \mathcal{O}(\delta)
 \end{equation}
-. We can now derive the update error in the actor update:
+. 
+Again using $\theta(\phi) + \epsilon$ we get:
 \begin{equation}
-    \nabla_{\phi} J(\phi, \theta(\phi)) - \widetilde{\nabla}_\phi J(\phi, \theta) = \delta \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi} + \mathcal{O}(\delta^2)
+    \widetilde{\nabla}_\phi J(\phi, \theta + \epsilon) = \widetilde{\nabla}_\phi J(\phi, \theta) + \epsilon_{\widetilde{\nabla}_{\theta}}
 \end{equation}
-. Recall that $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$, so the partial derivative $\frac{\partial J}{\partial \theta} = 1$, 
+We can now derive the update error in the actor update:
+\begin{equation}
+    \nabla_{\phi} J(\phi, \theta(\phi)) - \widetilde{\nabla}_\phi J(\phi, \theta) = \nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \epsilon_{\nabla_{\theta}} - \widetilde{\nabla}_\phi J(\phi, \theta(\phi) + \epsilon) + \epsilon_{\widetilde{\nabla}_{\theta}}
+\end{equation}
+\begin{equation*}
+    = \epsilon_{\widetilde{\nabla}_{\theta}} - \epsilon_{\nabla_{\theta}} + \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi}
+\end{equation*}
+. We will call $\epsilon_{\widetilde{\nabla}_{\theta}} - \epsilon_{\nabla_{\theta}}$ the  \textbf{function approximator error}. \\
+Recall that $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$, so the partial derivative $\frac{\partial J}{\partial \theta} = 1$, 
 as the expectation commutes with the derivative. This leaves us with estimating $\delta \frac{\partial \theta}{\partial \phi}$. Again using taylor's theorem, we get 
 \begin{equation}
-    \delta \frac{\partial \theta}{\partial \phi} = \theta(\phi + \delta) - \theta(\phi) + \mathcal{O}(\delta^2).
+    \label{dist_shift_error}
+    \delta \frac{\partial \theta}{\partial \phi} = \theta(\phi + \delta) - \theta(\phi) + \mathcal{O}(\delta).
 \end{equation}
-This means, the error of the update of $\pi$ is proportinal to the change in the expected value of $\pi$. 
+We will call this error the \textbf{distribution shift error}.\\
+While this derivation assumes direct policy gradient to update the actor, other actor critic policy update methods like the minimisation of a KL divergence as 
+proposed is SAC will have similar terms (\cite{SAC}, equation 13).
+
+\subsection{Distribution Shift Error}
+From \ref{dist_shift_error} we see, that the error of the update of $\pi$ is proportinal to the change in the 
+expected value of $r(\pi)$.\\ 
+
+Eher in function approximator bereich
+In the paper "Trust Region Policy Optimization" \cite{TRPO} the authors derive a lower bound on the policy improvement given the KL divergence between the new policy $\tilde{\pi}$ 
+at step $i+1$ and the old policy at step $i$ as. Let $\rho_{\pi}(s)$ be the occupancy measure of state $s$ given policy 
+$\pi$ let $L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tild{\pi}(a|s) A_\pi(s,a)$ 
+be the expected discounted reward of policy $\tild{\pi}$ given the occupance measure of policy $\pi$ with the advatage function $A$. It can be shown, that 
+\begin{equation}
+    J(\tilde{\pi}) \geq L_\pi(\tilde{\pi}) - C D_{\max} \mathrm{KL}(\pi, \tilde{\pi}),
+\end{equation}
+where $C = 4\epsilon\gamma/(1-\gamma)^2$ and $\epsilon = \max_{s,a} |A_\pi(s,a)|$. Although not directly comparable, this falls in line with our approximation of the update error, as 
+the negative term on the right side of the inequality scales linear with the KL divergence between the old policy $\pi$ and the new policy $\tilde{\pi}$. \\
+The point of this analysis is to show, that inherently actor critic policies make policy update errors and tend to overestimate value functions, 
+which makes using data collected from earlier policies challenging. We have discussed one way to counter this problem in our section about TQC \ref{section:TQC}, 
+where the overestimation bias was derived differently, but the methods main focus was on introducing a parameter, with which this overestimation can be controlled. 
+While it shows good results in practice, solving this problem by introducing a mechanism that can use a hyper parameter to emperically counter the update error 
+entails the reliance on hyper parameter tuning. \\
+
+
+In our aproach, we want to decouple the critic from the actor to set the distribution shift error to zero. To do so, let's see where the difference between 
+$\theta(\phi)$ and $\theta(\phi + \delta)$ comes from. Recall when we write $\theta(\phi)$ we mean $Q_{\theta}(a,s|\pi_{\phi})$:
+\begin{equation*}
+    Q_{\theta}(a,s|\pi_{\phi}) = \mathbb{E}_{(a_t \propto \pi_{\phi}(s_t), s_t \propto T(s_{t-1}, a_{t-1}, s_t))|a_0=a, s_0=s}\left[\sum_t \gamma^t r(a_t, s_t)\right]
+\end{equation*}
+from that we get
+\begin{equation}
+    Q_{\theta }(a,s|\pi_{\phi + \delta}) - Q_{\theta}(a,s|\pi_{\phi}) != 0 \text{ if } \pi_{\phi + \delta}(a|s) != \pi_{\phi}(a|s)
+\end{equation}
+except for degenerate cases. We propose a whole sequence actor critic, where given an observation, the actor proposes the whole sequence of actions it will 
+take and the critic uses the whole sequence of actions to predict all rewards. The new $Q_{\text{whole sequence}}$ is thus defined on an observation and a 
+sequence of actions: 
+\begin{equation}
+    (a_0, ..., a_T) \propto \pi_{\text{whole sequence}}(a_0, ..., a_t|s)
+\end{equation}
+\begin{equation*}
+    Q_{\text{whole sequence}}(t, s, a_0, ..., a_T) = \mathbb{E}_{s_t \propto T(s_{t-1}, a_{t-1}, s_t) | s_0=s}\left[r(a_t, s_t)\right]
+\end{equation*}
+Note, that as there is no dependency of $Q$ on $\pi$, the distribution shift error \ref{dist_shift_error} is zero. The downside of this approach is, that the 
+critic has to predict the MDP, to predict the correct reward after the action sequence $a_{0, ... t}$. While predicting an MDP entailes a quadratic error in 
+$\gamma$, it has been shown to be useful for example as a regularizor in \ref{GAIL_POMDP} and as a proxy loss in \ref{MUESLI}. Note, that our 
+formulation does not train the policy to predict the exact observations at time step t, but rather it is trained to only predict the expected reward. 
+In our discussion of \ref{GAIL_POMDPS} we stated, that predicting exact observations is unnecessarly hard and not optimally aligned with the actual objective. 
+Our whole sequence critic only has to learn a value equvialent MDP \ref{https://arxiv.org/abs/2011.03506}.\\
+While our approach is generally applicable in all MDPs, it is specifically usefull in our environment with only one observation, as in this setup, we can't do 
+better then to predict all actions and the reward $T$ steps into the future, as we don't get any other signal.\\ \\
+
+\subsection{Function Approximation Error}
+1. Recall only n boundary conditions -> theta + epsilon. 
+2. Intuitively we know Q value only for trj that we saw and approximate Q value for new trajectory. 
+3. Decouple Actor from critic: update actor w.r.t. sampled trajectories. For example, only successful trjs. 
+4. Improve actor performance by using critic in inference time to sample new actions. 
+5. Thus the name: active critic.
+
+\subsection{Average Actions Problem}
+In imitation case: what if two trj. lead to success and are both found by the critic? Average trj. between those two probably not correct. Inverse plan to 
+disambugate trjs. in inference time, always start with zero plan.
+
+\subsection{Inference Time optimisation}
+Multiple options what to optimize: Actions, Actor, Plan. Assumptions: smallest state space is most sample efficient. Optimize on actions is most general.
+
+The other identified error signal in the update step for our policy comes from the fact that we use a function approximator for the $Q$ value. From temporal 
+difference learning we get the update signal for our $Q$ function as derived in \ref{Q-ValueTD}:
+\begin{equation}
+    \delta_t = r_t + \gamma Q_{\theta}(s_{t+1}, a_{t+1}\propto \pi_{\phi}) - Q_{\theta}(s_{t}, a_{t} \propto \pi_{\phi})
+\end{equation}
+. If we change $\pi_{\phi}$, 
 
 Instead use TQC error bound (https://arxiv.org/pdf/1502.05477.pdf) (8). 
 Say, that ising old data has high KL divergence and not using old data means less data efficient. also, mention quadratic error from imitation and 
@@ -136,3 +234,47 @@ Stabe update to the actor by Imitation setup from newly found correct trajectori
 explain L2-problem and solution
 Critic learns implicit believe representation for value equvialent MDPs, directly task oriented. (Equivalence of MDPs) (https://proceedings.neurips.cc/paper/2020/file/3bb585ea00014b0e3ebe4c6dd165a358-Paper.pdf)
 State whole algorithm.
+
+\begin{tikzpicture}[>=stealth,font=\small]
+    
+    % Define node styles
+    \tikzstyle{observation_block_1} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{actor_block} = [draw, rounded corners, fill=black!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{critic_block} = [draw, rounded corners, fill=black!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{actions_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{critic_reward_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{observation_block_2} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{plan_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
+    
+    % Draw nodes
+    \node [actor_block] (actor) {Actor};
+    \node [observation_block_1, above of=actor, yshift=1cm] (observations_vector_1) {$o_0$};
+    \node [plan_block, below of=actor, yshift=-1.5cm] (plans_vector) {$\begin{matrix}p_0\\ \vdots\\ p_T\end{matrix}$};
+    \node [actions_block, right of=actor, xshift=2cm] (actions_vector) {$\begin{matrix}a_0\\ \vdots\\ a_T\end{matrix}$};
+    \node [critic_block, right of=actions_vector, xshift=2cm] (critic) {Critic};
+    \node [observation_block_2, above of=critic, yshift=1cm] (observations_vector_2) {$o_0$};
+
+    \node [critic_reward_block, right of=critic, xshift=2cm] (critic_reward_vector) {$\begin{matrix}c_0\\ \vdots\\ c_T\end{matrix}$};
+
+    % Draw arrows
+    \draw [->, black!50, line width=1pt] (actor.east) ++(0, +0.3cm) --node[midway, above] {} (actions_vector.west |- 0,+0.3cm);
+    \draw [<-, green!50!black!50, line width=1pt, dashed] (actor.east) ++(0, -0.3cm) --node[midway, above] {} (actions_vector.west |- 0,-0.3cm);
+
+    \draw [<-, blue!50!black!50, line width=1pt, dashed] (plans_vector.north) ++(+0.3cm, 0) --node[midway, above] {} (actor.south -| 0.3cm,0);
+    \draw [->, black!50, line width=1pt] (plans_vector.north) ++(-0.3cm, 0) --node[midway, above] {} (actor.south -| -0.3cm,0);
+
+    \draw [->, black!50, line width=1pt] (observations_vector_1)  --node[midway, above] {} (actor);
+    \draw [->, black!50, line width=1pt] (observations_vector_2)  --node[midway, above] {} (critic);
+
+
+    \draw [->, black!50, line width=1pt] (actions_vector.east) ++(0, +0.3cm) --node[midway, above] {} (critic.west |- 0,+0.3cm);
+    \draw [<-, red!50, line width=1pt, dashed] (actions_vector.east) ++(0, -0.3cm) --node[midway, above] {} (critic.west |- 0,-0.3cm);
+
+    \draw [->, black!50, line width=1pt] (critic.east) ++(0, +0.3cm) --node[midway, above] {} (critic_reward_vector.west |- 0,+0.3cm);
+    \draw [<-, red!50, line width=1pt, dashed] (critic.east) ++(0, -0.3cm) --node[midway, above] {} (critic_reward_vector.west |- 0,-0.3cm);
+
+    %\draw [->, double] (actions_vector) -- node[midway, above] {} (critic);
+    %draw [->, double] (critic) -- ++(-0.1cm) node[midway, above] {} (vector2);
+    %\draw [<-, double] (critic) -- ++(-0,1cm) node[midway, above] {} (vector2);
+\end{tikzpicture}
+
