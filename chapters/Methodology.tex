@@ -189,7 +189,10 @@ higher predicted values, the gradient also increases. Instead, we use gradient d
 choose reward 1 for the success cases and reward 0 for the failure cases. In this sence, we aim to optimize the predicted probability, that actions $a$ will lead 
 to a success, given observations $o$. An overview of the algorithm can be seen in figure {AC algo}. The new trajectory $a_{c, o}$ found by unsing the critic, will 
 be added to the set of trajectories for the critic and to the set of expert trajectories, if it was a success. \\
-With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. The actor is 
+With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. 
+Another way to motivate the imitation learning paradigm for our actor comes from using the lower bound on plicy improvement from the TRPO paper \cite{TRPO}.
+
+The actor is 
 model free, while the critic is weakly grounded model based, as it learns to predict the dynamics of the MDP. In this sense, it is close to MuZero and MuEsli, 
 but our architecture enables search on continuous action space, which is not possible in MuZero and MuEsli. 
 "Monte-Carlo Tree Search in Continuous Action Spaces with Value Gradients" does search on continues action space, but requires the knowledge of the transition model. 
@@ -231,54 +234,6 @@ critic gradient works best. This update rule can be written as:
 \end{equation}
 , where we used the planner network to compute $p(a_i)$ and $p(a_0) = 0$ for the first input to the actor network. 
 We do not apply the updated weights to the actor after the inference, but only use them in inference time for the given trajectory. 
-
-\begin{tikzpicture}[>=stealth,font=\small]
-    
-    % Define node styles
-    \tikzstyle{observation_block_1} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{actor_block} = [draw, rounded corners, fill=black!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{critic_block} = [draw, rounded corners, fill=black!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{actions_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{critic_reward_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{observation_block_2} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{plan_block} = [draw, rounded corners, fill=blue!20, minimum width=2cm, minimum height=1cm, text centered]
-    \tikzstyle{asd} = [draw, rounded corners, fill=black!20, minimum width=2cm, minimum height=1cm, text centered]
-    
-    % Draw nodes
-    \node [actor_block] (actor) {Actor};
-    \node [observation_block_1, above of=actor, yshift=1cm] (observations_vector_1) {$o_1$};
-    \node [plan_block, below of=actor, yshift=-1.5cm] (plans_vector) {$\begin{matrix}p_1\\ \vdots\\ p_T\end{matrix}$};
-    \node [actions_block, right of=actor, xshift=2cm] (actions_vector) {$\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}$};
-    \node [critic_block, right of=actions_vector, xshift=2cm] (critic) {Critic};
-    \node [observation_block_2, above of=critic, yshift=1cm] (observations_vector_2) {$o_1$};
-
-    \node [critic_reward_block, right of=critic, xshift=2cm] (critic_reward_vector) {$\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}$};
-    \node [asd, above of=critic_reward_vector, yshift=2cm] (vvv) {asaa};
-
-    % Draw arrows
-    \draw [->, black!50, line width=1pt] (observations_vector_2.east) ++(0, +0.3cm) --node[midway, above] {} (vvv.west |- 0,+0.3cm);
-    \draw [<-, black!50, line width=1pt] (observations_vector_2.east) ++(0, -0.3cm) --node[midway, above] {} (vvv.west |- 0,-0.3cm);
-
-    \draw [->, black!50, line width=1pt] (actor.east) ++(0, +0.3cm) --node[midway, above] {} (actions_vector.west |- 0,+0.3cm);
-    \draw [<-, green!50!black!50, line width=1pt, dashed] (actor.east) ++(0, -0.3cm) --node[midway, above] {} (actions_vector.west |- 0,-0.3cm);
-
-    \draw [<-, blue!50!black!50, line width=1pt, dashed] (plans_vector.north) ++(+0.3cm, 0) --node[midway, above] {} (actor.south -| 0.3cm,0);
-    \draw [->, black!50, line width=1pt] (plans_vector.north) ++(-0.3cm, 0) --node[midway, above] {} (actor.south -| -0.3cm,0);
-
-    \draw [->, black!50, line width=1pt] (observations_vector_1)  --node[midway, above] {} (actor);
-    \draw [->, black!50, line width=1pt] (observations_vector_2)  --node[midway, above] {} (critic);
-
-
-
-    \draw [->, black!50, line width=1pt] (actions_vector.east) ++(0, +0.3cm) --node[midway, above] {} (critic.west |- 0,+0.3cm);
-    \draw [<-, red!50, line width=1pt, dashed] (actions_vector.east) ++(0, -0.3cm) --node[midway, above] {} (critic.west |- 0,-0.3cm);
-
-
-
-    \draw [->, black!50, line width=1pt] (critic.east) ++(0, +0.3cm) --node[midway, above] {} (critic_reward_vector.west |- 0,+0.3cm);
-    \draw [<-, red!50, line width=1pt, dashed] (critic.east) ++(0, -0.3cm) --node[midway, above] {} (critic_reward_vector.west |- 0,-0.3cm);
-
-\end{tikzpicture}
 
 
 \section{Algorithm}
@@ -424,3 +379,108 @@ critic score will be lower.
 
 
 
+\section{Introduction}
+
+\begin{figure}
+    \centered
+    \begin{tikzpicture}
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,0) {Planner};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (critic) at (6,2) {Critic};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (0,2) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
+        
+        \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
+            \begin{cases}
+                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>0}\\
+                [0]_{t=0}
+            \end{cases}
+            };
+        \node[draw, fill=blue!20, rounded corners] (actions) at (3,2) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
+        \node[draw, fill=blue!20, rounded corners] (exp_values) at (8.5,2) {$\left[\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}\right]_t$};
+        \node[draw, thick, rectangle] (loss) at (11,2) {$|c^t_T - 1|_{_2}^{^2}$};
+
+        \node[draw, fill=blue!20, rounded corners] (obs_1) at (0,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
+        \node[draw, fill=blue!20, rounded corners] (obs_2) at (6,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
+
+        \node[draw, thick, circle] (embplus_1) at (0,3.5) {$\oplus$};
+        \node[draw, thick, circle] (embplus_2) at (6,3.5) {$\oplus$};
+
+        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
+        (pe_1) at (-1.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
+        (pe_2) at (4.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+
+
+        \draw[<-, black!50, line width=1pt] (plans)  to (planner);
+
+        \draw[->, black!50, line width=1pt] (plans)  to (actor);
+
+        \draw[->, black!50, line width=1pt] (actor) to (actions);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.west) to (actor.east);
+
+        \draw[->, black!50, line width=1pt] (critic) to (exp_values);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (exp_values.west) to (critic.east);
+
+        \draw[->, black!50, line width=1pt] (actions) to (critic);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (critic.west) to (actions.east);
+
+        \draw[->, black!50, line width=1pt] (obs_1) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (embplus_1) to (actor);
+        \draw[->, black!50, line width=1pt] (actions) to (planner);
+
+        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
+
+        \draw[->, black!50, line width=1pt] (embplus_2) to (critic);
+        \draw[->, black!50, line width=1pt] (obs_2) to (embplus_2);
+        \draw[->, black!50, line width=1pt] (pe_2) to (embplus_2);
+
+        \draw[->, black!50, line width=1pt] (exp_values) to (loss);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (exp_values.east);
+
+
+    \end{tikzpicture}
+\caption{Overview of the infernece mechanism of Active Critic. The solid lines indicate the forward path, the dashed lines indicate backward gradients, which 
+are used to update the actor from timestep $t$ to \color{black!50!green!80} $t+1$ \color{black}.}
+\end{figure}
+
+\begin{figure}
+    \centered
+    \begin{tikzpicture}
+        \node[draw, fill=blue!20, rounded corners] (obs_inpt) at (0,0) {$\begin{matrix}[o_1\end{matrix} ]$};
+        \node[draw, fill=blue!20, rounded corners] (obs_rep) at (2,0) {$\left[\begin{matrix}o_1\\ \vdots\\ \times T \\ \vdots \\ o_1\end{matrix}\right]_t$};
+        \node[draw, thick, circle] (embplus_1) at (4, 0) {$\oplus$};
+        \node[draw, thick, circle, inner sep=0pt, label={[align=left]above:Positional\\ Encoding}] 
+        (pe_1) at (4,1.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+        \node[draw, fill=blue!20, rounded corners] (seq_enc_obs_rep) at (6.5,0) {$\left[\begin{matrix}\tilde{o}_1\\ \vdots \\ \tilde{o}_T\end{matrix}\right]_t$};
+
+
+        \node[draw, fill=blue!20, rounded corners] (actions) at (0,5) {$\left[\begin{matrix}a_1^E\\ \vdots\\ a_T^E\end{matrix}\right]_t$};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,5) {Planner};
+        \node[draw, fill=blue!20, rounded corners] (plans) at (6.5,5) {$\begin{matrix}[p_1, ..., p_T\end{matrix} ]^T$};
+
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (6.5,3) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
+        \node[draw, fill=blue!20, rounded corners, right = of actor, x_shift = 1] (prop_actions) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
+        \node[draw, thick, rectangle , right = of prop_actions, x_shift = 1] (loss) {$|a_t - a^E_t|_{_2}^{^2}$};
+
+        \draw[->, black!50, line width=1pt] (obs_inpt) to (obs_rep);
+        \draw[->, black!50, line width=1pt] (obs_rep) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (embplus_1) to (seq_enc_obs_rep);
+        \draw[->, black!50, line width=1pt] (seq_enc_obs_rep) to (actor);
+
+        \draw[->, black!50, line width=1pt] (actions) to (planner);
+        \draw[->, black!50, line width=1pt] (planner) to (plans);
+        \draw[->, black!50, line width=1pt] (plans) to (actor);
+
+        \draw[->, black!50, line width=1pt] (actor) to (prop_actions);
+        \draw[->, black!50, line width=1pt] (prop_actions) to (loss);
+
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (prop_actions.east);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (prop_actions.west) to (actor.east);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actor.north) to (plans.south);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (plans.west) to (planner.east);
+
+
+
+    \end{tikzpicture}
+\caption{Overview of the learning step for the actor. The solid lines indicate the forward path, the dashed lines indicate backward gradients.}
+\end{figure}
