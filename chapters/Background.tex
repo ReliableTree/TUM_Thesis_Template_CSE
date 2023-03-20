@@ -641,7 +641,8 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 \end{algorithm}
 TQC achieves state of the art performance in a wide variety of challenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
 for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps. In this sense, it is a successor to the 
-SAC algorithm, where the overestimation problem in off policy learning was the main focus.
+SAC algorithm, where the overestimation problem in off policy learning was the main focus. While it shows good results in practice, solving this problem by introducing a mechanism that can use a hyper parameter to emperically counter the update error 
+entails the reliance on hyper parameter tuning. \\
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
@@ -703,6 +704,7 @@ be the probability of the expert selecting action $a$ in state $s$, and let $\pi
 
 Differentiating the KL divergence with respect to $\theta$ gives:
 \begin{equation}
+    \label{prob_imitation_learning}
     \nabla_{\theta} D_{KL}(\pi_{\text{expert}} || \pi_{\theta}) \approx \nabla_{\theta} (-log\left({\pi_{\theta}(a|s)}\right))
 \end{equation}
 , as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
