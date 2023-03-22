@@ -53,7 +53,12 @@ We call this a strong inductive belief state bias for the single observatino POM
 In our method, we implement a weak inductive bias, which is motivated by this observation: We use transformer encoder type architecture, which inputs are 
 the repeated initial observation plus a positional encoding. We then use a single pass through the network, which means it does not work autoregressively and 
 relies less on former actions to determin action at time point $t$. We test this hypothesis by using baselines that have the strong inductive bias, as well as 
-using the transformer in autoregressive mode. \\
+using a recurrent policy.\\ 
+Another benfit of computing the whole trajectory in one pass is that the independent and identically distributed (i.i.d.) input data 
+assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution durng infernece time 
+then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
+However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the POMDP, which is independent of 
+the policy, thus the i.i.d. assumption holds.\\
 
 \section{Update Error}
 \label{inference_time_planning}
@@ -83,10 +88,26 @@ The objective function is then defined as
 \begin{equation}
     J_\theta = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right]
 \end{equation}
-. This is an unbiased estimate, as it is simply the empiciral distribution over the rewards given an observation o and an action sequence $a_{1,...,T}$. As the 
-first observation is all the information we have during inference time, we find this aproach to be well suited for our setup. As the critic predicts the reward 
-for the whole sequence of steps into the future, it is an estimate of a proper value equvialent model of the POMDP, as defined by Christopher Grimm et. al (2021) \ref{grimm2021proper}. 
-[[[make this part of backgournd, then say what happens here]]]. Following this insight, we know we can learn an optimal policy using this critic.
+. This is an unbiased estimate of the expected rewards at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
+over the rewards. Because the 
+first observation is all the information we have during inference time, we find this aproach to be well suited for our setup.\\
+
+Next we want to show that the wohle sequence critic can be used to find an optimal policy. 
+To do this, we show the critic learns a proper value equvialent model of the POMDP. Recall the defining property of a proper 
+value equvivalent model $m'$ for a model $m$ is defined in \ref{eq_kthVE} as:
+\begin{equation*}
+   \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k = \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m}_{\pi}(V)\right)^k
+\end{equation*}
+\begin{equation}
+    = V_{\pi}.
+\end{equation}
+As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence. Using this, we can compute the value function for 
+any action sequence $a_1, ..., a_T$ induced by a policy $\pi$:
+\begin{equation*}
+    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right].
+\end{equation*}
+As it has been shown by Christopher Grimm et. al \cite{grimm2021proper}, a policy that is optimal with respect to a proper value equivalent model $m'$ is optimal 
+in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy.
 
 \subsection{Actor}
 \label{sec:AC_actor}
@@ -229,9 +250,8 @@ to a success, given observations $o$. The new trajectory $a_{c, o}$ found by uns
 be added to the set of trajectories for the critic and to the set of expert trajectories, if it was a success. \\
 With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. 
 
-The actor is 
-model free, while the critic is weakly grounded model based, as it learns to predict the dynamics of the MDP. In this sense, it is close to MuZero and MuEsli, 
-but our architecture enables search on continuous action space, which is not possible in MuZero and MuEsli. 
+The actor is model free, while the critic is weakly grounded model based, as it learns to predict the dynamics of the MDP. In this sense, it is close to MuZero, 
+but our architecture enables search on continuous action space, which is not possible in MuZero. 
 "Monte-Carlo Tree Search in Continuous Action Spaces with Value Gradients" does search on continues action space, but requires the knowledge of the transition model. 
 To the authors knowledge, active critic is the only search based algorithm on a continuous action space with no prior access to the transition model.
 
@@ -385,10 +405,9 @@ are used to update the actor from timestep $t$ to \color{black!50!green!80} $t+1
 \section{Algorithm}
 The inference of the actor critic algorithm is depicted in algorithm \ref{AC_Inference}. \\
 
-\begin{algorithm}
-    \caption{Active critic inference}
+\begin{algorithm}[H]
+    \caption{Active Critic Inference}
     \label{AC_Inference}
-    \begin{algorithmic}
     \Require Given $\mathcal{D}_{\text{critic}}$, $\mathcal{D}_{\text{expert}}$,  
     $C_{\theta}$, $\pi_{\phi}$, $\alpha_{inf}$, $N$\\
     \State $p_a \gets 0^{T \times d_p}$ \hfill\COMMENT{Initialize plan to zero vector} \\
@@ -407,7 +426,6 @@ The inference of the actor critic algorithm is depicted in algorithm \ref{AC_Inf
         \State $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$\\
     }
     return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
-\end{algorithmic}
 \end{algorithm}
 
 Following the insights from the section "curse of dimensionality" \ref{COD_AC}, we first repeat the input observation $o_1$ $T$ times and append a positional encoding $p_i$:

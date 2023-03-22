@@ -234,19 +234,31 @@ where $\alpha$ is the learning rate. This update rule is used in the REINFORCE a
     
 The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. The algorithm continues to collect more trajectories and update the policy until convergence.
 
+\section{MDP Model}
+Now that we have estalished the foundation of reinforcement learning, we will investigate two learning paradigms, namely model free and model based reinforcment learning. 
+Model free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn a posterior 
+function over the current estimate of the MDP dynamics and the policy. It is the preferred paradigm in continuous action spaces with no known model, 
+as it is robust to uncertainties of the MDP dynamics. Model based approaches learn the policy given a model of the MDP. If the model is not known, it is learned 
+from observed interactions. The advantage of model based algorithms is, that the policy can use the model to plan some steps ahead. Planning has been shown to be 
+a crucial advantage, where it is applicable. One example is the MuZero algorithm from Julian Schrittwieser et. al \cite{MUZero}.
 
-\section{Value Functions}
+\section{Model Free Learning}
+In the following section, we will develop the framework of value functions, on which off policy algorithms rely. 
+We will then introduce PPO, a SOTA on policy algorithm and TQC, a SOTA off policy algorithm, which we will use as part of our baselines.
+
+\subsection{Value Functions}
 
 Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in MDPs: state-value functions and action-value functions.
 To clean up the notation, we will use upper case letters for functions, if the argument 
 is implicit and lower case, if the argument is explicit.
 
-\subsection{State-Value Function}
+\subsubsection{State-Value Function}
 
 The state-value function $v_{\pi}(s)$ is the expected return when starting in state $s$ and following policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
-    v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right].
+    \label{eq:value_func_proper}
+    V_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right].
 \end{equation}
 
 $\mathbb{E}_{\tau \propto \pi}$ denotes the expected value under policy $\pi$.
@@ -267,9 +279,9 @@ from state $s$ to state $s'$ under action $a$, $r(s,a)$ is the reward received i
 This formulation assumes a discrete action space,
 however it can be adapted for the continuous case by chainging the summation with an integral over the probability density function.
 
-\subsection{Action-State Value Function}
+\subsubsection{State Action Value Function}
 
-The action-state value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
+The state action value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
 policy $\pi$ thereafter. It is defined as:
 
 \begin{equation}
@@ -277,7 +289,7 @@ policy $\pi$ thereafter. It is defined as:
 \end{equation}
 .
 
-The action-state value function also satisfies the Bellman equation:
+The state action value function also satisfies the Bellman equation:
 
 \begin{equation}
     \label{bmeq_q}
@@ -295,6 +307,8 @@ and
 \begin{equation}
     v_{\pi}(s) = \mathbb{E}_{a \propto \pi(\cdot|s)} \left[ q_\pi(s,a) \right]
 \end{equation}
+
+
 
 \subsection{Temporal Difference Learning}
 \label{subsection:TD_learning}
@@ -376,12 +390,14 @@ $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,
 As the fixpoint is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it can be shown that for small enough 
 update rates $\alpha$, TD learning converges to the true value function. A simular proof can be found for TD learning of the $Q$ value function.
 
-\section{Actor-Critic Algorithm}
+
+\subsection{Actor-Critic Algorithm}
 \label{AC-Alg}
 One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
 rule is off policy with high variance. An idea is to approximate the expectation over $G_t$ using another neural network, so that an update can be made after every step, 
 rather then after the whole trajectory. This approximation is referred to as a "critic" in the actor critic method.
-\subsection{Critic}
+
+\subsubsection{Critic}
 In this section, we will derive an expression to aproximate $G_t$ by using an iterative update step with guaranteed convergence.
 Revisiting \ref{nabla_reinforce}: 
 \begin{equation}
@@ -420,7 +436,7 @@ One way to approximate the $Q$ value using a neural network with parameters $\th
 and we can update the $Q$ function using the learning rate $\alpha$ with $\theta_{i+1} = \theta_i + \alpha \nabla_{\theta} J(\theta)$. As shown for the value 
 function, this update rule is guaranteed to converge to $Q_{\pi}$ with sufficiently small $\alpha$.
 
-\subsection{Actor}
+\subsubsection{Actor}
 Once we have an estimate of the state value function, we can use policy gradient to update our policy $\pi_{\phi}$ with parametrs $\phi$:
 \begin{equation}
     \label{AC_general_update}
@@ -684,6 +700,34 @@ TQC achieves state of the art performance in a wide variety of challenging tasks
 for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps. In this sense, it is a successor to the 
 SAC algorithm, where the overestimation problem in off policy learning was the main focus. While it shows good results in practice, solving this problem by introducing a mechanism that can use a hyper parameter to emperically counter the update error 
 entails the reliance on hyper parameter tuning. \\
+
+\section{Model Based Learning}
+In model based reinforcement learning, the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
+expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
+$a_{1, ..., T}$ to optimize the expected reward $J(a) = \mathbb{E}_{\tau}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
+expectation is build with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ as 
+$J(a) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu et. al \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
+model of the environment has a quadratic error in $\gamma$. Thus, most successful applications of this framework are in cases, where the model is known or 
+the action space is discrete, to make the task of learning the model easier.
+
+\subsection{Proper Value Equivalence}
+So far we have stated, that the proper transition function $T(s,a,s')$ must be known for model based learning. However this is not strictly true. Recall we are 
+interested in optimizing the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state 
+our environment will be in at each timestep $s_t$, but only in the rewards $r_t$. 
+This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equvivalence model class of an MDP. For that 
+let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the MDP and let 
+$\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equvialent to $m$, 
+if $k$ applications of the Bellman operator result in the same updated value function: 
+\begin{equation}
+    \label{eq_kthVE}
+    \left(\mathcal{T}^{m}_{\pi}(V)\right)^k = \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k.
+\end{equation}
+It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall the value function is 
+defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
+equvivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model. From this work we conclude that solving the 
+reinforcement learning problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual MDP with model $m$.
+
+
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
