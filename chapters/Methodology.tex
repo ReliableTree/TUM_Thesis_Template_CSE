@@ -3,6 +3,7 @@
 \chapter{Methodology}
 \label{chapter:Methodology}
 We identify two main challenges with the single observation sparse reward setup. \\
+
 \section{Curse of Dimensionality}
 \label{COD_AC}
 As introduces in \ref{COD}, the evidence for a model scales approximately inversly proportinal to the exponent of the dimension on which it acts. In MDPs, the 
@@ -55,17 +56,50 @@ relies less on former actions to determin action at time point $t$. We test this
 using the transformer in autoregressive mode. \\
 
 \section{Update Error}
+\label{inference_time_planning}
 As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. In \cite{NEURIPS2020_b5c01503} 
 it has been shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
 However, we identify that this challange also grants us a unique improvement over previous actor critic methods. By predicting whole sequences of actions at once, 
 we show that we can eliminate errors in the update step of the actor and critic.\\
-All parametrized actor critic mehtods are technically speaking off policy, as the critic value is bootstrapped with former estimates. Once the actor is updated, the 
+
+\subsection{Critic}
+\label{sec:AC_Critic}
+To train the critic in actor critic mehtods, we can either use on policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
+in the current episode is used for training, or we can use off policy data as in TQC \ref{section:TQC}, where the critic has an overestimation bias. This 
+leads to sub optimal data usage and the reliance on an addtional hyper parameter. We find that in our setup with a single observation, we can use all data 
+collected without introducing a bias on the critic. \\
+Recall that the overestimation bias comes from the reliance on the estimation of the $Q$ value for the bootstrapped temporal difference target \ref{eq:overestimation}:
+\begin{equation}
+    \label{eq:TD_Methodology}
+    J_{\theta}(\pi) = \mathbb{E}_{a,a' \propto \pi, s' \propto T(s,a,s')}(r(a,s) + \gamma Q_\theta(a', s') - Q_\theta(a,s))^2
+\end{equation}
+, where the estimator is $Q_\theta(a', s')$. We propose to use a whole sequence critic $C_{\text{whole sequence}}$, which predicts all immediate rewards given a current observation 
+and the planned action sequence for the whole trajectory:
+\begin{equation}
+    C_{\text{whole sequence}}(t, o, a_{1, ..., T}) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right]
+\end{equation}
+, where $\tau_t$ indicates the sequence until timestep $t$. 
+The objective function is then defined as 
+\begin{equation}
+    J_\theta = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right]
+\end{equation}
+. This is an unbiased estimate, as it is simply the empiciral distribution over the rewards given an observation o and an action sequence $a_{1,...,T}$. As the 
+first observation is all the information we have during inference time, we find this aproach to be well suited for our setup. As the critic predicts the reward 
+for the whole sequence of steps into the future, it is an estimate of a proper value equvialent model of the POMDP, as defined by Christopher Grimm et. al (2021) \ref{grimm2021proper}. 
+[[[make this part of backgournd, then say what happens here]]]. Following this insight, we know we can learn an optimal policy using this critic.
+
+\subsection{Actor}
+\label{sec:AC_actor}
+All parametrized actor critic mehtods are technically speaking off policy, as the critic value is bootstrapped with estimates sampled from former policies $\pi_{old}$ during the training process. 
+Once the actor is updated, the 
 critic target moved, on which the actor was updated. Intuitively, when the policy is changed to choose a different action at time point $t$, it might also change 
 the policy to choose different actions at 
-all subsequent time points, which changes the value function. This leads to unstable update behaviour and is the main reason, why algorithms like PPO try to 
-make sure, that changes to the policy are limited. This update instability is specifically challenging in our one observation environment, as the policy does not 
+all subsequent time points, which changes the value function. \\
+
+We assume this update instability is specifically challenging in our one observation environment, as the policy does not 
 get updates of the state of the environment it is currently in. \\
-Formally, let's define the objective function $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$ for actor critic methods as the function we whish to optimize to learn the optimal policy. 
+Formally, define the objective function $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$ for actor critic methods 
+as the function we whish to optimize to learn the optimal policy. While there are other choices, like using the value estimate $V$ instead, the general argument holds.\\
 $Q_{\theta(\phi_i)}$ indicates the $Q$ function for policy $\pi_{\phi_{i}}$ parametrized by parameters 
 $\theta(\phi_i)$. For example, DDPGs policy update rule \ref{AC_general_update} is written as:
 \begin{equation}
@@ -73,7 +107,7 @@ $\theta(\phi_i)$. For example, DDPGs policy update rule \ref{AC_general_update} 
 \end{equation}
 . Note that generally, we do not have access to $\theta(\phi)$, but only an approximation given the limited data we have collected. Let us denote the actual 
 $Q$ function we have as $Q(\theta(\phi) + \epsilon)$, where $\epsilon$ indicates an error between the optimal parameters and the actual parameters.
-Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward, but less readable. We want 
+Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward. We want 
 to estimate the update error to $\pi$ from the objective $J$. The proper derivative is given by:
 \begin{equation}
     \nabla_{\phi} J(\phi, \theta(\phi)) = \frac{J(\phi + \delta \phi, \theta(\phi + \delta \phi)) - J(\phi, \theta(\phi))}{\delta \phi} + \mathcal{O}(\delta)
@@ -84,7 +118,7 @@ with
         \frac{\partial J}{\partial \phi} + \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi}
     \right] \delta \phi  + \mathcal{O}(\delta^2)
 \end{equation}
-, where we used the chain rule and taylor's theorem. 
+, where we used the chain rule and Taylor's theorem. 
 We can express this in terms of the parametrs $\theta(\phi) + \epsilon$:
 \begin{equation}
     \nabla_{\phi} J(\phi, \theta(\phi)) = \nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \nabla_{\phi} J(\phi, \theta(\phi)) + \nabla_{\phi} J(\phi, \theta(\phi))
@@ -121,18 +155,17 @@ as the expectation commutes with the derivative. This leaves us with estimating 
     \label{dist_shift_error}
     \delta \frac{\partial \theta}{\partial \phi} = \theta(\phi + \delta) - \theta(\phi) + \mathcal{O}(\delta).
 \end{equation}
-We will call this error the \textbf{distribution shift error}.\\
+We will call this error the \textbf{distribution shift error}. \\
 While this derivation assumes direct policy gradient to update the actor, other actor critic policy update methods like the minimisation of a KL divergence as 
-proposed is SAC will have similar terms (\cite{SAC}, equation 13).
+proposed is SAC will rely on simlar gradients in there update step (\cite{haarnoja2018soft}, equation 13).
 
-\subsection{Distribution Shift Error}
-\label{dist_shift_error}
+\subsubsection{Distribution Shift Error}
+\label{dist_shift_error_section}
 From \ref{dist_shift_error} we see, that the error of the update of $\pi$ is proportinal to the change in the 
-expected value $J(\pi)$.\\ 
+expected value $J(\pi)$. Using our whole sequence critic $C$, this error is zero. \\ 
 
 
-In our aproach, we want to decouple the critic from the actor to set the distribution shift error to zero. To do so, let's see where the difference between 
-$\theta(\phi)$ and $\theta(\phi + \delta)$ comes from. Recall when we write $\theta(\phi)$ we mean $Q_{\theta}(a,s|\pi_{\phi})$:
+Recall when we write $\theta(\phi)$ we mean $Q_{\theta}(a,s|\pi_{\phi})$:
 \begin{equation*}
     Q_{\theta}(a,s|\pi_{\phi}) = \mathbb{E}_{(a_t \propto \pi_{\phi}(s_t), s_t \propto T(s_{t-1}, a_{t-1}, s_t))|a_0=a, s_0=s}\left[\sum_t \gamma^t r(a_t, s_t)\right]
 \end{equation*}
@@ -143,54 +176,58 @@ from that we get
 \begin{equation*}
     \text{ if } \pi_{\phi + \delta}(a|s) != \pi_{\phi}(a|s)
 \end{equation*}
-except for degenerate cases. We propose a whole sequence actor critic, where, given an observation, the actor proposes the whole sequence of actions it will 
-take and the critic uses the whole sequence of actions to predict all immediate rewards. The new $C_{\text{whole sequence}}$ is thus defined on an observation $o$ and a 
+except for degenerate cases. We propose a whole sequence actor, where, given an observation, the actor proposes the whole sequence of actions it will 
+take. We use these as input for the whole sequence critic, as discussed in the last section. 
+Recall $C_{\text{whole sequence}}$ is defined on an observation $o$ and a 
 sequence of actions: 
 \begin{equation}
     (a_{1,...,T}) \propto \pi_{\text{whole sequence}}(a_{1,...,T}|o)
 \end{equation}
 \begin{equation*}
-    c_{\text{whole sequence}}(t, o, a_{1,...,T}) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right]
+    C_{\text{whole sequence}}(t, o, a_{1,...,T}) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right]
 \end{equation*}
 , where $\tau_t$ indicates the trajectory until timestep $t$ and $c_{\text{whole sequence}}(t, o, a_1, ..., a_T)$ is the expected reward at time step $t$. \\
-Note, that as there is no dependency of $C$ on $\pi$, the distribution shift error \ref{dist_shift_error} is zero. The downside of this approach is, that the 
-critic has to predict the MDP, to predict the correct reward after the action sequence $a_{1, ... t}$. While predicting an MDP entailes a quadratic error in 
-the sequence lenght as shown in \cite{NEURIPS2020_b5c01503}, it has been shown to be useful for example as a regularizor in \ref{GAIL_POMDP} and as a proxy 
-loss in \ref{MUESLI}. Note, that our formulation does not train the policy to predict the exact observations at time step t, but rather it is trained to 
-only predict the expected reward. 
-In our discussion of \ref{GAIL_POMDPS} we stated, that predicting exact observations is unnecessarly hard and not optimally aligned with the actual objective. 
-Our whole sequence critic only has to learn a value equvialent MDP \ref{https://arxiv.org/abs/2011.03506}.\\
-While our approach is generally applicable in all MDPs, it is specifically usefull in our environment with only one observation, as in this setup, we can't do 
-better then to predict all actions and the reward $T$ steps into the future, as we don't get any other signal.\\ \\
+We can now see that, as there is no dependency of $C$ on $\pi$, the distribution shift error \ref{dist_shift_error} is zero. 
 
-\subsection{Function Approximation Error}
+\subsubsection{Function Approximation Error}
 \label{func_app_error}
-Recall the function approximator error $\epsilon_{\widetilde{\nabla}_{\theta}} - \epsilon_{\nabla_{\theta}}$ in \ref{equation:general_update_error} was derived from the observation, that our $\theta(\phi)$ is underdetermined 
+Recall the function approximator error $\epsilon_{\widetilde{\nabla}_{\theta}} - \epsilon_{\nabla_{\theta}}$ in \ref{equation:general_update_error} was 
+derived from the observation, that our $\theta(\phi)$ is underdetermined 
 given limited data $\mathcal{D}^n$. \\
-Intuitively, even if the distribution shift error was zero, meaning we knew perfectly the value 
-$C((t, o, a_{1,...,T}) \in \mathcal{D}^n)$ of a given action sequence, we don't know the value of an arbitrary action sequence \\
+Intuitively, even if the distribution shift error is zero, meaning we knew perfectly the value 
+$C((t, o, a_{1,...,T}) \in \mathcal{D}^n)$ of a given action sequence, we don't know the value of an arbitrary action sequence
 $C((t, o, a_{1,...,T}), o \in \mathcal{D}^n, a_{1,...,T} \notin \mathcal{D}^n)$.\\
 To mitigate this error, we want to decouple the actor update from the critic by rephrasing the actor update as an imitation learning problem. 
 Let's say we have $m$ expert demonstrations in our dataset. 
 Like in imitation learning, we define the update step to our actor as
 \begin{equation}
-    \Delta \phi = \nabla_{\phi} \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E, t \in \{1, ..., T\}}\left(\sum_n \pi_{\phi}(o)_{t, n} - a_{t, n}\right)^2
+    \Delta \phi = \nabla_{\phi} \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E, t \in \{1, ..., T\}}\sum_n \left(\pi_{\phi}(o)_{t, n} - a_{t, n}\right)^2
 \end{equation}
 , where we use a whole sequence actor 
 $\pi(o):\mathcal{R}^m \rightarrow \mathcal{R}^{n \times T}$ with an $n$ dimensional action space and $T$ timesteps per trajectory. The index $t$ denotes the $t$th action of the sequence and the index $n$ denotes the $n$th dimension of 
-the action. For probabalistic policies, we can use the update rule as stated in \ref{prob_imitation_learning}.\\
+the action. For probabalistic policies, we can use the update rule as stated in \ref{prob_imitation_learning}. We don't push the actor towards a predicted goal, 
+but only towards measured goals. This formulation allows us to use good lower bound on the expected policy improvement.\\
+
+From equation \ref{eq:pol_impr_TRPO} we know our policy improvement is lower bound by the KL divergence of the policy $\pi$ before the update step and 
+$\tilde{\pi}$ after the update step. We can estimate the KL divergence given our expert dataset:
+\begin{equation*}  
+    {\operatorname{KL}} (\pi,\tilde{\pi}) \approx \frac{1}{N} \sum_{n=1}^N {\operatorname{KL}} (\pi(a_n|s_n),\tilde{\pi}(a_n|s_n)) \quad |(a_n,s_n) \in \mathcal{D}_{\text{expert}}.
+\end{equation*}  
+We train $\pi$ to immitade the expert actions as close as possible. Assuming we trained $\pi$ until convergence, we get $\pi(a_n|s_n) = \tilde{\pi}(a_n|s_n)$ on seen 
+data. This means our best estimate of the KL divergence between $\pi$ and $\tilde{\pi}$ is zero. No other method can do better using the emperical 
+estimate of the KL divergence. The tight lower bound does not guarantee strict policy improvement, though, as it is only using emperical estimates.
+\\
 This leaves us with the question of how to improve our policy beyond what it can learn from the initial set of expert trajectories. To do this, we propose to use 
-the critic in inference time. Let $a_{\pi}(o)$ be the actions proposed by the actor and $c(a_{\pi}(o), o)$ be the immediate predicted rewards by the critic. 
+a search based method using the critic in inference time. Let $a_{\pi}(o)$ be the actions proposed by the actor and $c(a_{\pi}(o), o)$ be the immediate predicted rewards by the critic. 
 We can now find the gradient of the critic values $c$ by the actions to define new actions: $a_{i+1} = a_i + \nabla_{a}c(a, o)$, as the predicted rewards are a 
 function of the actions. This step is repeated k times, to find new actions using the critic in inference time. This usage of the critic in inference time 
 is the reason, why we call this method "active critic". To be more precise, in our setup we use the critic to predict only the reward of the last state, as we are 
-in the sparse reward setting. A generalisation to dense rewards is straight forward. Moreover, we don't use gradient ascent, as it can be unstable, because with 
-higher predicted values, the gradient also increases. Instead, we use gradient descent on $J_{c, a, o} = (c(a, 0) - 1)^2$. This is a natural choice, as we can 
+in the sparse reward setting. A generalisation to dense rewards is straight forward. Moreover, we don't use gradient ascent, but gradient descent on 
+$J_{c, a, o} = (c(a, 0) - 1)^2$. This is a natural choice, as we can 
 choose reward 1 for the success cases and reward 0 for the failure cases. In this sence, we aim to optimize the predicted probability, that actions $a$ will lead 
-to a success, given observations $o$. An overview of the algorithm can be seen in figure {AC algo}. The new trajectory $a_{c, o}$ found by unsing the critic, will 
+to a success, given observations $o$. The new trajectory $a_{c, o}$ found by unsing the critic, will 
 be added to the set of trajectories for the critic and to the set of expert trajectories, if it was a success. \\
 With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. 
-Another way to motivate the imitation learning paradigm for our actor comes from using the lower bound on plicy improvement from the TRPO paper \cite{TRPO}.
 
 The actor is 
 model free, while the critic is weakly grounded model based, as it learns to predict the dynamics of the MDP. In this sense, it is close to MuZero and MuEsli, 
@@ -215,7 +252,53 @@ $P:\mathcal{R}^{T\times n} \rightarrow \mathcal{R}^{d_p},\ p(a) = p_a$, with act
 with the observation $o$: $a = \pi(o, p_a)$. Now the actor can learn both trajectories disjunctly. However, during inference time, we don't have access to an action sequence 
 that would solve the problem to give to the planner $P$. Instead, we define the output of the planner for all action sequences that were initially provided as 
 expert trajectories as the zero vector. We can do this, as long as the expert, from which the initial trajectories were sampled, is deterministic, or we make sure 
-no two same observations are part of the initial expert trajectories. In inference time, we can then set the plan to the zero vector. 
+no two same observations are part of the initial expert trajectories. In inference time, we can then set the plan to the zero vector. An overview of the learning 
+paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
+
+\begin{figure}
+    \centered
+    \begin{tikzpicture}
+        \node[draw, fill=blue!20, rounded corners] (obs_inpt) at (0,0) {$\begin{matrix}[o_1\end{matrix} ]$};
+        \node[draw, fill=blue!20, rounded corners] (obs_rep) at (2,0) {$\left[\begin{matrix}o_1\\ \vdots\\ \times T \\ \vdots \\ o_1\end{matrix}\right]_t$};
+        \node[draw, thick, circle] (embplus_1) at (4, 0) {$\oplus$};
+        \node[draw, thick, circle, inner sep=0pt, label={[align=left]above:Positional\\ Encoding}] 
+        (pe_1) at (4,1.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+        \node[draw, fill=blue!20, rounded corners] (seq_enc_obs_rep) at (6.5,0) {$\left[\begin{matrix}\tilde{o}_1\\ \vdots \\ \tilde{o}_T\end{matrix}\right]_t$};
+
+
+        \node[draw, fill=blue!20, rounded corners] (actions) at (0,5) {$\left[\begin{matrix}a_1^E\\ \vdots\\ a_T^E\end{matrix}\right]_t$};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,5) {Planner};
+        \node[draw, fill=blue!20, rounded corners] (plans) at (6.5,5) {$\begin{matrix}[p_1, ..., p_T\end{matrix} ]^T$};
+
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (6.5,3) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
+        \node[draw, fill=blue!20, rounded corners, right = of actor, x_shift = 1] (prop_actions) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
+        \node[draw, thick, rectangle , right = of prop_actions, x_shift = 1] (loss) {$|a_t - a^E_t|_{_2}^{^2}$};
+
+        \draw[->, black!50, line width=1pt] (obs_inpt) to (obs_rep);
+        \draw[->, black!50, line width=1pt] (obs_rep) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (embplus_1) to (seq_enc_obs_rep);
+        \draw[->, black!50, line width=1pt] (seq_enc_obs_rep) to (actor);
+
+        \draw[->, black!50, line width=1pt] (actions) to (planner);
+        \draw[->, black!50, line width=1pt] (planner) to (plans);
+        \draw[->, black!50, line width=1pt] (plans) to (actor);
+
+        \draw[->, black!50, line width=1pt] (actor) to (prop_actions);
+        \draw[->, black!50, line width=1pt] (prop_actions) to (loss);
+
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (prop_actions.east);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (prop_actions.west) to (actor.east);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actor.north) to (plans.south);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (plans.west) to (planner.east);
+
+
+
+    \end{tikzpicture}
+\caption{Overview of the learning step for the actor. The solid lines indicate the forward path, the dashed lines indicate backward gradients.}
+\label{fig:actor_planner}
+
+\end{figure}
 
 \subsection{Inference Time Search}
 In the derivation of the AC algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
@@ -233,153 +316,8 @@ critic gradient works best. This update rule can be written as:
     \theta_{i+1} = \theta_i - \alpha_{inf} \nabla_{\theta} (C(\pi_{\theta}(o, p(a_i)), o) - 1)^2
 \end{equation}
 , where we used the planner network to compute $p(a_i)$ and $p(a_0) = 0$ for the first input to the actor network. 
-We do not apply the updated weights to the actor after the inference, but only use them in inference time for the given trajectory. 
-
-
-\section{Algorithm}
-The inference of the actor critic algorithm is depicted in algrothm \ref{AC_Inference}.
-Following the insights from \ref{COD_AC}, we first repeat the input observation $o_1$ $T$ times and append a positional encoding $p_i$:
-\begin{equation*}
-    \tilde{o}_{1, ..., T} = [o_1]^T \oplus [p_i]_{i=1}^T
-\end{equation*}
-. We then generate the plan encoding as a zero vector with $p_a = 0^{T \times d_p}$ with plan dimension $d_p$. The plan and the repeated observation is the input 
-of the actor $\pi$:
-\begin{equation}
-    a^0 = a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T})
-\end{equation}
-. The initial action sequence $a^0$ is then optimized given the critic. For example, if we optimize the actions directly, we get:
-\begin{equation*}
-    a_{i+1} = a_i + \alpha_{inf}\nabla_{a} (c(o_0, a_i) - 1)^2
-\end{equation*}
-. Then, the trajectory is added to the respective data sets:
-\begin{equation}
-    \mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{critic}} \cup (o_0, a_k, r_k)
-\end{equation}
-\begin{equation*}
-    \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_0, a_k, r_k)\quad |\quad r_k = 1
-\end{equation*}
-. Note that with expert actions and expert dataset, we don't mean action sequences that were computed by 
-a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The AC learner might add 
-addtional successful trajectories to the expert dataset. \\
-\begin{algorithm}
-    \caption{Active critic inference}
-    \label{AC_Inference}
-    \begin{algorithmic}
-    \Require Given $\mathcal{D}_{\text{critic}}$, $\mathcal{D}_{\text{expert}}$,  
-    $C_{\theta}$, $\pi_{\phi}$, $\alpha_{inf}$, $N$\\
-    \State $p_a \gets 0^{T \times d_p}$ \hfill\COMMENT{Initialize plan to zero vector} \\
-    \State sample $o_1$ from MDP\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{Add positional encoding $p_i$ to repeated observation} \\
-    \State $a^0 \gets \pi(\tilde{o}_{1, ..., T}, p_a)$\hfill\COMMENT{Get initial actions $a^0$ according to policy $\pi$} \\
-    \For {$i=1$ to $N$}{
-        \State Update action $a^i$ using gradient descent:\\
-        \State $a^{i} \gets a^{i-1} + \alpha_{inf} \nabla_{a^{i-1}} (c(\tilde{o}, a^{i-1}) - 1)^2$
-    }
-    \State Execute actions sequence $a^N$\\
-    \State Get reward $r$ based on final state $s_t \propto a^N$\\
-    \State Add experience to replay buffers:\\
-    \State $\mathcal{D}_{\text{critic}} \gets \mathcal{D}_{\text{critic}} \cup (o_1, a^N_{1, ..., T}, r)$\\
-    \If {$r = 1$}{\\
-        \State $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$\\
-    }
-    return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
-\end{algorithmic}
-\end{algorithm}
-
-Now we want to derive the update step of the wohle sequence actor as motivated in the function approximation error section \ref{func_app_error}, given an observation 
-$o$ and an action sequence $a^{\text{E}}_{1, ..., T}$. 
-To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_a_{\zeta} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
-We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$ as described above. From those inputs, we can compute the actions:
-\begin{equation*}
-    a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T},p_a_{\zeta})
-\end{equation*}
-. From this we get the objective function of the actor as:
-\begin{equation}
-    \label{actor_objective}
-    J_{\phi, \zeta} = \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left(\sum_n \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a_{\zeta})_{t, n} - a_{t, n}\right)^2
-\end{equation}
-, where the respective gradient steps are:
-\begin{equation*}
-    \phi_{i+1} = \phi_i - \alpha_{\phi} \nabla_{\phi}J_{\phi, \zeta}
-\end{equation*}
-\begin{equation*}
-    \zeta_{i+1} = \zeta_ - \alpha_{\zeta_} \nabla_{\zeta_}J_{\phi, \zeta}
-\end{equation*}
-. The pseudocode is depicted in algorithm \ref{Actor_Update_Alg}.
-\begin{algorithm}
-    \caption{Actor Update}
-    \label{Actor_Update_Alg}
-    \begin{algorithmic}
-    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, actor $\pi_{\phi}$, planner $P_{\zeta}$, 
-    learning rate $\alpha_{\phi}$, learning rate $\alpha_{\zeta}$\\
-    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1)$ from $\mathcal{D}_{\text{expert}}$\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
-    \State $p_a \gets $
-    \begin{cases}
-        p_{\zeta}(a^{\text{E}}_{1, ..., T})\ |\ a^{\text{E}} \notin \text{original expert demonstrations}\\
-        0^{T \times d_p}, \text{else}
-    \end{cases} \hfill\COMMENT{generate plan $p_a$} \\
-    \State $a^\pi_{1,...,T} \gets \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a)$ \hfill\COMMENT{generate actions according to $\pi_{\phi}$} \\
-    \State $J_{\pi} = \mathcal{L}_2(a^\pi_{1,...,T}, a^{\text{E}}_{1, ..., T})$ \hfill\COMMENT{compute $L_2$ loss from actions} \\
-    \State $\phi \gets \phi_{old} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
-    $\zeta \gets \zeta{old} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill\COMMENT{update $\phi$ and $\zeta$ according to gradients} \\
-    \State return $\phi$, $\zeta$
-\end{algorithmic}
-\end{algorithm}
-Following the section distribution shift error \ref{dist_shift_error} and using $\tilde{o}_{1, ..., T}$ the objective function of the whole sequence critic is defined as :
-\begin{equation}
-    J_{\theta} = \mathbb{E}_{(o, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(t, \tilde{o}_{1, ..., T}, a_{1,...,T}) - r_t)^2\right]
-\end{equation}
-. The gradient step is:
-\begin{equation*}
-    \theta_{i+1} = \theta_i - \alpha_{\theta} \nabla_{\theta}J_{\theta}
-\end{equation*}
-with learning rate $\alpha_{\theta}$. The pseudocode is depicted in algorithm \ref{Critic_Update_Alg}.
-\begin{algorithm}
-    \caption{Critic Update}
-    \label{Critic_Update_Alg}
-    \begin{algorithmic}
-    \Require Given replay buffer $\mathcal{D}_{\text{critic}}$, critic $C_{\theta}$ and learning rate $\alpha_{\theta}$\\
-    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1, r)$ from $\mathcal{D}_{\text{critic}}$\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
-    \State $c \gets C_{\theta}(\tilde{o}_{1, ..., T}, a^{\text{E}}_{1, ..., T})$\hfill\COMMENT{compute expected reward $c$} \\
-    
-    \State $J_{C} = \mathcal{L}_2(c, r)$ \hfill\COMMENT{compute $L_2$ loss from reward $r$} \\
-    \State $\theta \gets \theta{old} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
-    \State return $\theta$
-\end{algorithmic}
-\end{algorithm}
-Putting everything together, we can now define the whole learning paradigm of the active critic, depicted in algorithm \ref{AC_Learner}. The number of update 
-steps in inference time $N$ can be used to weigh exploration against exploitation. A high number of update steps means the critic can find very different 
-trajectories, then the one proposed by the actor. As these trajectores are further from the distribution on which the critic learned, the confidence of the 
-critic score will be lower.
-\begin{algorithm}
-    \caption{Active critic learner}
-    \label{AC_Learner}
-    \begin{algorithmic}
-    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, sequence length $T$, learning rates $\alpha_{inf}$, $\alpha_{\theta}$, 
-    $\alpha_{\phi}$ and $\alpha_{\zeta}$, inference steps $N$ and update steps $N_{\text{update}}$\\
-    \State Initialize  $\mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{expert}}$, 
-    actor $\pi_{\phi}$, planner $P_{\zeta}$, critic $C_{\theta}$\\
-    \While {\text{not converged}}
-    {
-        \For {$i=1$ to $N_{\text{update}}$}
-        {
-            $\phi_{new}$, $\zeta_{new}$ = Actor Update \hfill\COMMENT{see algorithm \ref{Actor_Update_Alg}}\\
-            $\theta_{new}$ = Critic Update \hfill\COMMENT{see algorithm \ref{Critic_Update_Alg}}\\
-        }
-        \For {$s=1$ to $N_{\text{samples}}$}
-        {
-           $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$ = Inference Step \hfill\COMMENT{see algorithm \ref{AC_Inference}}\\
-        }
-    }
-    \end{algorithmic}
-\end{algorithm}
-
-
-
-
-\section{Introduction}
+We do not apply the updated weights to the actor after the inference, but only use them in inference time for the given trajectory.  An overview of the inference 
+algorithm is shown in \ref{fig:inference}
 
 \begin{figure}
     \centered
@@ -440,47 +378,150 @@ critic score will be lower.
     \end{tikzpicture}
 \caption{Overview of the infernece mechanism of Active Critic. The solid lines indicate the forward path, the dashed lines indicate backward gradients, which 
 are used to update the actor from timestep $t$ to \color{black!50!green!80} $t+1$ \color{black}.}
+\label{fig:inference}
+
 \end{figure}
 
-\begin{figure}
-    \centered
-    \begin{tikzpicture}
-        \node[draw, fill=blue!20, rounded corners] (obs_inpt) at (0,0) {$\begin{matrix}[o_1\end{matrix} ]$};
-        \node[draw, fill=blue!20, rounded corners] (obs_rep) at (2,0) {$\left[\begin{matrix}o_1\\ \vdots\\ \times T \\ \vdots \\ o_1\end{matrix}\right]_t$};
-        \node[draw, thick, circle] (embplus_1) at (4, 0) {$\oplus$};
-        \node[draw, thick, circle, inner sep=0pt, label={[align=left]above:Positional\\ Encoding}] 
-        (pe_1) at (4,1.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
-        \node[draw, fill=blue!20, rounded corners] (seq_enc_obs_rep) at (6.5,0) {$\left[\begin{matrix}\tilde{o}_1\\ \vdots \\ \tilde{o}_T\end{matrix}\right]_t$};
+\section{Algorithm}
+The inference of the actor critic algorithm is depicted in algorithm \ref{AC_Inference}. \\
+
+\begin{algorithm}
+    \caption{Active critic inference}
+    \label{AC_Inference}
+    \begin{algorithmic}
+    \Require Given $\mathcal{D}_{\text{critic}}$, $\mathcal{D}_{\text{expert}}$,  
+    $C_{\theta}$, $\pi_{\phi}$, $\alpha_{inf}$, $N$\\
+    \State $p_a \gets 0^{T \times d_p}$ \hfill\COMMENT{Initialize plan to zero vector} \\
+    \State sample $o_1$ from MDP\\
+    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{Add positional encoding $p_i$ to repeated observation} \\
+    \State $a^0 \gets \pi(\tilde{o}_{1, ..., T}, p_a)$\hfill\COMMENT{Get initial actions $a^0$ according to policy $\pi$} \\
+    \For {$i=1$ to $N$}{
+        \State Update action $a^i$ using gradient descent:\\
+        \State $a^{i} \gets a^{i-1} + \alpha_{inf} \nabla_{a^{i-1}} (c(\tilde{o}, a^{i-1}) - 1)^2$
+    }
+    \State Execute actions sequence $a^N$\\
+    \State Get reward $r$ based on final state $s_t \propto a^N$\\
+    \State Add experience to replay buffers:\\
+    \State $\mathcal{D}_{\text{critic}} \gets \mathcal{D}_{\text{critic}} \cup (o_1, a^N_{1, ..., T}, r)$\\
+    \If {$r = 1$}{\\
+        \State $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$\\
+    }
+    return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
+\end{algorithmic}
+\end{algorithm}
+
+Following the insights from the section "curse of dimensionality" \ref{COD_AC}, we first repeat the input observation $o_1$ $T$ times and append a positional encoding $p_i$:
+\begin{equation}
+    \label{eq:seq_emb}
+    \tilde{o}_{1, ..., T} = [o_1]^T \oplus [p_i]_{i=1}^T
+\end{equation}
+, with a transformer style sinusoidal encoding.
+. We then generate the plan encoding as a zero vector with $p_a = 0^{T \times d_p}$ with plan dimension $d_p$. The plan and the repeated observation is the input 
+of the actor $\pi$:
+\begin{equation}
+    a^0 = a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T})
+\end{equation}
+. The initial action sequence $a^0$ is then optimized given the critic. For example, if we optimize the actions directly, we get:
+\begin{equation*}
+    a_{i+1} = a_i + \alpha_{inf}\nabla_{a} (c(o_0, a_i) - 1)^2
+\end{equation*}
+, with the learning rate for the inference time search $\alpha_{inf}$. Then, the trajectory is added to the respective data sets:
+\begin{equation}
+    \mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{critic}} \cup (o_0, a_k, r_k)
+\end{equation}
+\begin{equation*}
+    \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_0, a_k, r_k)\quad |\quad r_k = 1
+\end{equation*}
+. Note that with expert actions and expert dataset, we don't mean action sequences that were computed by 
+a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The AC learner might add 
+addtional successful trajectories to the expert dataset. \\
 
 
-        \node[draw, fill=blue!20, rounded corners] (actions) at (0,5) {$\left[\begin{matrix}a_1^E\\ \vdots\\ a_T^E\end{matrix}\right]_t$};
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,5) {Planner};
-        \node[draw, fill=blue!20, rounded corners] (plans) at (6.5,5) {$\begin{matrix}[p_1, ..., p_T\end{matrix} ]^T$};
-
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (6.5,3) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        \node[draw, fill=blue!20, rounded corners, right = of actor, x_shift = 1] (prop_actions) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
-        \node[draw, thick, rectangle , right = of prop_actions, x_shift = 1] (loss) {$|a_t - a^E_t|_{_2}^{^2}$};
-
-        \draw[->, black!50, line width=1pt] (obs_inpt) to (obs_rep);
-        \draw[->, black!50, line width=1pt] (obs_rep) to (embplus_1);
-        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
-        \draw[->, black!50, line width=1pt] (embplus_1) to (seq_enc_obs_rep);
-        \draw[->, black!50, line width=1pt] (seq_enc_obs_rep) to (actor);
-
-        \draw[->, black!50, line width=1pt] (actions) to (planner);
-        \draw[->, black!50, line width=1pt] (planner) to (plans);
-        \draw[->, black!50, line width=1pt] (plans) to (actor);
-
-        \draw[->, black!50, line width=1pt] (actor) to (prop_actions);
-        \draw[->, black!50, line width=1pt] (prop_actions) to (loss);
-
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (prop_actions.east);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (prop_actions.west) to (actor.east);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actor.north) to (plans.south);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (plans.west) to (planner.east);
-
-
-
-    \end{tikzpicture}
-\caption{Overview of the learning step for the actor. The solid lines indicate the forward path, the dashed lines indicate backward gradients.}
-\end{figure}
+Now we want to derive the update step of the wohle sequence actor as motivated in the section "Actor" \ref{sec:AC_actor}.
+To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_a_{\zeta} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
+We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$ as described in equation \ref{eq:seq_emb}. We can now compute the actions as:
+\begin{equation*}
+    a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T},p_a_{\zeta})
+\end{equation*}
+. From this we get the objective function of the actor:
+\begin{equation}
+    \label{actor_objective}
+    J_{\phi, \zeta} = \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left(\sum_n \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a_{\zeta})_{t, n} - a_{t, n}\right)^2
+\end{equation}
+, where the respective gradient steps are:
+\begin{equation*}
+    \phi_{i+1} = \phi_i - \alpha_{\phi} \nabla_{\phi}J_{\phi, \zeta}
+\end{equation*}
+\begin{equation*}
+    \zeta_{i+1} = \zeta_ - \alpha_{\zeta_} \nabla_{\zeta_}J_{\phi, \zeta}
+\end{equation*}
+. The pseudocode is depicted in algorithm \ref{Actor_Update_Alg}.
+\begin{algorithm}
+    \caption{Actor Update}
+    \label{Actor_Update_Alg}
+    \begin{algorithmic}
+    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, actor $\pi_{\phi}$, planner $P_{\zeta}$, 
+    learning rate $\alpha_{\phi}$, learning rate $\alpha_{\zeta}$\\
+    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1)$ from $\mathcal{D}_{\text{expert}}$\\
+    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
+    \State $p_a \gets $
+    \begin{cases}
+        p_{\zeta}(a^{\text{E}}_{1, ..., T})\ |\ a^{\text{E}} \notin \text{original expert demonstrations}\\
+        0^{T \times d_p}, \text{else}
+    \end{cases} \hfill\COMMENT{generate plan $p_a$} \\
+    \State $a^\pi_{1,...,T} \gets \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a)$ \hfill\COMMENT{generate actions according to $\pi_{\phi}$} \\
+    \State $J_{\pi} = \mathcal{L}_2(a^\pi_{1,...,T}, a^{\text{E}}_{1, ..., T})$ \hfill\COMMENT{compute $L_2$ loss from actions} \\
+    \State $\phi \gets \phi_{old} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
+    $\zeta \gets \zeta{old} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill\COMMENT{update $\phi$ and $\zeta$ according to gradients} \\
+    \State return $\phi$, $\zeta$
+\end{algorithmic}
+\end{algorithm}
+Using $\tilde{o}_{1, ..., T}$ as in \ref{eq:seq_emb}, the objective function of the whole sequence critic is defined as :
+\begin{equation}
+    J_{\theta} = \mathbb{E}_{(o, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(t, \tilde{o}_{1, ..., T}, a_{1,...,T}) - r_t)^2\right]
+\end{equation}
+. The gradient step is:
+\begin{equation*}
+    \theta_{i+1} = \theta_i - \alpha_{\theta} \nabla_{\theta}J_{\theta}
+\end{equation*}
+with learning rate $\alpha_{\theta}$. The pseudocode is depicted in algorithm \ref{Critic_Update_Alg}.
+\begin{algorithm}
+    \caption{Critic Update}
+    \label{Critic_Update_Alg}
+    \begin{algorithmic}
+    \Require Given replay buffer $\mathcal{D}_{\text{critic}}$, critic $C_{\theta}$ and learning rate $\alpha_{\theta}$\\
+    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1, r)$ from $\mathcal{D}_{\text{critic}}$\\
+    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
+    \State $c \gets C_{\theta}(\tilde{o}_{1, ..., T}, a^{\text{E}}_{1, ..., T})$\hfill\COMMENT{compute expected reward $c$} \\
+    
+    \State $J_{C} = \mathcal{L}_2(c, r)$ \hfill\COMMENT{compute $L_2$ loss from reward $r$} \\
+    \State $\theta \gets \theta{old} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
+    \State return $\theta$
+\end{algorithmic}
+\end{algorithm}
+Putting everything together, we can now define the learning paradigm of the active critic algorithm, depicted in figure \ref{AC_Learner}. The number of update 
+steps in inference time $N$ can be used to weigh exploration against exploitation. A high number of update steps means the critic can find very different 
+trajectories, then the one proposed by the actor. As these trajectores are further from the distribution on which the critic learned, the confidence of the 
+critic score will be lower.
+\begin{algorithm}
+    \caption{Active critic learner}
+    \label{AC_Learner}
+    \begin{algorithmic}
+    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, sequence length $T$, learning rates $\alpha_{inf}$, $\alpha_{\theta}$, 
+    $\alpha_{\phi}$ and $\alpha_{\zeta}$, inference steps $N$ and update steps $N_{\text{update}}$\\
+    \State Initialize  $\mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{expert}}$, 
+    actor $\pi_{\phi}$, planner $P_{\zeta}$, critic $C_{\theta}$\\
+    \While {\text{not converged}}
+    {
+        \For {$i=1$ to $N_{\text{update}}$}
+        {
+            $\phi_{new}$, $\zeta_{new}$ = Actor Update \hfill\COMMENT{see algorithm \ref{Actor_Update_Alg}}\\
+            $\theta_{new}$ = Critic Update \hfill\COMMENT{see algorithm \ref{Critic_Update_Alg}}\\
+        }
+        \For {$s=1$ to $N_{\text{samples}}$}
+        {
+           $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$ = Inference Step \hfill\COMMENT{see algorithm \ref{AC_Inference}}\\
+        }
+    }
+    \end{algorithmic}
+\end{algorithm}

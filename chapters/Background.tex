@@ -297,6 +297,7 @@ and
 \end{equation}
 
 \subsection{Temporal Difference Learning}
+\label{subsection:TD_learning}
 Temporal Difference (TD) learning is a paradigm that learns the value function from experience by updating its value based on the difference between the predicted reward and the actual reward received at each time step.
 
 The update rule for TD learning is derived from the Bellman equation\\ 
@@ -495,7 +496,46 @@ To approximate the derivative of \ref{sac_pol_obj} given limited sample size, th
 To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. It outperforms non stochastic 
 policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces, which are hard to explore.
 
+\subsection{TRPO}
+Trust Region Policy Optimisation \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
+Recall we defined the reinforcement learning objective as:
+\begin{equation}
+    J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right]
+\end{equation}
+. The authors show that we can compute $J(\tile{\pi})$ for a different policy $\tile{\pi}$ using $J(\pi)$ like:
+\begin{equation}
+    J(\tilde{\pi}) = J(\pi) + \mathbb{E}_{s_0, a_0, ... \propto \tilde{\pi}}\left[ \sum_{t=0}^{\infty}  \gamma^t A_{\pi}(s_t, a_t)\right]
+\end{equation}
+with the advantage function $A_{\pi}(s_t, a_t) = Q_{\pi}(s_t,a_t) - V_{\pi}(s_t)$. Note that the expectation of the states and actions is taken with respect to 
+$\tilde{\pi}$. 
+We now introduce the occupancy measure $\rho_{\pi}$ for states, which measures how often a state is visited, given a policy:
+\begin{equation*}
+    \rho_{\pi}:\mathcal{S} \rightarrow \mathbb{R} = \mathbb{E}_{\tau \propto \pi} \left[ \sum_{t=0}^\infty \gamma^t P(s_t=s) \right]
+\end{equation*}
+. With this, we can define a local approximation $L$ to $J(\tilde{\pi})$:
+\begin{equation}
+    L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tilde{\pi}(a|s) A_{\pi}(s,a)
+\end{equation}
+, where we used the ocupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
+Let's say we have policy $\pi$ and collect statistics by generating trajectores from it to approximate $J(\pi)$ and $\rho(\pi)$. We now want to change the policy 
+such that our expected value $J$ improves $J(\tilde{\pi}) > J(\pi)$, ideally, but we don't have an estimate of $J(\tilde{\pi})$, before we use $\tilde{\pi}$. 
+However, we can compute $L_{\pi}(\tilde{\pi})$, given our current data from policy $\pi$. It has been shown, that the following lower bound on policy 
+improvement holds:
+\begin{equation*}
+    J(\tilde{\pi}) \geq L_{\pi}(\tilde{\pi}) - C D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}),
+\end{equation*}
+\begin{equation*}
+    \text{where}\quad C = \frac{4\epsilon}{\gamma/(1-\gamma)^2}\
+\end{equation*}
+\begin{equation}
+    \label{eq:pol_impr_TRPO}
+    \text{and} \quad  D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}) = \max_s D_{\operatorname{KL}} (\pi(\cdot|s),\tilde{\pi}(\cdot|s)).
+\end{equation}
+Following this insight, the authors propose an algorithm that aims to maximize expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
+We will not explain their algorithm here, as the PPO algorithm builds upon this insight, but is computationally cheaper and has been empirically shown to have 
+similar or better performance then TRPO.
 \subsection{PPO}
+\label{section:PPO}
 The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman et al. 
 builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
@@ -569,6 +609,7 @@ Emperically, the learned $Q$ function tends to overestimate the actual $Q$ value
 two critics in the SAC algorithm \ref{SAC}. In the TQC paper \cite{TQC_Paper} the authors cite a formal derivation of the over estimation bias by 
 Thrun and Schwartz (1993) \cite{thrun1993issues} stating:
 \begin{equation}
+    \label{eq:overestimation}
     \begin{align}
         \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left{Q(s,a) + U(a)\right}\right]
     \end{align}
@@ -764,7 +805,7 @@ no natural upper bound. For this pratical reason, we will make use of $c$ instea
 The key insight of the paper is, that this optimisation problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
 induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the MDP. If two policies visit the same 
 states and choose the same actions, they are similar to each other.\\
-Formally, the occupancy measure is defined as 
+Formally, the occupancy measure for states and actions is defined as: 
 \begin{equation*}
     \rho_{\pi}:\mathcal{S} \times \mathcal{A} \rightarrow \mathbb{R} = \pi(a|s)\sum_{t=0}^\infty \gamma^tP(s_t=s|\pi)
 \end{equation*}
