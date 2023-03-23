@@ -89,3 +89,32 @@ is in a state that it has not seen before and acts slightly different to the exp
 different then the training distribution, thus it starts to act unpredictable. As argued in section \ref{COD_AC} this is an advantage of our policy, as it 
 does not break the i.i.d. assumption.
 
+\section{Meta World}
+The Meta World benchmark is a challenging robot simulation benchmark...
+
+We want to test two aspects of our algorithm
+-fine tuning
+-reinforcement learning
+
+\subsetion{Fine Tuning}
+In this section we analyze our algorithm in a fine tuning setup. We define a setup as fine tuning, when the provided expert demonstrations alone 
+are suffiecient for at least one of our algorithms to reach 50 persent success rate. We present our findings. We see that we are better, sometimes by a 
+wide margin. RPPO performs the worst, as expected. Because fine tuning relies heavily on demonstrations, we use GAIL together with PPO and TQC, as well as 
+RPPO and pure PPO. We found TQC to perform worse then PPO so with our limited compute time, we chose to concentrate on the best performing benchmarks.
+TQC probably performs worse then PPO in this setup, as PPO is an on plicy algorithm and thus more robust to distribution shift from the 
+behaviour cloning phase to the reinforcement phase. TQC is strongest in settings, were compex behaviour must be explored.
+
+\subsetion{Reinforcement Learning}
+In this section we analyze the performance of our algorithm on a selection of (4) Meta World tasks, with varying degree of expert demonstrations
+
+4: Reach PickPlcae, Push, Windowopen 
+
+1: Reach with only one example
+-with planner without planner
+-compare optimized vs. non optimized
+-show how planner and actions change the trj. differently
+
+0: Drawer Close with 0 examples
+-compare optimized vs. non optimized
+We chose these setups, as they demonstrate the abilities of AC.
+
