@@ -29,7 +29,7 @@ Consider the goal of not driving into a vehicle or a goal expressed in natural l
 
 \section{Single Observation Imitation Learning in POMDPs}
 \label{LCILRM}
-The paper "Language-Conditioned Imitation Learning for Robot Manipulation Tasks" \cite{Language-Conditioned Imitation} proposes a method for robot manipulation tasks that takes 
+The paper "Language-Conditioned Imitation Learning for Robot Manipulation Tasks" \cite{stepputtis2020languageconditioned} proposes a method for robot manipulation tasks that takes 
 into account natural language instructions. The proposed method involves using a neural network to map natural language instructions to 
 corresponding robot actions. The authors also introduce a novel dataset of language-conditioned robot manipulation tasks, which they use to evaluate 
 their method. The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
@@ -37,7 +37,7 @@ tasks when language instructions are given.\\
 
 A policy $\pi(v,I)$ is learned to imitate expert behavior in a set of demonstrations $D = \{d_0,...,d_m\}$, each containing a trajectory 
 $R \in R^{T \times N}$ over $T$ time steps and with $N$ control variables, an rgb image $I \in \mathcal{R}^{569 \times 320 \times 3}$ of the agent's surroundings, 
-and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language using GloVe \cite{GloVe} embeddings. The proposed method takes the image $I$ and task description $v$ 
+and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language using GloVe \cite{pennington-etal-2014-glove} embeddings. The proposed method takes the image $I$ and task description $v$ 
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
 which is subsequently used in the control model to generate robot actions at each time in a closed-loop 
 fashion. A schematic overview can be seen in figure \ref{language_imitation}.
@@ -52,7 +52,7 @@ the task embedding $e$ is used in every timestep, as we know, that the task does
     \caption{Overview of the general system architecture. (Left) Details of the controller model, which
     synthesizes robot control signals . (Right) details of the semantic model, which extracts critical
     information about the task from both perceptual input and language commands. Dark-blue boxes
-    indicate pre-trained components of the model \cite{Language-Conditioned Imitation}.}
+    indicate pre-trained components of the model \cite{stepputtis2020languageconditioned}.}
     \label{language_imitation}
 \end{figure}
 
@@ -67,7 +67,7 @@ tasks, which greatly outperforms a baseline using an end to end RNN model with $
     \centering
     \includegraphics[width=\textwidth]{images/Language_Conditioned/simulator.pdf}
     \caption{Overview of a task. (top) - All possible objects and colors. (left) Example trajectory to "pick up the red cup" following the natural language description. 
-    (right) Example trajectory to "pour some of it into the blue bowl". Figure taken from \cite{Language-Conditioned Imitation}.}
+    (right) Example trajectory to "pour some of it into the blue bowl". Figure taken from \cite{stepputtis2020languageconditioned}.}
     \label{lang_imi_expl}
 \end{figure}
 
