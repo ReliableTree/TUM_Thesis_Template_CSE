@@ -121,34 +121,87 @@ behaviour cloning phase to the reinforcement phase. TQC is strongest in settings
 
 \begin{figure}[htbp]
     \centering
+    \begin{subfigure}[t]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{images/15_400/Reach.png}
+      \caption{Reach environment, 15 expert demonstrations.}
+      \label{fig:plot2}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{images/15_400/Push.png}
+      \caption{Push environment, 15 expert demonstrations.}
+      \label{fig:plot3}
+    \end{subfigure}
+    \begin{subfigure}[t]{0.3\textwidth}
+      \includegraphics[width=\textwidth]{images/15_400/Pick and Place.png}
+      \caption{Pick and Place 111environment, 15 expert demonstrations.}
+      \label{fig:plot4}
+    \end{subfigure}
+    \caption{Each learner had access to the same number of expert demonstrations per experiment. 
+    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 15 demonstrations. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided.
+    For the pure imitation AC plot, the algorithm did not use new samples 
+    from the environment, but used the same amount of compute compared to the algorithm using reinforcement learning.}
+    \label{fig:15}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/FineTuning/Reach Environment Imi vs Ref.png}
-      \caption{Reach environment, comparison pure imitation and reinforcement learning.}
+      \includegraphics[width=\textwidth]{images/4_400/Window Open.png}
+      \caption{Window Open environment.}
       \label{fig:plot1}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/FineTuning/Reach Environment.png}
+      \includegraphics[width=\textwidth]{images/4_400/Reach.png}
       \caption{Reach environment.}
       \label{fig:plot2}
     \end{subfigure}
     \medskip
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/FineTuning/Push Environment.png}
+      \includegraphics[width=\textwidth]{images/4_400/Push.png}
       \caption{Push environment.}
       \label{fig:plot3}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/FineTuning/Pick and Place Environment.png}
+      \includegraphics[width=\textwidth]{images/4_400/Pick and Place.png}
       \caption{Pick and Place environment.}
       \label{fig:plot4}
     \end{subfigure}
-    \caption{Each learner had access to 15 expert demonstrations. 
-    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 15 demonstrations. 
-    The x-axis shows the number of sampled environment epsiodes, each with 100 steps.  A sparse reward signal was provided at the end of each episode. 
-    For the pure imitation AC plot, the algorithm did not use new samples 
-    from the environment, but used the same amount of compute compared to the algorithm using reinforcement learning.}
+    \caption{Each learner had access to 4 expert demonstrations. 
+    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 4 demonstrations. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
+    \label{fig:4}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/1_2000/Reach.png}
+      \caption{Reach environment.}
+      \label{fig:plot1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/1_2000/Window Open.png}
+      \caption{Window Open environment.}
+      \label{fig:plot2}
+    \end{subfigure}
+    \caption{Each learner had access to one expert demonstrations per experiment. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
+    \label{fig:fourplots}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/0/Drawer Close.png}
+      \caption{Drawer Close environment.}
+      \label{fig:plot1}
+    \end{subfigure}
+    \caption{No expert demonstrations were provided. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
     \label{fig:fourplots}
 \end{figure}
 
