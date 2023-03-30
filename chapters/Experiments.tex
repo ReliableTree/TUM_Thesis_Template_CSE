@@ -116,6 +116,8 @@ We tested our algorithm on four environments from the Meta-World benchmark with 
 PPO, TQC and RPPO were pretrained unsing behavioural cloning. We chose the best performing policy during behavioural cloning by testing the policy on 50 test 
 trajectories every 400 full cycles through the 
 expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best case comparison to the AC algorithm, which was not pretrained. 
+
+
 \subsection{Fine Tuning}
 In this section we analyze our algorithm in a fine tuning setup. We provided the algorithms with 4 and 15 expert demonstrations per environment and used a relatively short reinforcement learning phase 
 with 400 sampled trajectory consisting of 100 steps each. One problem we wanted to overcome is "catastrophic 
@@ -163,42 +165,60 @@ mostly the performance decreased, anyway.
     \label{fig:finetuning}
 \end{figure}
 
-
+\subsection{Guided Reinforcement Learning}
+In this section, we test the perforance of AC given only one expert trajectory. We use the Reach and Winow Open environments with 2000 training epsiodes per run and two runs per experiment and learner. 
+Per data point we sampled 50 trajectories from the test data set. 
+In this setting, the algorithms must learn most of the behaviour from reinforcement learning, but the initial expert 
+demonstration is useful to overcome the initial search problem. We only provide sparse reward and one obervsation per trajectory, thus finding the first viable solution by unguided 
+trial and error is unviable for most problems. For the baselines, we used RPPO, PPO and TQC with behavioural cloning as pretraining. We expect TQC to be better at exploration and PPO to be more stable. The results 
+are shown in figure \ref{fig:guided_ref}. 
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000/Reach.png}
       \caption{Reach environment. Comparison of the different learners.}
-      \label{fig:plot1}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000/Window Open.png}
       \caption{Window Open environment. Comparison of the different learners.}
-      \label{fig:plot2}
     \end{subfigure}
     \medskip
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000_imi/Reach.png}
       \caption{Reach environment. Comparison between pure imitation learning and reinforcement learning.}
-      \label{fig:plot3}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000_imi/Window Open.png}
       \caption{Window Open environment. Comparison between pure imitation learning and reinforcement learning.}
-      \label{fig:plot4}
     \end{subfigure}
     \caption{Each learner had access to one expert demonstration. 
-    The learner trained by PPO, RPPO and TQC were pretrained using behavioural cloning given the demonstration. 
+    The learner trained by PPO, RPPO and TQC were pretrained using behavioural cloning given one demonstration. 
     The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided 
-    during the reinforcement phase. The pure imitation learning experiments were conducted using no additional epsiodes from the environment. The x-axis displays the 
+    during the reinforcement phase. The pure imitation learning experiments on the buttom row were conducted using no additional epsiodes from the environment. There, the x-axis 
     displays equal amount of compute compared to the reinforcement learning algorithm.
     The y-axis shows the success rate. Each experiment was repeatet twice with 
-    30 sampled validation episodes per run and data point. The shaded region displays one standard deviation.}
-    \label{fig:4}
+    50 sampled validation episodes per run and data point. The shaded region displays one standard deviation.}
+    \label{fig:guided_ref}
 \end{figure}
+
+The AC algorithm was able to solve both environments with high success rates after 2000 sampled trajectories. TQC found a policy with about $20 \%$ success rate in the Reach environment after
+about 1250 epsiodes in both runs, but did not outperform behavioural cloning. PPO was the most stable algorithm, as it did not drop below the initial performance from 
+BC, but did not greatly improve. In the reach environment, no algorithm accept AC was able to improve above $20 \%$ perforance. In the windowopen environment, PPO and TQC achieved about $40 \%$ 
+success rate. AC was able to achieve above $90 \%$ success rate in both environments. \\
+Next we wanted to rule out, that the observed perforance gain of AC over the baselines comes mostly from the different underlying neural network architectures. AC uses transformers for the actor and 
+critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU. To do this, we tested the performance of AC using pure imitation learning shown on the bottom row of 
+figure \ref{fig:guided_ref}. We expect the main improvement of behavioural cloning in AC, TQC and PPO over a recurrent policy comes from the sequence encoding, as proposed in section \ref{COD_AC}.
+We find that the pure imitation learning performance 
+of AC is about the same as behavioural cloning for PPO and TQC. While in the Window Open environment, both PPO and TQC outperformed RPPO, we find that in the Reach environment RPPO performs 
+similar to PPO. As only one expert trajectory was provided and we could only repeat the experiment twice out of time constraints, we find the difference between RPPO, PPO and TQC in the Reach 
+environment too small to make conclusion about their relative perforance. \\
+Overall, we take this finding as evidence for the effectiveness of the AC algorithm. It is highly unlikely that the observed improvement 
+over the baselines comes mostly from the transformer architecture underlying the AC actor and critic, given the similar behavioural cloning perforance and the fact that our algorithms trains the actor and 
+critic in a behavioural cloning style.  
+
 
 \begin{figure}[htbp]
     \centering
