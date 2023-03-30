@@ -111,84 +111,115 @@ We want to test two aspects of our algorithm
 -fine tuning
 -reinforcement learning
 
-\subsetion{Fine Tuning}
-In this section we analyze our algorithm in a fine tuning setup. We define a setup as fine tuning, when the provided expert demonstrations alone 
-are suffiecient for at least one of our algorithms to reach 50 persent success rate. We present our findings. We see that we are better, sometimes by a 
-wide margin. RPPO performs the worst, as expected. Because fine tuning relies heavily on demonstrations, we use GAIL together with PPO and TQC, as well as 
-RPPO and pure PPO. We found TQC to perform worse then PPO so with our limited compute time, we chose to concentrate on the best performing benchmarks.
-TQC probably performs worse then PPO in this setup, as PPO is an on plicy algorithm and thus more robust to distribution shift from the 
-behaviour cloning phase to the reinforcement phase. TQC is strongest in settings, were compex behaviour must be explored.
+RPPO TQC PPO fine tuning, positional encoding, reasons why they were chosen.
+We tested our algorithm on four environments from the Meta-World benchmark with variying complexity. 
+PPO, TQC and RPPO were pretrained unsing behavioural cloning. We chose the best performing policy during behavioural cloning by testing the policy on 50 test 
+trajectories every 400 full cycles through the 
+expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best case comparison to the AC algorithm, which was not pretrained. 
+\subsection{Fine Tuning}
+In this section we analyze our algorithm in a fine tuning setup. We provided the algorithms with 4 and 15 expert demonstrations per environment and used a relatively short reinforcement learning phase 
+with 400 sampled trajectory consisting of 100 steps each. One problem we wanted to overcome is "catastrophic 
+forgetting" that can occure, when the data distribution shifts. During the imitation phase, the learners only sees positive examples sampled according to the distribution induced by the expert. 
+In the reinforcement learning phase, the learner samples trajectories according to the actor of the learner, thus the distribution shift. Our algorithm is more robust to this problem, as it 
+decouples the generator distribution, namely the distribution induced by the actor, from the training process, as discussed in section \ref{inference_time_planning}. We present our findings in 
+figure \ref{fig:finetuning}. For the environments "Pick and Place" and "Push" we show the plots 
+for 15 expert demonstrations, as we found 4 expert demonstrations were not enough to meaningfully learn within 400 training episodes. The environments "Reach" and "Window Open" are easier to learn, 
+so we display the experiments with 4 expert demonstrations each, as giving 15 expert demonstrations lead to near pefect performance from imitation learning alone. All plots for all experiments can 
+be found in Appendix \ref{chapter:additional_plots}. 
+We find, that AC is the only algorithm that can meaningfully improve it's perforance given the limited amount of environment interactions. RPPO is a recurrent algorithm and is the most sensitive to hyper parameter tuning. 
+We expected RPPO to be the least performant from our discussion of the curse of dimensionality in section \ref{COD_AC}. The algorithms guided by GAIL did not improve meaningfully. We assume the limited 
+amount of environment interaction was not proficcient to learn a good discriminator and improve the policies. We tried differnt hyper parameter settings, including fine tuned parameters for the 
+environments but for dense rewards and observations from the [hyper parameter ZOO]. We found that the performance was most relient on the learning rate. Too high values lead to catastrophic forgetting. Some cases can be seen in 
+the appendix \ref{chapter:additional_plots}, where we were not able to find suitable hyper parameters. The values we chose were the highest values before pratically no learning took place, however 
+mostly the performance decreased, anyway.
+
 
 \begin{figure}[htbp]
     \centering
-    \begin{subfigure}[t]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{images/15_400/Reach.png}
-      \caption{Reach environment, 15 expert demonstrations.}
-      \label{fig:plot2}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{images/15_400/Push.png}
-      \caption{Push environment, 15 expert demonstrations.}
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/FineTuning/Window Open.png}
+      \caption{Window Open environment, 4 expert demonstrations.}
       \label{fig:plot3}
     \end{subfigure}
-    \begin{subfigure}[t]{0.3\textwidth}
-      \includegraphics[width=\textwidth]{images/15_400/Pick and Place.png}
-      \caption{Pick and Place 111environment, 15 expert demonstrations.}
-      \label{fig:plot4}
-    \end{subfigure}
-    \caption{Each learner had access to the same number of expert demonstrations per experiment. 
-    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 15 demonstrations. 
-    The x-axis shows the number of sampled environment epsiodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided.
-    For the pure imitation AC plot, the algorithm did not use new samples 
-    from the environment, but used the same amount of compute compared to the algorithm using reinforcement learning.}
-    \label{fig:15}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/4_400/Window Open.png}
-      \caption{Window Open environment.}
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/FineTuning/Reach.png}
+      \caption{Reach environment, 4 expert demonstrations.}
       \label{fig:plot1}
     \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/4_400/Reach.png}
-      \caption{Reach environment.}
+    \medskip
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/FineTuning/Push.png}
+      \caption{Push environment, 15 expert demonstrations.}
       \label{fig:plot2}
     \end{subfigure}
-    \medskip
-    \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/4_400/Push.png}
-      \caption{Push environment.}
-      \label{fig:plot3}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/4_400/Pick and Place.png}
-      \caption{Pick and Place environment.}
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/FineTuning/Pick and Place.png}
+      \caption{Pick and Place environment, 15 expert demonstrations.}
       \label{fig:plot4}
     \end{subfigure}
-    \caption{Each learner had access to 4 expert demonstrations. 
-    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 4 demonstrations. 
-    The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
-    \label{fig:4}
+    \caption{
+    The learner trained by GAIL and RPPO were pretrained using behavioural cloning with the given number of expert demonstrations. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided.}
+    \label{fig:finetuning}
 \end{figure}
+
+
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000/Reach.png}
-      \caption{Reach environment.}
+      \caption{Reach environment. Comparison of the different learners.}
       \label{fig:plot1}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000/Window Open.png}
-      \caption{Window Open environment.}
+      \caption{Window Open environment. Comparison of the different learners.}
       \label{fig:plot2}
     \end{subfigure}
-    \caption{Each learner had access to one expert demonstrations per experiment. 
+    \medskip
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/1_2000_imi/Reach.png}
+      \caption{Reach environment. Comparison between pure imitation learning and reinforcement learning.}
+      \label{fig:plot3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/1_2000_imi/Window Open.png}
+      \caption{Window Open environment. Comparison between pure imitation learning and reinforcement learning.}
+      \label{fig:plot4}
+    \end{subfigure}
+    \caption{Each learner had access to one expert demonstration. 
+    The learner trained by PPO, RPPO and TQC were pretrained using behavioural cloning given the demonstration. 
+    The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided 
+    during the reinforcement phase. The pure imitation learning experiments were conducted using no additional epsiodes from the environment. The x-axis displays the 
+    displays equal amount of compute compared to the reinforcement learning algorithm.
+    The y-axis shows the success rate. Each experiment was repeatet twice with 
+    30 sampled validation episodes per run and data point. The shaded region displays one standard deviation.}
+    \label{fig:4}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.65\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/Reach.png}
+      \caption{Reach environment. Shown is the difference in learning efficiency of the Active Critic algorithm using two different optimisation modes.}
+      \label{fig:plot1}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/actions_1.png}
+      \caption{Optimized trajectories (orange) and trajectories proposed by the actor (green). The gradient from the critic was applied to the actions.}
+      \label{fig:plot2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/plans_actor_0.png}
+      \caption{Optimized trajectories (orange) and trajectories proposed by the actor (green). The gradient from the critic was applied to the actor and planner.}
+      \label{fig:plot4}
+    \end{subfigure}
+    \caption{Comparison of two different optimisation modi. Each experiment was repeated twice with 30 evaluation episodes per data point.
     The x-axis shows the number of sampled environment epsiodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
     \label{fig:fourplots}
 \end{figure}

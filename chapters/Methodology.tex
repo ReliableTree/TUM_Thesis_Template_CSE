@@ -464,9 +464,9 @@ We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$
 . From this we get the objective function of the actor:
 \begin{equation}
     \label{actor_objective}
-    J_{\phi, \zeta} = \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left(\sum_n \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a_{\zeta})_{t, n} - a_{t, n}\right)^2
+    J_{\phi, \zeta} = \mathbb{E}_{(o, a(t)) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\sum_n \left( \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a_{\zeta})_{t, n} - a_{n}(t)\right)^2
 \end{equation}
-, where the respective gradient steps are:
+, with $n$ indicating the dimension of the action space. The respective gradient steps are:
 \begin{equation*}
     \phi_{i+1} = \phi_i - \alpha_{\phi} \nabla_{\phi}J_{\phi, \zeta}
 \end{equation*}
@@ -496,7 +496,7 @@ We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$
 \end{algorithm}
 Using $\tilde{o}_{1, ..., T}$ as in \ref{eq:seq_emb}, the objective function of the whole sequence critic is defined as :
 \begin{equation}
-    J_{\theta} = \mathbb{E}_{(o, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(t, \tilde{o}_{1, ..., T}, a_{1,...,T}) - r_t)^2\right]
+    J_{\theta} = \mathbb{E}_{(o, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(\tilde{o}_{1, ..., T}, a_{1,...,T})(t) - r(t))^2\right]
 \end{equation}
 . The gradient step is:
 \begin{equation*}
@@ -543,3 +543,146 @@ critic score will be lower.
     }
     \end{algorithmic}
 \end{algorithm}
+
+\section{Dense Observations}
+We now want to relax the constraint that we only use one obervsation per trajectory. To do this, we develop an addition to the active critic algorithm we call dense observation active critic (DOAC). 
+We will first discuss how a straight forward adaption of AC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of DOAC.\\
+
+So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
+length $T$ from it. A straight forward adaptation of this algorithm to dense observations would be to use a different encoding of the observations. We propose to use a special token to indicate an 
+observation from the future that was not yet measured $t_f$. We then build the current observation sequence at time $t$ by filling the $T - t$ unseen observations with $t_f$, use positional encoding and 
+the planner and 
+generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the AC algorithm, the new loss of the actor becomes: 
+\begin{equation}
+    \label{dense_actor_objective}
+    J_{\phi, \zeta} = \mathbb{E}_{(o_{1:t}, a_{1:T}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left[\left( \pi_{\phi}(o_{1, ..., t}, t_{f, t+1:T}, p_{\zeta}(a))(t) - a(t)\right)^2\right]
+\end{equation}
+, where we now have $T$ observation sequences per trajectory, as $o_{1:t}$ and $o_{1:t+1}$ are two inputs.\\
+With this construction, we can still use the whole sequence critic, 
+which prediction is defined as $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(i) = \mathbb{E}_{\tau \propto a_{1:T}, o_{1:t}}\left[r(o_i, a_i)\right]$. The corresponding loss is
+\begin{equation}
+    J_{\theta} = \mathbb{E}_{(o_{1:t}, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(o_{1, ..., t}, t_{f, t+1:T},  a_{1,...,T})(t) - r_t)^2\right]
+\end{equation}
+
+For simplicity, we will denote the prediction 
+$C^t(i)$ and the actual expected reward $r(i)$. In inference time, we can choose the action sequence 
+${a^t}^* = \max_{a^t} \sum_{i=1}^T C^t(i)$. We will show that with this adaptation, $C^t(i)$ is not an unbiased estimate of $r(i)$.
+Let ${a^t}^*$ be the action sequence that the critic proposes at time step t, as defined above. Generally, $a^t != a^{t+1}$, as the critic sees two different input distributions 
+$o_{1:t}$ and $o_{1:t+1}$. The action sequence that the AC algorithm will propose is sampled according to $a(t) = {a^t}^*(t)$. Thus the distribution of action sequences in the training data is not 
+the same, as the distribution of proposed action sequences at time steps $t<T$. As the critic always chooses the action sequence that maximizes the current estimate, the estimated reward at time step 
+$t$ will be an overestimation of the actual expected reward given action sequence ${a^t}^*$. To counter this, we propose the loss $J_{pred, C}$ defined as:
+\begin{equation}
+    \label{proxy_loss_dense}
+    $J_{pred, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\text{train data}}}\left[ \sum_{i=1}^T(C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(i) - C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, a^t_{1:T})(i))^2 \right]$
+\end{equation}
+. Intuitively, we demand that the critic expects the same rewards at time step $t$ and $t+1$, given action sequence $a^t$. Since we always take the maximum over the estimated sum of rewads $C^t(i)$, 
+the expected values at time step $t$ will converge to the actual rewards recieved, as from minimizing loss \ref{proxy_loss_dense} ensures, that the expected values at time step $t+1$ must be equal or 
+higher then the expected values at time step $t$, as the action sequence ${a^t+1}^* = {a^t}^*$ can be chosen.
+
+
+
+
+
+because if there was an action sequence with higher predicted rewards, it would have been chosen.
+Assume the critic predicts at time step $t$ for action sequence $a^t$ that the reward at timepoint $t$ will be small $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t+1) = r_{t}* \approx 0$, but 
+the reward at time step $t+1$ will be high: $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t+1) = r_{t+1}*$, with $r_{t+1}* >> 0$. Now consider action $a_t$ 
+is applied with reward $r_t$ matching the expected value $r_t = r_{t}*$, as the reward at time step $t$ follows the empiciral distribution given actions including time step $t$. The new observation 
+sequence is now $o_{1:t+1}$ with the new predicted reward $C(o_{1:t+1}, t_{f, t+2:T}, a_{1:T})(t+1) = r_{t+1}**$. There is no reason, why $r_{t+1}** = r_{t+1}*$, as the critic sees 
+$(o_{1:t}, t_{f, t+1:T}, a_{1:T})$ and $(o_{1:t+1}, t_{f, t+2:T}, a_{1:T})$ as two different inputs. The new best action sequence $a^{t+1}$ might thus not be the same as $a^t$, and another action is 
+chosen at time step $t+1$ then predicted at time step $t$. Because a different action is now chosen, the critic will not learn, that $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t+1)$ had a wrong value. Thus 
+the distribution of action sequences that the critic will be trained on is not the same, that it predicts. An approach showcased for example in {MESLI} to counter this problem is to condition the critic to predict the action sequence 
+at every time step, that will be chosen eventually by the policy. This is not applicable to our case, as that would couple the critic to the actor and the strength of our approach lies in decoupling 
+the two components. Thus we develop a different approach. We introduce a second loss term for the critic, which measures the $L^2$ distance between the predicted rewards at time step $t$ and $t+1$ given 
+action sequence $a^t$. We will show that we have provable asymptotic optimality under a common assumption with this additional loss term. \\
+
+
+
+\textbf{Definitions:}\\
+Let $C$ be a whole sequence critic defined on $C : (n_o + n_a)^T \rightarrow \mathcal{R}^T$, with the observtion dimension $n_o$ and action dimension $a_o$. Additionally, the 
+$i'th$ value of $C(x)(i)$ only depends on the input sequence until time step $i$. Also let $t_{f, t}$ be a special token indicating a not yet observed observation and $t_{f, t:T}$ be th sequence 
+of $T-t$ such tokens. Finally, we will write the expectation over actions and observations at time step $t+1$ as $\mathbb{E}_{a_{1:t+1}, o_{\textbf{1:t}}}$ to indicate 
+$\mathbb{E}_{a_{1:t+1}, o_\textbf{1:t}, o_{t+1} \propto (a_{1:t}, o_{1:t})}$, where we implicitly mean an expected $o_{t+1}$ according to the POMDP.
+\begin{lemma}
+    \label{dense_ind_start}
+    $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t)$ will converge to $\mathbb{E}_{a_{1:t}, o_{1:t}}\left[r(t)\right]$, if $C$ minimizes the $L_2$ distance to the recieved reward given the train data: \\
+    $J_C = \mathbb{E}_{\mathcal{D}_{\text{train data}}}\left[(C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t) - r(t))^2\right]$, where the argument $t$ means the $t^{th}$ time step of the seqeucen.
+\end{lemma}
+\begin{proof}
+    The reward at time step t depends on the action and state at time step t. In a POMDP, the probability distribution over the states depends on former observations and actions 
+    $r_t \propto (a_{1:t}, o_{1:t})$. 
+    It is known that the mean minimizes the $L_2$ distance, thus minimizing $J_C$ is equal to finding the mean of the empirical 
+    distribution given the state sequence $s_{1:t}$ and action seqeuce $a_{1:t}$: 
+    $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(t) = \mathbb{E}_{(s_t \propto [o_{1:t}, a_{1:T}], a_t) \propto \mathcal{D}_{\text{train data}}} \left[r(s_{t}, a_{t})\right]$. Using the law of large numbers, the empirical distribution will 
+    converge to the actual distribution.
+\end{proof}
+\begin{lemma}
+    \label{dense_ind_step}
+    $C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(t + 1) = \mathbb{E}_{a_{1:t+1}, o_{\textbf{1:t}}} \left[ r(t+1) \right]$ will converge to \\
+    $C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, a^t_{1:T})(t + 1) = \mathbb{E}_{a_{1:t+1}, o_{\textbf{1:t+1}}} \left[ r(t+1) \right]$, 
+    if $C$ minimizes the respective $L_2$ distance given the train data: \\
+    $J_{pred, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\text{train data}}}\left[ \sum_{i=1}^T(C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(i) - C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, a^t_{1:T})(i))^2 \right]$. 
+    Note that one of the values depends on observations until time step $t$ and the other one depends on observations until time step $t+1$.
+\end{lemma}
+\begin{proof}
+    The reward $r(t+1)$ at time step $t+1$ depends on the action $a_{t+1}$ and state $s_{t+1}$. In a POMDP, the probability distribution over states $s_{t+1}$ depends on $a_{1:t}$ and $o_{1:t}$, using the 
+    transition function and observation function. Given this, we can now write \\
+    $\mathbb{E}_{a_{1:t+1}, o_{1:t}} \left[ r(t+1) \right]$ = $\mathbb{E}_{a_{1:t+1}, o_{1:t+1}} \left[ r(t+1) \right]$. Again using the fact that the minimum over the $L_2$ distance finds the mean of 
+    the distribution and the law of large numbers, we know $C(o_{1:t}, t_{f, t+1:T}, a^t_{1:T})(t + 1)$ will converge to $C(o_{1:t+1}, t_{f, t+1:T}, a^t_{1:T})(t + 1)$ if it minimizes $J_{pred, C}$ 
+    over the empirical distribution $\mathcal{D}_{\text{train data}}$. 
+\end{proof}
+\begin{lemma}
+    \label{lemma:dense_conv}
+    $C(o_{1:t}, t_{f, t+1:T}, a^t_{1:T})(i)$ will converge to $\mathbb{E}_{\tau \propto o_{1:t}, a^t_{1:T}}\left[r_{i}\right]$ for $i \in {1, ..., T}$, given $C$ minimizes $J_C$ and $J_{pred, C}$. Here we mean all $T$ predictions 
+    of $C$ will converge to the true $T$ expectations of the rewards given observations until time step t and the whole action sequence.
+\end{lemma}
+\begin{proof}
+    From lemma \ref{dense_ind_start} and the fact that the critic only attends to observations and actions until time step t, we now lemma \ref{emma:dense_conv} holds for $i \seq t$. Intuitively, 
+    for observations we already saw, the critic will predict the correct reward. We now want to show, that this is also the case for $i > t$. To do this, we will use induction. \\
+    \textbf{Initial Case}: Let $i = t+1$:
+    From lemma \ref{dense_ind_step}, we know $C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(t+1) = C(o_{\textbf{1:t+1}}, t_{f, t+1:T}, a^t_{1:T})(t+1)$. using lemma \ref{dense_ind_start}, we know 
+    $C(o_{\textbf{1:t+1}}, t_{f, t+1:T}, a^t_{1:T})(t+1) = \mathbb{E}_{o_{1:t+1}, a_{1:t+1}}\left[r(t+1)\right]$.
+    \\
+    \textbf{Induction Step}: 
+    We now want to show, that if $C(o_{\textbf{1:t+1}}, t_{f, t+1:T}, a^t_{1:T})(i) = \mathbb{E}_{o_{1:t+1}, a_{1:t+1}}\left[r(i)\right]$, it is also true that \\
+    $C(o_{\textbf{1:t+1}}, t_{f, t+1:T}, a^t_{1:T})(i+1) = \mathbb{E}_{o_{1:t+1}, a_{1:t+1}}\left[r(i+1)\right]$.\\
+    We start by stating:\\
+    \begin{equation*}
+        C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(i) = C(o_{\textbf{1:i}}, t_{f, i+1:T}, a^t_{1:T})(i)
+    \end{equation*}
+
+
+    \begin{equation*}
+        = C(o_{\textbf{1:t+1}}, t_{f, t+1:T}, a^t_{1:T})(i)
+    \end{equation*}
+    $C(o_{\textbf{1:t}}, t_{f, t+1:T}, a_{1:T})(i+1) = \mathbb{E}_{o_{\textbf{1:t+1}}, a_{1:T}}\left[r(i+1)\right]$ also holds. \\
+    From lemma \ref{dense_ind_step} we now:\\
+    $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(i+1) = C(o_{1:t+1}, t_{f, t+1:T}, a_{1:T})(i+1)$. From lemma \ref{dense_ind_start} we see that 
+    $C(o_{1:t+1}, t_{f, t+1:T}, a_{1:T})(i+1) = \mathbb{E}_{o_{1:t}, a_{1:T}}(r(i+1))$. This conculdes our induction step.
+\end{proof}
+Now back to our algorithm. We want to show, that given a critic minimizing the two proposed losses, choosing the action $a_t$ of the action sequence $a$ with the highest predicted commulative reward at 
+each time step will monotonically improve the true expected value of the commulative reward of the trajectory.
+\begin{lemma}
+    Given a whole seqeuce critic $C$ that minimizes $J_C$ and $J_{pred, C}$, choosing the action seqeucen ${a^t}^*$ with the highest predicted reward at each time step $t$ and applying action ${a^t}^*_t$ 
+    will monotonically improve the true expect value of the action sequence $a$, consisting of the respective actions $a_t = {a^t}^*_t$.
+\end{lemma}
+\begin{proof}
+    Let's denote the true expected value $\mathbb{E}_{\tau_t, a^t}$ of the action seqeuce $a^t$ given observations $o_{1:t}$, where the first $t$ actions have already been applied. 
+\end{proof}
+
+    1. during inference time, 
+    1. instead of repeating first observation T times, use it in first position, then rest with zeros.
+    2. Predict Action sequence
+    3. Predict reward sequence
+    4. Optimize Actions sequence
+    5. return action at time t
+
+2. during training:
+    1. for succesful trajectores, train actor to always propose the actions given the observations
+
+    2. critic: train critic to predict rewards, given current observation and all actions. 
+        but! magic action: the critic can propose an action at subsequent time point.
+        train critic to predict same resulst before and after taking action
+
+3. Inference time optimisation: 
+    keep optimized actor and planner bu only optimize few steps. 
+     
