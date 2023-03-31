@@ -328,10 +328,10 @@ the authors aim to reconstruct a video sequence
 using conserved properties of the underlying physics. While a different problem setup, they also have a high dimensional derivative with respect to a 
 generated output. The authors find, that 
 building the gradient with respect to the generator and then regenerating the output performs better, then directly optimizing the output. They hypothesize this 
-may be, because the generator has some knowledge about the action space. Following this insight, we found that updating the weights of the actor with respect to the 
-critic gradient works best. This update rule can be written as:
+may be, because the generator has some knowledge about the action space. Following this insight, we found that updating the weights of the actor and planner 
+with respect to the critic gradient works best. This update rule can be written as:
 \begin{equation}
-    a_{i+1} = \pi_{\theta_{i+1}}(o, p(a_i))
+    a_{i+1} = \pi_{\theta_{i+1}}(o, p_{\zeta}(a_i))
 \end{equation}
 \begin{equation}
     \theta_{i+1} = \theta_i - \alpha_{inf} \nabla_{\theta} (C(\pi_{\theta}(o, p(a_i)), o) - 1)^2
