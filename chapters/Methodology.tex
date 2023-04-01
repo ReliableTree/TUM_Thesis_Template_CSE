@@ -250,9 +250,10 @@ to a success, given observations $o$. The new trajectory $a_{c, o}$ found by uns
 be added to the set of trajectories for the critic and to the set of expert trajectories, if it was a success. \\
 With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. 
 
-The actor is model free, while the critic is weakly grounded model based, as it learns to predict the dynamics of the MDP. In this sense, it is close to MuZero, 
+The actor is model free, while the critic is weakly grounded model based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
 but our architecture enables search on continuous action space, which is not possible in MuZero. 
-"Monte-Carlo Tree Search in Continuous Action Spaces with Value Gradients" does search on continues action space, but requires the knowledge of the transition model. 
+"Monte-Carlo Tree Search in Continuous Action Spaces with Value Gradients" as introduces in section \ref{sec:mctsca} does search on continues action space, 
+but requires the knowledge of the transition model. 
 To the authors knowledge, active critic is the only search based algorithm on a continuous action space with no prior access to the transition model.
 
 \subsection{Average Actions Problem}

@@ -104,38 +104,71 @@ is in a state that it has not seen before and acts slightly different to the exp
 different then the training distribution, thus it starts to act unpredictable. As argued in section \ref{COD_AC} this is an advantage of our policy, as it 
 does not break the i.i.d. assumption.
 
-\section{Meta World}
-The Meta World benchmark is a challenging robot simulation benchmark...
+\section{Reinforcement Learning from Sparse Rewads in Single Observation Environments}
+In this section we will explore the perforance of the AC algorithm given sparse rewards from trajectories together with expert demonstrations. We find this to be 
+a plausible setting, as sparse rewards are typically easy to define even in real world applications or sparse reward from human feedback could be used. It is well 
+discussed that reward shaping is tedious and can lead to sub optimal perforance. As an example, imagine an automated production line, where a robot conducts a 
+fast correction step, like cutting away bad parts of food, with high speed, based on an image of the object. A human could easily provide the feedback of wether 
+the object is in the intendet state after the operation. It would be vastly more effort to provide a reward signal for every step along the trajectory and it is 
+not trivial to do so in a way that is helpful for the learning algorithm. Another application are natural language models. Resent efforts have been made to tune 
+models according to humane preferences from a pretrained initialisation. Language models don't get any observations from the environment, as the initial 
+observation is the input from the user and the current environment state is the generated text, which is fully determined by the actions, or words, of the model. 
+In this sense, it is comparable to our setup. We will focus on dense action and observation spaces however and leave further investigation of discrete spaces to future work. 
+In addition to the practical relevance of the setting, an advantage is that the planning part of our algorithm is most efficient in single observation settings. 
+We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the MDP has a quadratic error bound, we don't get any updated information 
+during the trajectory and thus no better estimate is possible. \\
 
-We want to test two aspects of our algorithm
--fine tuning
--reinforcement learning
+We chose environments from the "Meta-World" \ref{yu2019meta} benchmark, as they have a success indication per environment, from which sparse rewards can be defined naturally. 
+Specifically, we chose five environments from the ML10 suite, namely "Pick and Place", "Push", "Reach", "Window Open" and "Drawer Close", which represent a variaty 
+of tasks and differently levels suited to test different aspects of our algorithm. We defined a constant sequence length of 100 steps per trajectory and provided 
+a reward at the end according to wether the environment was solved at any step along the trajectory. Additionally, the environment 
+only returns the initial observation along the trajectory.\\
 
-RPPO TQC PPO fine tuning, positional encoding, reasons why they were chosen.
-We tested our algorithm on four environments from the Meta-World benchmark with variying complexity. 
+The single observation setup is not well studied in continues spaces, so we have to find baselines that are best suited to challenge the perforance of our algorithm. For sparse rewards, a common 
+algorithm is "HER" as discussed in section \ref{sec:HER}, but it assumes a way to compute the goal from an enviroment state. This is not suitable in our setup, as we don't have access to enviroment 
+states after the first state. Moreover, this assumption limits the generality of the approach, which AC does not need to. \\
+We use PPO, a state of the art on 
+policy algorithm, and TQC, a state of the art off policy algorithm, together with transformer style sequential encoding to indicate the timestep. We also include 
+RPPO, a recurrent implementation of PPO, where we repeatedly input the initial observation and use the hidden states to encode the position along the action sequence. 
 PPO, TQC and RPPO were pretrained unsing behavioural cloning. We chose the best performing policy during behavioural cloning by testing the policy on 50 test 
 trajectories every 400 full cycles through the 
-expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best case comparison to the AC algorithm, which was not pretrained. 
+expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best case comparison to the AC algorithm, which was not pretrained.\\
+
+For the base implementations we use "Stable Baselines3" \ref{stable-baselines3}, which is a common choice, as it provides well implemted algorithms with tested 
+performance and finetuned hyperparameters for a wide range of environments. This includes our chosen environments, but with dense rewards and continuous observations, 
+thus some hyperparameter tuning was necessary. \\
+
+In the following sections, we will test our algorithm in two different settings, namely fine tunning and guided reinforcement learning. In fine tuning, we provide 
+enough expert demonstrations, that the environment can be solved with acceptable performance, but with room for improvement. In guided reinforcement learning, 
+only one expert demonstration is provided. AC will use the same set of hyperparameters for all experiments to showcase its generality and robustness. Also, we had no choice for time constraints. 
+We will use limited finetuning for the baselines, however. 
+With these experiments, we aim to test both exploitation and exploration of our algorithm and show stable 
+behaviour across a wide range of use cases. \\
+
+In all plots, the first datapoint is sampled from the policy before any enviroment interaction. For the plots with behavioural cloning, it indicates learned perforance from expert trajectories. 
+In plots with no provided expert trajectory, it displays the behaviour following random initialisation.
 
 
 \subsection{Fine Tuning}
 \label{sec:fine_tuning}
 In this section we analyze our algorithm in a fine tuning setup. We provided the algorithms with 4 and 15 expert demonstrations per environment and used a relatively short reinforcement learning phase 
-with 400 sampled trajectory consisting of 100 steps each. One problem we wanted to overcome is "catastrophic 
-forgetting" that can occure, when the data distribution shifts. During the imitation phase, the learners only sees positive examples sampled according to the distribution induced by the expert. 
-In the reinforcement learning phase, the learner samples trajectories according to the actor of the learner, thus the distribution shift. Our algorithm is more robust to this problem, as it 
-decouples the generator distribution, namely the distribution induced by the actor, from the training process, as discussed in section \ref{inference_time_planning}. We present our findings in 
+with 400 sampled trajectory consisting of 100 steps each. We repeated each experiment four times with 30 test trajectories per datapoint. One problem we wanted to overcome is "catastrophic 
+forgetting" that can occure, when the data distribution shifts. During the imitation phase, the learners only see positive examples sampled according to the distribution induced by the expert, which leads 
+to overestimation by the critic. Our algorithm is more robust to this problem, as it 
+decouples the actor from the critic, as discussed in section \ref{inference_time_planning}. We present our findings in 
 figure \ref{fig:finetuning}. For the environments "Pick and Place" and "Push" we show the plots 
 for 15 expert demonstrations, as we found 4 expert demonstrations were not enough to meaningfully learn within 400 training episodes. The environments "Reach" and "Window Open" are easier to learn, 
 so we display the experiments with 4 expert demonstrations each, as giving 15 expert demonstrations lead to near pefect performance from imitation learning alone. All plots for all experiments can 
 be found in Appendix \ref{chapter:additional_plots}. 
-We find, that AC is the only algorithm that can meaningfully improve it's perforance given the limited amount of environment interactions. RPPO is a recurrent algorithm and is the most sensitive to hyper parameter tuning. 
-We expected RPPO to be the least performant from our discussion of the curse of dimensionality in section \ref{COD_AC}. The algorithms guided by GAIL did not improve meaningfully. We assume the limited 
-amount of environment interaction was not proficcient to learn a good discriminator and improve the policies. We tried differnt hyper parameter settings, including fine tuned parameters for the 
-environments but for dense rewards and observations from the [hyper parameter ZOO]. We found that the performance was most relient on the learning rate. Too high values lead to catastrophic forgetting. Some cases can be seen in 
-the appendix \ref{chapter:additional_plots}, where we were not able to find suitable hyper parameters. The values we chose were the highest values before pratically no learning took place, however 
-mostly the performance decreased, anyway.
 
+We expected RPPO to be the least performant from our discussion of the curse of dimensionality in section \ref{COD_AC}. As no current input is provided from the enviroment, RPPO has to keep track of 
+all previous actions. PPO and TQC use positional encoding to indicate the current timestep which makes the problem easier. The algorithms guided by GAIL did not improve meaningfully. We assume the limited 
+amount of environment interaction was not proficcient to learn a good discriminator and improve the policies. We found that the performance of the baselines were most relient on the learning rate. 
+Too high values lead to catastrophic forgetting. The values we chose were the highest possible values before catastrophic forgetting took place. However, the perforance from behavioural cloning, indicated 
+by the first datapoint per plot, was mostly the best achievable perforance. PPO tends to do better then TQC in the single observation setup in genral. We expect this is due to the fact that TQCs 
+strength as an off policy algorithm lies in exploration. In our chosen setup, exploration is specifically hard, given no information from the enviroment during the trajectories.\\  
+We find, that AC is the only algorithm that can meaningfully improve it's perforance given the limited amount of environment interactions. We propose this is due to the fact, that catastrophic forgetting 
+is not a problem with AC, as discussed earlier in this section, which makes it specifically suitable for finetuning.
 
 \begin{figure}[htbp]
     \centering
@@ -168,12 +201,12 @@ mostly the performance decreased, anyway.
 
 \subsection{Guided Reinforcement Learning}
 \label{sec:g_ref_ler}
-In this section, we test the perforance of AC given minimal expert guidance. We use the Reach and Winow Open environments with 2000 training epsiodes per run and three runs per experiment and learner. 
-Per data point we sampled 50 trajectories from the test data set. 
+In this section, we test the perforance of AC given minimal expert guidance. We use the "Reach" and "Winow Open" environments with 2000 training epsiodes per run and three runs per experiment and learner. 
+Per data point we sampled 30 trajectories to evaluate the success rate.\\ 
 With this setting, the algorithms must learn most of the behaviour from reinforcement learning, but the expert 
 demonstration is needed to overcome the initial search problem. We only provide sparse reward and one obervsation per trajectory, thus finding the first viable solution by unguided 
-trial and error is unviable for most problems. We found the "Drawer Close" environment can be learned without any expert guidance. 
-For the baselines, we used RPPO, PPO and TQC with behavioural cloning as pretraining, where expert trajectories are provided. We expect TQC to be better at exploration and PPO to be more stable. The results 
+trial and error is unviable for most problems. However, we found the "Drawer Close" environment can be learned without any expert guidance. 
+For the baselines, we used RPPO, PPO and TQC with behavioural cloning as pretraining, where expert trajectories are provided. The results 
 are shown in figure \ref{fig:guided_ref}. 
 
 \begin{figure}[htbp]
@@ -214,35 +247,32 @@ The AC algorithm was able to solve all environments with high success rates afte
 of behavioural cloning was not improved in the reinforcement phase by any of the baselines. Similar to our discussion in section \ref{sec:fine_tuning}, 
 we had to choose small learning rates to prevent catastrophic forgetting. With higher learning rates, all algorithms dropped to $0 \%$ success rate and did 
 not recover in initial tests. We find from the experiments, that the challenging one observation sparse reward environment is difficult to learn in for 
-traditional actor critic algorithms and that AC is a significant improvement in these setups.\\
+traditional actor critic algorithms. In these setups, AC shows a significant improvement.\\
 
 We wanted to rule out, that the perforance difference comes mainly from our behavioural cloning setup. As PPO and TQC natively don't make use of expert demonstrations, 
 we pretrained them using behavioural cloning. We expected that from the pretraining, at least one successful trajectory would be sampled in the training phase, thus 
 helping to overcome the initial search problem. We find that all algorithms perform significantly above $0 \%$ success rate, so we conclude that all algorithms had 
-access to guidance to correct solutions. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms on the 
-"Drawer Close" environment. We found, that random trajectories can already solve the environment, so no expert guidance is needed to learn a feasable behaviour. 
-The results are shown in subplot \ref{fig:drawerclose}. The different perforance at 0 environment interactions comes from different behaviour of the algorithms at 
-the start of the learning phase. TQC samples actions randomly until a threshold is met, in our we set it 100 steps equal to one randomly sampled trajectory. 
-PPO starts sampling actions according to the actor network from the beginning. As we repeat the initial observation $T$ times for the trajectory and only append the 
-positoinal encoding, the observations tend to be close in $L_2$ distance. This might be the reason why we find that PPO produces narrowly distributed action sequences 
-at the beginning of the training, which lead to poor performance. Once the robot arm is driven to an edge, it does not move anywhere else and the probability of 
-closing the drawer is low. We investigated the difference between the initial performance of AC and TQC by repeating the first step of the experiment 20 times and 
-found that both algorithms converge to about $65 \%$ successrate from zero environment interaction in this setup. Like PPO, RPPO does not sample randomly at the 
-beginning. From the plot it can be seen that PPO steadily improves perforance until, further showcasing that it is the most stable algorithm from our baselines. 
-TQC learns rapidly in some sections but seems to overshoot and fall back to bad perforance frequently. We find it to be more dependent on hyper parameters then PPO 
-and RPPO. AC rapidly improved to perfect perforance within about 400 steps. Notably, we used the same set of hyper parameters for AC across all our experiments, 
-which demonstrates the robustness of our approach. \\
+access to guidance to find successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms on the 
+"Drawer Close" environment. We found, that random trajectories can already solve the environment with about $20 \%$ success rate, so no expert guidance is needed to learn a feasable behaviour. 
+The results are shown in subfigure \ref{fig:drawerclose}. The difference in perforance at 0 enviroment interactions comes from random initialisation. As we only had time for three runs per 
+experiment, there is some noice in the data. However, all algorithms sample trajectories randomly in the initial training phase. We set the initial random phase to 
+1000 steps or 10 trajectories, so all algorithms had access to some succesful trajectories with high probability. \\
+From the plot it can be seen that PPO steadily improves perforance, which is expected, as on policy algorithms tend to be more stable. 
+TQC learns rapidly in some sections but seems to overshoot and fall back to bad perforance frequently.  
+We find it to be more dependent on hyper parameters then PPO and RPPO. 
+The high variance shown from the baselines in the plot can be explained by the sparse rewards, which provide highly non linear feedback. 
+AC rapidly improved to perfect perforance within about 400 steps. \\
 
-Next we wanted to rule out, that the observed perforance gain of AC over the baselines comes mostly from the different underlying neural network architectures. AC uses transformers for the actor and 
+Next we wanted to rule out, that the observed performance gain of AC over the baselines comes mostly from the different underlying neural network architectures. AC uses transformers for the actor and 
 critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU. To do this, we tested the performance of AC using pure imitation learning shown on the bottom row of 
 figure \ref{fig:guided_ref}. We expect the main improvement of behavioural cloning in AC, TQC and PPO over a recurrent policy comes from the sequence encoding, as proposed in section \ref{COD_AC}.
 We find that the pure imitation learning performance 
 of AC is about the same as behavioural cloning for PPO and TQC. While in the Window Open environment, both PPO and TQC outperformed RPPO, we find that in the Reach environment RPPO performs 
-similar to PPO. As only one expert trajectory was provided and we could only repeat the experiment twice out of time constraints, we find the difference between RPPO, PPO and TQC in the Reach 
-environment too small to make conclusion about their relative perforance. \\
+similar to PPO. As only one expert trajectory was provided and we repeated the experiment three times, we find the difference between RPPO, PPO and TQC in the Reach 
+environment too small to make conclusion about their relative perforance, given the variance from the data. \\
 Overall, we take this finding as evidence for the effectiveness of the AC algorithm. It is highly unlikely that the observed improvement 
-over the baselines comes mostly from the transformer architecture underlying the AC actor and critic, given the similar behavioural cloning perforance and the fact that our algorithms trains the actor and 
-critic in a behavioural cloning style.  
+over the baselines comes mostly from the transformer architecture underlying the AC actor and critic, given the similar behavioural cloning perforance. We also find clear imporvement of AC with 
+reinforcement learning over AC with pure imitation learning, which demonstrates the AC algorithm makes effective use from the additinal feedback.  
 
 \subsection{Comparison of Optimisation Modes}
 \label{ref:com_opt_modes}
@@ -282,36 +312,39 @@ subfigure \ref{fig:ac_pl_actions} shows a structured exploration, while subfigur
 \end{figure}
 
 \subsection{Dense Observations}
-In this section we test the relaxation of the AC algorithm to MDP environments with the environment state given as an observation after each step, as developed in section \ref{sec:relax_dense}. 
+In this section we test the relaxation of the AC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
-and compare "Dense Observation Active Critic" (DOAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Apart from 
+and compare "Dense Observation Active Critic" (DOAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Again, we don't use "HER", as it limits the generality of 
+the approach. Apart from 
 providing an observation per time step,
 we use the same setup as discribed in previous sections. The results are shown in figure \ref{fig:dense_ref}. First, we find that both base line algorithms 
 start at similar perforance from behavioural cloning as in the single observation setup, which is expected, since behavioural cloning does not rely on 
 environment interactions. After the first data point, both algorithms sharply drop to near zero perforance, which is worse perforance then for the single 
-observation runs. We explain this with the distribution shift after training starts. As discussed earlier, a policy trained by imitation learning 
-will induce a different distribution then the expert data. This breaks the i.i.d. assumption. In the single observation case for PPO and TQC, the i.i.d. assumption was not broken, 
-as the inputs are only the first observtion which distribution is a constant of the environment. In the MDP setup with dense observations, most input data is 
+observation runs. We explain this with the distribution shift after training starts. Additionally to the overestimation by the critic, as discussed earlier, a policy trained by imitation learning 
+will induce a different distribution of observations then the expert data. This breaks the i.i.d. assumption. In the single observation case for PPO and TQC, this assumption was not broken, 
+as the inputs are the first observtion, which distribution is a constant of the environment. In the MDP setup with enviroment state observations, most input data is 
 sampled according to the current policy and thus the i.i.d. assumption is broken. PPO did not find solutions to the "Reach" and "Window Open" environments, 
 but we find TQC got about $20 \%$ success rate on "Reach" and achieved about $80 \%$ success rate on "Window Open" leveling out after about 2500 episodes. 
 The superior perforance of TQC over PPO is expected, as TQC tends to perfrom better in environments where exploration is important. As TQC now gets 
 feedback from it's actions on the environment, the better exploration is an advantage over PPO.\\ 
 TQCs perforance drops to about $0 \%$ for the "Window Open" 
-environment after the first data point before environment interaction. We wanted to analyze, if TQC uses the guidance from the expert at all, or if it starts from 
+environment after the first data point showing the performance from behavioural cloning. We wanted to analyze, if TQC uses the guidance from the expert at all, or if it starts from 
 no usable knowledge about the environment. To do this, we also conducted the experiment three times with no initial behavioural cloning. The results are shown in 
 subfigure \ref{fig:TQC_0_vs_exp}. We find that TQC can solve the environment within 5000 steps from no expert demonstrations in one case, but does not find a good policy in the other two. 
-We propose that the pretraining from behavioural cloning guides is a useful bias for the algorithm to find feasable solutions quicker with higher probability. Following this insight, 
-we also conducted the "Window Open" experiment in MDP setting with GAIL to make better use of the provided expert demonstration. 
+We propose pretraining from behavioural cloning is a useful bias for the algorithm to find feasable solutions quicker with higher probability. Following this insight, 
+we also conducted the "Window Open" experiment in MDP setting with GAIL to make better use of the provided expert demonstration. We find our initial 
+baseline with pretrained TQC performs best. This is probably due to the fact that GAIL makes no use of the sparse reward. Additionaly, 
+the authos mentioned in the paper, that GAIL is not more efficient in terms of environment interactions then TRPO with rewards. A large number of 
+environment interactions is needed, before the discriminator of GAIL provides useful rewards for the learner. We suppose that is a reason, why GAIL does not perform 
+well in our setting, where relatively small amount of environment interactions are used. \\
 
-###Result from GAIL
-
-However, DOAC is the oly algorithm that can greatly benifit from the expert demonstration and 
-it outperforms all baselines easily. \\
+Overall, DOAC is the only algorithm that can greatly benefit from expert demonstration in the sparse reward setting and 
+it significantly outperforms all baselines including additional tests with GAIL. \\
 
 We also included results for the "Drawer Close" environment with no expert demonstrations. All algorithms perform better then in the single observation environment, 
-but DOAC is the only algorithm with stable perforance, meaning it found a solution with near perfect success rate in all three runs quickly. \\
+but DOAC is the only algorithm with stable perforance. It found a solution with near perfect success rate in all three runs quickly. \\
 Overall, DOAC performs well in all shown environments. Especially in the "Reach" environment it is the only algorithm that finds a feasable solution while it 
-converges much quicker and has a more stable bahaviour in general. 
+converges much quicker and has a more robust bahaviour in general. 
 
 \begin{figure}[htbp]
   \centering
@@ -358,6 +391,7 @@ the relative close perforance of both algorithms. We expect a major advantage of
 observation alone. DOAC already has a method to disambiguate action sequences given the same observations as discussed in section \ref{avr_action_problem}, which is key, if the same initial 
 observations and actions can lead to different observations at later time steps. However out of time constraints, we leave this research question to future work.\\
 Overall we find that DOAC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewads.
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}[t]{0.32\textwidth}
