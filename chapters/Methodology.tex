@@ -331,11 +331,14 @@ building the gradient with respect to the generator and then regenerating the ou
 may be, because the generator has some knowledge about the action space. Following this insight, we found that updating the weights of the actor and planner 
 with respect to the critic gradient works best. This update rule can be written as:
 \begin{equation}
-    a_{i+1} = \pi_{\theta_{i+1}}(o, p_{\zeta}(a_i))
+    a_{i+1} = \pi_{\theta_{i+1}}(o, p_{\zeta_{i+1}}(a_i))
 \end{equation}
-\begin{equation}
-    \theta_{i+1} = \theta_i - \alpha_{inf} \nabla_{\theta} (C(\pi_{\theta}(o, p(a_i)), o) - 1)^2
-\end{equation}
+\begin{equation*}
+    \theta_{i+1} = \theta_i - \alpha_{inf} \nabla_{\theta} (C(\pi_{\theta_{i+1}}(o, p_{\zeta_{i+1}}(a_i)), o) - 1)^2
+\end{equation*}
+\begin{equation*}
+    \zeta_{i+1} = \zeta_i - \alpha_{inf} \nabla_{\zeta} (C(\pi_{\theta_{i+1}}(o, p_{\zeta_{i+1}}(a_i)), o) - 1)^2
+\end{equation*}
 , where we used the planner network to compute $p(a_i)$ and $p(a_0) = 0$ for the first input to the actor network. 
 We do not apply the updated weights to the actor after the inference, but only use them in inference time for the given trajectory.  An overview of the inference 
 algorithm is shown in \ref{fig:inference}
@@ -547,6 +550,7 @@ critic score will be lower.
 \end{algorithm}
 
 \section{Dense Observations}
+\label{sec:relax_dense}
 We now want to relax the constraint that we only use one obervsation per trajectory. To do this, we develop an addition to the active critic algorithm we call dense observation active critic (DOAC). 
 We will first discuss how a straight forward adaption of AC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of DOAC.\\
 
