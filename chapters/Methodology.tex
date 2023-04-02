@@ -568,27 +568,45 @@ generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(
 With this construction, we can still use the whole sequence critic, 
 which prediction is defined as $C(o_{1:t}, t_{f, t+1:T}, a_{1:T})(i) = \mathbb{E}_{\tau \propto a_{1:T}, o_{1:t}}\left[r(o_i, a_i)\right]$. The corresponding loss is
 \begin{equation}
-    J_{\theta} = \mathbb{E}_{(o_{1:t}, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(o_{1, ..., t}, t_{f, t+1:T},  a_{1,...,T})(t) - r_t)^2\right]
+    \label{eq:dense_critic_loss}
+    J_{\theta, MDP} = \mathbb{E}_{(o_{1:t}, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(c_{\theta}(o_{1, ..., t}, t_{f, t+1:T},  a_{1,...,T})(t) - r_t)^2\right]
 \end{equation}
 
 For simplicity, we will denote the prediction 
-$C^t(i)$ and the actual expected reward $r(i)$. In inference time, we can choose the action sequence 
-${a^t}^* = \max_{a^t} \sum_{i=1}^T C^t(i)$. We will show that with this adaptation, $C^t(i)$ is not an unbiased estimate of $r(i)$.
-Let ${a^t}^*$ be the action sequence that the critic proposes at time step t, as defined above. Generally, $a^t != a^{t+1}$, as the critic sees two different input distributions 
-$o_{1:t}$ and $o_{1:t+1}$. The action sequence that the AC algorithm will propose is sampled according to $a(t) = {a^t}^*(t)$. Thus the distribution of action sequences in the training data is not 
-the same, as the distribution of proposed action sequences at time steps $t<T$. As the critic always chooses the action sequence that maximizes the current estimate, the estimated reward at time step 
-$t$ will be an overestimation of the actual expected reward given action sequence ${a^t}^*$. To counter this, we propose the loss $J_{pred, C}$ defined as:
+$C^t(i)$ and the actual expected reward $r(i)$, where $t$ is the current timestep and $i$ denotes the timestep of the predicted reward. If we mean the vector of all predicted rewards, we omit the 
+parameter $i$ and write $C^t$. Notice, that we have two time indices. The upper script index stands for the current timestep of the trajectory seen by the critic. 
+It determins which actions have already been taken and 
+which observations are available for the critic. The parameter $(i)$ indicates to which timestep of the trajectory the value belongs to. So for predictions, it indicates the prediction of the $i'th$ 
+reward from the trajectory and for the actual reard $r(i)$ it indicates the actual reward from timestep $i$.\\ 
+In inference time, we choose the action sequence 
+${a^t}^* = \max_{a^t} \sum_{i=t}^T C^t(i)$. The action at timestep $t$ is then ${a^t}^*(t)$. We will show that with this adaptation, $\sum_{i=t}^T C^t(i)$ is not an unbiased estimate of 
+$\sum_{i=t}^T r(i)$.\\
+First, we note ${a^t}^* != {a^{t+1}}^*$ in general, as ${a^t}^* \propto C^t$ and ${a^{t+1}}^* \propto C^{t+1}$. $C^{t+1}$ sees an additional observation and can thus differ from $C^{t}$. 
+From equation \ref{eq:dense_critic_loss} we see, that the critic learns an estimate of the empiciral distribution of action sequences that are present in the train dataset, so action sequences that 
+were actually taken. As ${a^t}^*$ is generally not the action sequence that is taken, but only provides the action at timestep $t$, the critic does not learn an estimate $C^t$ of action sequence 
+${a^t}^*$. \\
+As we always maximize the predicted reward according to $\sum_{i=t}^T C^t(i)$ and we showed that $C^t$ is not learned, we conclude that $\sum_{i=t}^T C^t(i)$ 
+will be an overestmation of the actual rewards $r \propto {a^t}^*$, were the action sequence ${a^t}^*$ used for all actions of the trajectory. \\
+
+To counter this, we propose the loss $J_{pred, C}$ defined as:
 \begin{equation}
     \label{proxy_loss_dense}
     $J_{pred, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\text{train data}}}\left[ \sum_{i=1}^T(C(o_{\textbf{1:t}}, t_{f, t+1:T}, a^t_{1:T})(i) - C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, a^t_{1:T})(i))^2 \right]$
 \end{equation}
 . Intuitively, we demand that the critic expects the same rewards at time step $t$ and $t+1$, given action sequence $a^t$. By always taking the actions sequence ${a^t}^*$ maximizing the estimated sum of 
 rewads $C^t(i)$, 
-the expected values at time step $t$ will converge to the actual rewards recieved. This is because minimizing loss \ref{proxy_loss_dense} ensures, that the expected 
+the expected values $C^t$ will converge to the actual rewards recieved $r$. This is because minimizing loss \ref{proxy_loss_dense} ensures, that the expected 
 values at time step $t+1$ must be equal or higher then the expected values at time step $t$, as the action sequence ${a^t+1}^* = {a^t}^*$ can be chosen with 
-$C(o_{\textbf{1:t}}, t_{f, t+1:T}, {a^t}^*_{1:T})(i) = C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, {a^t}^*_{1:T})(i)$. The update 
-steps are adapted straight forward from AC using the new loss functions. 
-
+$C(o_{\textbf{1:t}}, t_{f, t+1:T}, {a^t}^*_{1:T})(i) = C(o_{\textbf{1:t+1}}, t_{f, t+1+1:T}, {a^t}^*_{1:T})(i)$. Now if $C^t = C^{t+1}$, the action sequence ${a^t}^* = {a^{t+1}}^*$, thus the action 
+sequence ${a^t}^*$ is actually used for all actions of the trajectory and $C^t$ becomes an unbiased estimate, as ${a^t}^*$ is part of the train dataset. \\
+Now there are a few important observations. First, we did not show, that it is possible to learn an estimate such that $C^t = C^{t+1}$ can always hold. In fact, this assumption relies on a deterministic 
+enviroment. In a non deterministic environment, $C^t(i)$ will be the mean of posterior distribution over the rewards from the enviroment given the proposed action sequence and observations until timestep $t$. 
+Moreover, it is not guaranteed and in fact unlikely that there is a unique optimal action sequence $a$. This means, even if $C^t = C^{t+1}$, ${a^t}^* != {a^{t+1}}^*$ in general. We can 
+disambiguate action sequences with additinal proxy losses, like choose the action sequence with minimum movement: $L_{\text_{min move}} = \sum (a(i)(n))^2$, where $n$ stands for the dimension of the 
+action space. For now, we will ensure convergence by choosing the action sequence ${a^t}^*$ as a starting point for the optimisation to get ${a^{t+1}}^*$, thus if $C^t = C^{t+1}$ we will find 
+${a^t}^* = {a^{t+1}}^*$. 
+The update 
+steps are adapted straight forward from AC using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
 
 \subsection{Inference Time Optimisation}
 A pratical issue we came across is the inference time per step. This is a typical problem of model based algorithms, as they need to optimize the trajectory given 

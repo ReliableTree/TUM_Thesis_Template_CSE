@@ -1,3 +1,38 @@
 % !TEX root = ../main.tex
 \chapter{Introduction}
 \label{chapter:Introduction}
+Deep reinfocement learning made promising advances in recent years. Notably, DeepMinds MuZero \cite{MUZero} can solve challenging problems leveraging deep neural networks as function approximators and 
+Monte Carlo Tree Search (MCTS) to plan actions ahead. Another field that made leaps forward recently is generative AI. As examples, Midjourney \cite{midjourney} 
+can produce live like pictures from natural 
+language description and "ChatGPT" is able to meaningfully provide assistance from natural language inputs. \\
+We identify two important paradigms from these examples: search and pretraining. In this thesis, we develop the "Active Critic" (AC) algorithm, which aims to effectively use 
+expert demonstrations and conducts a search over candidate trajectories during inference time, while still beeing real time capable.\\
+Search is currently not widely used in robotik, as MCTS can not be used, because the number of branches per node is infinite making enumeration impossible. While there are recent approaches 
+using search on continuous action spaces \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim_2020}, they require a differentiable model of the system dynamics, which is difficult to provide in real world scenarios. 
+Also currenlty there are no vast datasets for robot trajectories public, so data availablitliy is limited.\\ 
+In this thesis we develop a new reinforcement learning 
+paradigm called "Active Critic" (AC), that learns to model only relevant aspects of the world dynamics and does search in inference time to find good solutions, with a key aspect 
+of making efficient use of expert knowledge. To the authors knowledge, AC is the only algorithm that uses inference time search on continuous action space with no given model of the environment.\\
+
+To test our algorithm, we initially choose a setup, where a single observation per trajectory is provided together with a sparse reward signal, 
+indicating if the trajectory solved the environment. We also provide expert demonstrations for guidance. \\
+
+We find this to be an interesting setting. While a single observation is not a typical assumption in current reinfocement learning approaches, it is plausible that robots in the real world 
+will not have the time to do complex computation on the input signal after each time step. Moreover we think sparse rewards are a practival constraint. 
+They are typically easy to define even in real world applications or sparse reward from human feedback could be used. It is well 
+discussed that reward shaping is tedious and can lead to sub optimal perforance. As an example for our setup, imagine an automated production line, where a robot conducts a 
+fast correction step, like cutting away bad parts of food, with high speed, based on an image of the object. A human could easily provide the feedback of wether 
+the object is in the intendet state after the operation. It would be vastly more effort to provide a reward signal for every step along the trajectory and it is 
+not trivial to do so in a way that is helpful for the learning algorithm. As the time to perform the trajectory could be very short, realsitically only a sparse set of images per trajectory could be 
+processed. In our setup, we take the extreme and work with one observation per trajectory. Another application are natural language models. Resent efforts have been made to tune 
+models according to human preferences from a pretrained initialisation. Language models don't get any observations from the environment, as the initial 
+observation is the input from the user and the current environment state is the generated text, which is fully determined by the actions, or words, of the model. 
+In this sense, it is comparable to our setup.\\
+
+We will also develop and test a version of Active Critic called "Dense Observation Active Critic" which acts on Marcov Descision Processes (MDP), getting an observation after each step. With this setup we 
+showcase our approach is adaptbale to a wide range of applications.\\
+
+"Active Critic" is generally applicable in deterministic MDPs and "Paritally Observable" MDPs, 
+so it can be adapted to a wide range of usecases. 
+Becaus of that, we comapre it to two state of the art general purpose reinforcement learning algorithms, namely TQC and PPO together with behavioural cloning and GAIL, a state of the art 
+imitation learning algorithm, to make use of expert demonstrations.

@@ -1,7 +1,10 @@
 % !TEX root = ../main.tex
 \chapter{Problem Statement}
 \label{chapter:Problem}
-In this thesis, we consider the problem of developing an algorithm for solving a single observation partially observable Markov decision process (POMDP) with sparse reward and fixed horizon. In this setup, we assume that the agent receives a single initial observation and a fixed time horizon $T$, and must select a sequence of actions to maximize the expected cumulative reward over a single trajectory of length $T$. We also assume that the reward is sparse, i.e., the agent receives a reward of zero at each time step except for the final time step, where the reward is either zero or one depending on whether the goal state is reached.
+In this thesis, we consider the problem of developing an algorithm for solving a single observation partially observable Markov decision process (POMDP) with sparse reward and fixed horizon. 
+In this setup, we assume that the agent receives a single initial observation and must select a sequence of actions to maximize the expected cumulative reward over a trajectory of length $T$. 
+We also assume that the reward is sparse, i.e., the agent receives a reward of zero at each time step except for the final time step, where the reward is either zero or one depending on whether the 
+goal state was reached at any timestep along the trajectory.\\
 
 Formally, we define a single observation POMDP as a tuple $<S,A,T,O,R,\gamma>$, where $S$ is the set of states, $A$ is the set of actions, $T$ is the fixed 
 time horizon, $O$ is the observation space, $R$ is the reward function, and $\gamma$ is the discount factor (in this case, $\gamma=1$). 
@@ -18,27 +21,27 @@ That is, we seek to solve the following optimization problem:
 
 where the expectation is taken over trajectories of length $T$ induced by the policy\\ $\pi(a_t|o_0, a_0, ..., a_{t-1})$.\\
 
-Furthermore, we aim to design an algorithm that is sample efficient, i.e., requires a small number of expert trajectories and environment interactions 
-during the reinforcement phase, to address scenarios where environment interactions are expensive, thus the reinforcement phase should be as short as possible. 
-The single observation setup is important for environments, where observations are slow with respect to the performed actions. \\
+Furthermore, we aim to design an algorithm that is sample efficient with respect to both expert trajectories and enviroment interactions. 
 
-For example, consider a factory that processes fruits. The objective could be to cut away bad parts of a fruit with high speed. This could be accomplished by 
-taking a foto of the fruit, planning a trajectory for a blade to cut it and then performing the cut. In general, there are plenty of tasks, where the actions are 
-performed very quickly with respect to the time it takes to analyze an action. In the fruit cutting example environment, interactions are costly, as cutting 
-the fruit wrongly will produce waste. 
-In other applications, the processed parts may be even more expensive, for example if the robot performs some correcting action on industrial products like 
-electronics. Relying solely on simulation is not always viable, as there is a distribution shift between simulation and real world application, which has to be 
-corrected. Also, some scenarios might be prohibitly expensive to simulate, for example if the input image contains a complex and highly variable scene.\\
-In these scenarios, the goal state is implicitly given with the initial observation $o_0$, 
-but there is not necessarily direct mapping from the implicit representation to a goal state, which sorts out the approach discussed in HER. 
-An example of a goal description that cannot be mapped to a final goal state is given in "Language-Conditioned Imitation Learning for Robot Manipulation Tasks", 
-where the goal is defined by natural language and an imput image, which does not imply the exact goal observation, nor can we inferr the input, that implies a 
-goal observation. \\
-While approaches exist to make efficient use of expert demonstrations like GAIL or "Learning Belief Representations for Imitation Learning in POMDPs", 
-those methods suffer from poor sample efficiency in terms of environment interactions. Direct behavioural cloning with a recurrent actor as presented in 
-"Language-Conditioned Imitation Learning for Robot Manipulation Tasks" does not need additional environment interaction, but suffers from poor asymptotical 
-performance with respect to the number of expert trajectories, because of the quardratic error resulting from the compounding error problem in behavioural cloning. 
-To our knowledge, there is no method that tackles this setup specifily commonly found in industrial applications. \\
-As the single observatino sparse reward setup only provides very limited amount of feedback, the reinforcement phase is inherently a fine tuning phase, with 
-small changes to improve the policy performance. To summarize, we seek to find an algorithm that is efficient in both the required amount of expert demonstratnions 
-and the required amount of additinal environment interaction in the single observation, sparse reward setup.
+Currently, the state of the art imitation learning algorithm is GAIL \cite{ho2016generative}, which has good asymptotical performance with repsect to the number of expert trajecotries, but is not sample efficient 
+with respect to enviroment interactions during training time. Moreover, it does not make use of reward signals from the enviroment but only relies on the expert demonstrations.\\ 
+An approaches to laverage expert demonstrations by sampling them with higher priority \ref{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyper parameters. 
+An additional problem with mixing expert demonstrations and reinfocement data in actor critic algorithms is, that they induce two different distributions, one from the expert and one from 
+the learner. This leads to overestimation by the critic, further hindering the learning process. \\
+Apart from the expert demonstrations, critics in actor critic methods generally overestimate the expected reward. TQC \ref{TQC_Paper} aims to solve this issue by learning the 
+probability distribution of the expected reward and ignore the highest tail of it. While it shows good performance in reinfocement learning environments, it does not make use of expert demonstrations, 
+which makes finding solutions in difficult tasks with sparse rewards inefficient. To solve this problem, we aim to develop a critic that is unbiased using transitions from expert demonstrations 
+and reinfocement learning.\\\\
+A third difficulty with actor critic methods is that the update step of the policy must be carefully tuned. Apart from the general overestimation of the critic, it has a variance in the estimate, 
+as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, PPO ensures limited change of the policy 
+between update steps, making it more robust. The tradeoff is less exploration compared to TQC, making it less sample efficient in environments where exploration is important. To have good exploration 
+and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
+proposed trajectory of the actor, without changing the actor itself. \\
+
+While there are approaches using search in inference time, they require a model of the enviroment, which is either discrete \ref{MUZero} or differentiable \ref{Lee_Jeon_Kim_Kim_2020}. In our approach we 
+don't make the assumption that such a model is provided, as in real world applications for robot manipulations, this is typically not the case.
+
+We are interested in investigating the effectiveness of our search paradigm, which requires a learned weakly grounded model of the enviroment. We first develop the approach 
+for single observation environments, 
+as they don't provide additional information during the trajectory is rolled out, making the prediction of the whole enviroment dynamics crucial. We will then relax the constraint to the typcial 
+MDP setting.

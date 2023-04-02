@@ -59,7 +59,8 @@
 
 %  This code base is currently hosted at: 
 %  https://github.com/waltsims/TUM_Thesis_Template_CSE
-             
+\usepackage[backend=biber, sorting=none]{biblatex}
+\addbibresource{bibliography/literature.bib}
 \input{components/info}
 
 \input{components/settings}
@@ -95,6 +96,5 @@
  \printglossaries
 
  \addcontentsline{toc}{chapter}{Bibliography}
- \bibliography{bibliography/literature}
-
+ \printbibliography
 \end{document}

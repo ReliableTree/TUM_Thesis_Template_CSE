@@ -105,22 +105,15 @@ different then the training distribution, thus it starts to act unpredictable. A
 does not break the i.i.d. assumption.
 
 \section{Reinforcement Learning from Sparse Rewads in Single Observation Environments}
-In this section we will explore the perforance of the AC algorithm given sparse rewards from trajectories together with expert demonstrations. We find this to be 
-a plausible setting, as sparse rewards are typically easy to define even in real world applications or sparse reward from human feedback could be used. It is well 
-discussed that reward shaping is tedious and can lead to sub optimal perforance. As an example, imagine an automated production line, where a robot conducts a 
-fast correction step, like cutting away bad parts of food, with high speed, based on an image of the object. A human could easily provide the feedback of wether 
-the object is in the intendet state after the operation. It would be vastly more effort to provide a reward signal for every step along the trajectory and it is 
-not trivial to do so in a way that is helpful for the learning algorithm. Another application are natural language models. Resent efforts have been made to tune 
-models according to humane preferences from a pretrained initialisation. Language models don't get any observations from the environment, as the initial 
-observation is the input from the user and the current environment state is the generated text, which is fully determined by the actions, or words, of the model. 
-In this sense, it is comparable to our setup. We will focus on dense action and observation spaces however and leave further investigation of discrete spaces to future work. 
-In addition to the practical relevance of the setting, an advantage is that the planning part of our algorithm is most efficient in single observation settings. 
+In this section we will explore the perforance of the AC algorithm given a single observation per trajectory, one sparse reward per trajectory and some expert demonstrations.  
+We motivated the practical relevance in the introduction. An additional advantage for testing the effectiveness of the search paradigm is that the planning is that planning is most efficient in 
+single observation settings. 
 We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the MDP has a quadratic error bound, we don't get any updated information 
 during the trajectory and thus no better estimate is possible. \\
 
 We chose environments from the "Meta-World" \ref{yu2019meta} benchmark, as they have a success indication per environment, from which sparse rewards can be defined naturally. 
 Specifically, we chose five environments from the ML10 suite, namely "Pick and Place", "Push", "Reach", "Window Open" and "Drawer Close", which represent a variaty 
-of tasks and differently levels suited to test different aspects of our algorithm. We defined a constant sequence length of 100 steps per trajectory and provided 
+of difficulty levels suited to test different aspects of our algorithm. We defined a constant sequence length of 100 steps per trajectory and provided 
 a reward at the end according to wether the environment was solved at any step along the trajectory. Additionally, the environment 
 only returns the initial observation along the trajectory.\\
 

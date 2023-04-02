@@ -83,8 +83,8 @@ cloning on an expert dataset with n trajectories. In the fine tuning phase, the 
 like sparese rewards are used to enhance the performance of the policy. Fine tuning is a common approach to overcome the exploration problem of high dimensional 
 spaces.
 \subsection{Sparse Rewards in MDPs with Expert Demonstrations}
-In the paper Leveraging Demonstrations for Deep Reinforcement Learning on Robotics Problems with Sparse Rewards \cite{LDDRLP} the authors describe a priority 
-sampling algorithm in combination with the deep deterministic policy gradient (DDPG) algorithm as described in \ref{AC-Alg}. The probability with which a 
+Mel Vecerik et al. \ref{vecerik2018leveraging} describe a priority 
+sampling algorithm in combination with deep deterministic policy gradient (DDPG) as described in \ref{AC-Alg}. The probability with which a 
 training sample is chosen from the replay buffer is described as:
 \begin{equation}
     P(i) = \frac{p_i^\alpha}{\sum\limits_{k} p_k^\alpha}
@@ -104,8 +104,9 @@ implementation using no expert demonstration but dense reward. The authors find 
 demonstrations on a challenging robotic insertion task.\\ 
 A problem with this approach is, that the critic assumes the demporal difference error approximates the distribution induced by the policy $\pi_{\theta}$, but by 
 mixing in expert demonstrations, the expected $Q$ value will be higher, then that of the policy $\pi_{\theta}$. This overestimation can lead to poor performance. 
-The authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversly proportinal to the 
-probability of choosing a transition and thus counter acts the improvement rate towards expert behaviour.
+The authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversly proportional to the 
+probability of choosing a transition and thus counter acts the improvement rate towards expert behaviour. Moreover, $\epsilon_D$ is an additional parameter requirering 
+finetuning.
 
 \subsection{GAIL in POMDPs}
 \label{GAIL_POMDPS}
