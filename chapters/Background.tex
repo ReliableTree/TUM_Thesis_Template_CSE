@@ -477,8 +477,9 @@ In the original implementation, SAC uses two $Q$ value estimates and a state val
 \begin{equation}
     V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}],
 \end{equation}
-with the minimum value of the two $Q$ critics $Q_\text{min}$ to decrease the overestimation bias of critics in actor critic algorithms. 
-The $Q$ values are trained with typical TD:
+with the minimum value of the two $Q$ critics $Q_\text{min}$ to compensate the overestimation bias of critics in actor critic algorithms. We will 
+go into more detail on this bias in section \ref{sec:TQC}.
+The $Q$ values are trained with TD learning:
 
 \begin{equation}
     \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(q_{\theta_i}(s_t,a_t) - y_t)^2]
@@ -516,31 +517,32 @@ To approximate the derivative of \ref{sac_pol_obj} given limited sample size, th
 
 
 To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. It outperforms non stochastic 
-policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces, which are hard to explore.
+policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces.
 
 \subsection{TRPO}
+\label{sec:TQC}
 Trust Region Policy Optimisation \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
 Recall we defined the reinforcement learning objective as:
 \begin{equation}
-    J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right]
+    J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
 \end{equation}
-. The authors show that we can compute $J(\tile{\pi})$ for a different policy $\tile{\pi}$ using $J(\pi)$ like:
+The authors show that we can compute $J(\tile{\pi})$ for a different policy $\tilde{\pi}$ using $J(\pi)$ like:
 \begin{equation}
-    J(\tilde{\pi}) = J(\pi) + \mathbb{E}_{s_0, a_0, ... \propto \tilde{\pi}}\left[ \sum_{t=0}^{\infty}  \gamma^t A_{\pi}(s_t, a_t)\right]
+    J(\tilde{\pi}) = J(\pi) + \mathbb{E}_{s_0, a_0, ... \propto \tilde{\pi}}\left[ \sum_{t=0}^{\infty}  \gamma^t A_{\pi}(s_t, a_t)\right],
 \end{equation}
 with the advantage function $A_{\pi}(s_t, a_t) = Q_{\pi}(s_t,a_t) - V_{\pi}(s_t)$. Note that the expectation of the states and actions is taken with respect to 
 $\tilde{\pi}$. 
 We now introduce the occupancy measure $\rho_{\pi}$ for states, which measures how often a state is visited, given a policy:
 \begin{equation*}
-    \rho_{\pi}:\mathcal{S} \rightarrow \mathbb{R} = \mathbb{E}_{\tau \propto \pi} \left[ \sum_{t=0}^\infty \gamma^t P(s_t=s) \right]
+    \rho_{\pi}:\mathcal{S} \rightarrow \mathbb{R} = \mathbb{E}_{\tau \propto \pi} \left[ \sum_{t=0}^\infty \gamma^t P(s_t=s) \right].
 \end{equation*}
-. With this, we can define a local approximation $L$ to $J(\tilde{\pi})$:
+With this, we can define a local approximation $L$ to $J(\tilde{\pi})$:
 \begin{equation}
-    L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tilde{\pi}(a|s) A_{\pi}(s,a)
+    L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tilde{\pi}(a|s) A_{\pi}(s,a),
 \end{equation}
-, where we used the ocupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
+where we used the ocupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
 Let's say we have policy $\pi$ and collect statistics by generating trajectores from it to approximate $J(\pi)$ and $\rho(\pi)$. We now want to change the policy 
-such that our expected value $J$ improves $J(\tilde{\pi}) > J(\pi)$, ideally, but we don't have an estimate of $J(\tilde{\pi})$, before we use $\tilde{\pi}$. 
+such that our expected value $J$ improves $J(\tilde{\pi}) > J(\pi)$, but we don't have an estimate of $J(\tilde{\pi})$, before we use $\tilde{\pi}$. 
 However, we can compute $L_{\pi}(\tilde{\pi})$, given our current data from policy $\pi$. It has been shown, that the following lower bound on policy 
 improvement holds:
 \begin{equation*}
@@ -566,11 +568,7 @@ with respect to a KL divergence constraint:
         \text{subject to\ \ \ \ \ \ \ \ \ \ \ \ } \mathbb{E}_t[\text{KL}[ \pi_{\theta_{\text{old}}}(\cdot | s_t), \pi_{\theta}(\cdot | s_t)] ] \leq \delta
 \end{flalign}
 The core idea is to place a constraint on the distance between the new policy and the old policy. By doing so, 
-too large update steps to the policy should be prevented, resulting in a more stable learning behaviour. Note that the logarithm is monton and 
-$\pi_{\theta_{old}}$ is constant w.r.t. $\pi_{\theta}$. That means optimizing the unconstrained TRPO objective opimizes $L^{PG}$, thus the optimality proof of 
-$L^{PG}$ holds for $L^{TRPO}$. A more general proof considering the stochasticity of the policy update is provided in the paper Trust Region Policy Optimization, 
-theorem 1 \cite{TRPO}. \\
-
+too large update steps to the policy should be prevented, resulting in a more stable learning behaviour. 
 Recall the advantage estimator was defined as:
 \begin{equation}
     A(s,a) = Q(s,a) - V(s).
@@ -603,16 +601,16 @@ Let
 \end{equation}
 The algorithm aims to minimize $L^{CLIP}(\theta)$ by doing gradient update steps:
 \begin{equation}
-    \theta_{i+1} = \theta_{i} + \alpha \nabla_{\theta} L^{CLIP}(\theta_i)
+    \theta_{i+1} = \theta_{i} + \alpha \nabla_{\theta} L^{CLIP}(\theta_i).
 \end{equation}
-. The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
+The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \begin{algorithm}[h]
     \SetAlgoLined
     \begin{algorithmic}
     \For{$\text{iteration}=1,2,\dots$}{ \\
         \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ timesteps\\
         \State Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
-        \State Optimize surrogate $L^{CLIP}$ with respect to $\theta$, with $K$ epochs and minibatch size $M \leq T$\\
+        \State Optimize surrogate $L^{CLIP}$ with respect to $\theta$. \\
         \State $\theta_\text{old} \gets \theta$
         }
         
@@ -625,27 +623,26 @@ Overall, PPO is a robust and effective algorithm for deep reinforcement learning
 
 \subsection{TQC}
 \label{section:TQC}
-Controlling Overestimation Bias with Truncated Mixture of Continuous
-Distributional Quantile Critics (TQC) \cite{TQC_Paper} is a paper describing an off policy algorithm that aims to minimize the over estimation bias.\\
+Arsenii Kuznetsov, et al. develop "Truncated Mixture of Continuous Distributional Quantile Critics" (TQC) \cite{TQC_Paper} to compensate the over estimation bias of critics in actor critic methods.\\
 Emperically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
-two critics in the SAC algorithm \ref{SAC}. In the TQC paper \cite{TQC_Paper} the authors cite a formal derivation of the over estimation bias by 
-Thrun and Schwartz (1993) \cite{thrun1993issues} stating:
+two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the over estimation bias by 
+Thrun and Schwartz \cite{thrun1993issues} it is found that:
 \begin{equation}
     \label{eq:overestimation}
     \begin{align}
-        \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left{Q(s,a) + U(a)\right}\right]
+        \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left{Q(s,a) + U(a)\right}\right],
     \end{align}
 \end{equation}
-, where $U(a)$ is action dependent random noise with zero mean. \\
-The main idea of the paper is to learn the probability distribution of the $Q$ value, rather then approximating the expectation of the $Q$ value. 
+where $U(a)$ is action dependent random noise with zero mean. \\
+The main idea of TQC is to learn the probability distribution of the $Q$ value, rather then approximating the expectation of the $Q$ value. 
 It is then possible to drop the "right tail", that is the highest estimates for the $Q$ value, to lower the estimate.\\
 Formally, the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
-$Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantile regression loss.\\
+$Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.\\
 The kth $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the comulative distribution function crosses $k/M$:
 \begin{equation}
     Pr[X \leq x] \leq k/M
 \end{equation}
-with $M$ total quatiles. \\
+with $M$ total quantiles. \\
 Quantile regression is used to learn the values of the $M$ quantiles:
 \begin{equation}
     \label{rho}
@@ -668,17 +665,16 @@ with the tagret distribution
     Y(s,a)(v) = \frac{1}{N} \sum_{i=1}^N 1_{y_i(s,a) > v} | v \in \mathcal{R}
 \end{equation}
 $N<M$, where only the lowest N quantiles were used. \\
-Finally this expression leads us to the loss functino for the quantiles $\theta_m^{\psi}$ of Y:
+Finally this expression leads us to the loss function for the quantiles $\theta_m^{\psi}$ of Y:
 \begin{equation}
-    L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right)
+    L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right),
 \end{equation}
-, where $\psi$ deontes the parametrisation of $\theta$. Note that instead of the function $\rho_{\tau_m}(u)$ as described in \ref{rho}, they used the 
-1-Huber loss, which got better results emperically. \\
+where $\psi$ deontes the parametrisation of $\theta$.\\
 From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
-    J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right]
+    J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right].
 \end{equation}
-, similar to the PPO loss \ref{PPO_Loss_Reg}. In the paper, they use N critics $\psi_n$. To keep the notation clean, we derived the main ideas using only one. An 
+In the paper, they use N critics $\psi_n$. To keep the notation clean, we derived the main ideas using only one. An 
 overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 
 \begin{algorithm}
@@ -704,8 +700,7 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 \end{algorithm}
 TQC achieves state of the art performance in a wide variety of challenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
 for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps. In this sense, it is a successor to the 
-SAC algorithm, where the overestimation problem in off policy learning was the main focus. While it shows good results in practice, solving this problem by introducing a mechanism that can use a hyper parameter to emperically counter the update error 
-entails the reliance on hyper parameter tuning. \\
+SAC algorithm, where the overestimation problem in off policy learning was the main focus. \\
 
 \section{Model Based Learning}
 In model based reinforcement learning, the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
