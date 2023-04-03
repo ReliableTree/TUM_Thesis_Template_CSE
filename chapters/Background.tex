@@ -21,6 +21,8 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 	\item Reinforcement Learning
 \end{itemize} .
 
+#Overview of following secitons
+
 \section{Supervised Learning}
 \label{section:super_learn}
 Supervised learning is a learning paradigm where the input-output pairs $(x,y) \in X \times Y$ are given, and the goal is to learn a function 
@@ -47,11 +49,11 @@ given input sequence $x_1,\ldots,x_T$ \cite[chapter~4]{bishop} \cite[chapter~5, 
 \section{Unsupervised Learning}
 \label{section:unsup_learn}
 Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to discover underlying patterns or structure in the data.
-The objective function in unsupervised learning is typically not based on a pre-defined notion of correctness, but rather on measures of statistical
+The objective function in unsupervised learning is typically not based on a predefined notion of correctness, but rather on measures of statistical
 independence or data compression.\\
 
 Unsupervised learning can be used for a variety of tasks, including clustering, density estimation, dimensionality reduction, and anomaly detection.
-It is also often used as a pre-processing step in supervised learning, where the goal is to learn a representation of the input data that is more informative
+It is also often used as a pre-processing step in supervised learning, where the goal is to learn a more informative representation of the input data 
 for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}. 
 
 \section{Reinforcement Learning}
@@ -105,8 +107,8 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \end{itemize}
     \item \textbf{inference type:}
     \begin{itemize}
-    \item Probabalistic inference: the algorithm samples actions according to a probability distribution.
-    \item Deterministic inference: the algorithm chooses an action deterministicly.
+    \item Probabilistic inference: the algorithm samples actions according to a probability distribution.
+    \item Deterministic inference: the algorithm chooses an action deterministically.
     \end{itemize}
     \end{itemize}
 \end{minipage}
@@ -182,9 +184,12 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
     \end{tikzpicture}
   \caption{A MDP diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
 \end{figure}
+
 \section{Policy Gradient}
-There are numerous ways to arrive at a policy that maximizes the reinforcment learning objective \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
-to parametrize the policy using a differentiable function. In this thesis we will be using neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
+There are numerous ways to arrive at a policy that maximizes the reinforcement learning objective as defined in equation 
+\ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
+to parametrize the policy using a differentiable function.\\ 
+In this thesis we use neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
 reward $J = E[\sum_{t} \gamma^t r_t]$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
 
 \begin{equation}
@@ -204,14 +209,14 @@ Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the pol
 With $G_t = \sum_{t'=t}^T \gamma^t' r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
 $G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$ and following trajectory $\tau_{i>t}$ after that.
 
-In practice we don't have access to the real expectation. Instead we sample n Trajectories and approximate the expectation.
+In practice we don't have access to the real expectation. Instead we sample n trajectories and approximate the expectation.
 A common choice is to sample one trajectory per update step. 
 This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
 \begin{equation}
     \label{reinf_update}
     \theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
 \end{equation}
-where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm depicted in figure \ref{fig:REINFORCE}.
+where $\alpha$ is the learning rate. This update rule is used in the REINFORCE #TODO citation algorithm depicted in algorithm \ref{fig:REINFORCE}.
 The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. 
 It continues until convergence.
 
@@ -239,21 +244,28 @@ It continues until convergence.
     
 
 \section{MDP Model}
-Now that we have estalished the foundation of reinforcement learning, we will investigate two learning paradigms, namely model free and model based reinforcment learning. 
+Now that we have established the foundation of reinforcement learning, we will investigate two learning paradigms, 
+namely model free reinforcement learning in section \ref{sec:mod_free_ref} and model based reinforcement learning in section \ref{sec:mod_based_ref}. \\
+
 Model free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
 estimate of the expected rewards given the MDP dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
-as it is robust to uncertainties of the MDP dynamics and does not need a model of the enviroment, which is hard to provide in many cases. 
+as it is robust to uncertainties of the MDP dynamics and does not need a model of the environment, which is hard to provide in many cases. 
 Model based approaches learn the policy given a model of the MDP. If the model is not known, it is learned 
-from observed interactions. The advantage of model based algorithms is, that the policy can use the model to plan steps ahead. Planning has been shown to be 
-a crucial advantage, where it is applicable. One example is the MuZero algorithm from Julian Schrittwieser et. al \cite{MUZero}.
+from observed interactions. The advantage of model based algorithms is, that the policy can use the model to plan steps ahead. 
+Where it is applicable, planning has proven to be 
+a crucial advantage. One example is the MuZero algorithm from Julian Schrittwieser et. al \cite{MUZero}.
 
 \section{Model Free Learning}
-In the following section, we will develop the framework of value functions, on which off policy algorithms rely. 
-We will then introduce PPO, a state of the art on policy algorithm and TQC, a state of the art off policy algorithm, which we will use as part of our baselines.
+\label{sec:mod_free_ref}
+In the following section we develop the framework of value functions, on which off policy algorithms rely. 
+We will then introduce PPO, a state-of-the-art on policy algorithm and TQC, a state-of-the-art off policy algorithm, 
+which we will use as part of our baselines.
 
 \subsection{Value Functions}
 
-Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a particular state or taking a particular action. In this section, we will discuss the two main types of value functions in MDPs: state value functions and state action value functions.
+Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a 
+particular state or taking a particular action. In this section we discuss the two main types of value functions in MDPs: state 
+value functions and state action value functions.
 
 \subsubsection{State Value Function}
 
@@ -280,12 +292,12 @@ The state value function satisfies the Bellman equation, which expresses the rel
 where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
 from state $s$ to state $s'$ under action $a$, $r(s,a)$ is the reward received in state $s$ with action $a$, and $\gamma \in [0,1]$ is the discount factor. 
 This formulation assumes a discrete action space,
-however it can be adapted for the continuous case by chainging the summation with an integral over the probability density function.
+however it can be adapted for continuous cases by changeing the summation with an integral over the probability density function.
 
 \subsubsection{State Action Value Function}
 
-The state action value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and following 
-policy $\pi$ thereafter. It is defined as:
+The state action value function, also known as the Q-function, is the expected return when starting in state $s$, taking action $a$, and then following 
+policy $\pi$. It is defined as:
 
 \begin{equation}
     Q_{\pi}(s, a) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^T \gamma^t r_t \mid s_0 = s, a_0=a\right].
@@ -337,7 +349,7 @@ Bellman update operator defined as:
 \begin{equation}
     (T V)(s) = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right).
 \end{equation}
-From this equation, we can see, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
+From this equation it follows, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
 \begin{equation}
     \label{TD_update_BM}
     \delta_t = (T V)(s_t) - V(s_t),
@@ -346,10 +358,10 @@ so
 \begin{equation*}
     V^{t+1} = V^t + \delta_t = (T V)^t
 \end{equation*}
-We want to show that $V$ converges to $V_{\pi}$ under the action of the update operator $T$. We will do this in two steps:
+We want to proof that $V$ converges to $V_{\pi}$ under the action of the update operator $T$. We will do this in two steps:
 \begin{enumerate}
     \item Show that $T$ is a contraction mapping
-    \item Show that the unique fixpoint of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
+    \item Show that the unique fixed point of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
 \end{enumerate}
 \\ \\
 
@@ -365,7 +377,7 @@ Let $(X, d)$ be a complete metric space. A map $\mathcal{B}:X \rightarrow X$ is 
 Let (X,d) be a complete metric space and $\mathcal{B}:X \rightarrow X$ a contractor. 
 Then $\mathcal{B}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{B}(x^*) = x^*$. The sequence $\text{lim}_{n \rightarrow \infty}\mathcal{B}^n(x)$ converges to $x^*$.\\ \\
 
-We will first show that $T$ is a contraction mapping with respect to the infinity norm. Let $V$ and $W$ be two value function estimates. Then we have:
+First we will show that $T$ is a contraction mapping with respect to the infinity norm. Let $V$ and $W$ be two value function estimates. Then we have:
 
 \begin{equation}
     |(TV)(s) - (TW)(s)|_\infty =  
@@ -388,25 +400,25 @@ $|V(s'') - W(s'')|$ is independent of $s'$.
 
 Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
 
-\textbf{Step 2:} Unique fixpoint\\
+\textbf{Step 2:} Unique fixed point\\
 By the Banach fixed point theorem, $T$ has a fixed point $TV^* = V^*$. 
-We see, that this fixpoint satisfies the Bellman equation \ref{bootstrap_v} with 
+We see, that this fixed point satisfies the Bellman equation \ref{bootstrap_v} with 
 $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right).$$
-As the fixpoint is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it can be shown that for small enough 
-update rates $\alpha$, TD learning converges to the true value function. A simular proof can be found for TD learning of the $Q$ value function.
+As the fixed point is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it is shown that for small enough 
+update rates $\alpha$, TD learning converges to the true value function. A similar proof can be found for TD learning of the $Q$ value function.
 
 
-\subsection{Actor-Critic Algorithm}
+\subsection{Actor Critic Algorithm}
 \label{AC-Alg}
 One problem with REINFORCE is, that $G_t$ is computed from the rollout of a whole trajectory. As the policy changes with respect to the update step, this update 
 rule can only be used once on a sampled trajectory, making it sample inefficient. An idea is to approximate the expectation over $G_t$ using another neural network, so that an update can be made after every step, 
 rather then after the whole trajectory. This approximation is referred to as a "critic" in the actor critic method.
 
 \subsubsection{Critic}
-In this section, we will derive an expression to aproximate $G_t$ by using an iterative update step with guaranteed convergence.
+In this section, we will derive an expression to approximate $G_t$ by using an iterative update step with guaranteed convergence.
 Revisiting \ref{nabla_reinforce}: 
 \begin{equation}
-    \label{ac policy update}
+    \label{ac policy update}simular
     \begin{aligned}
         \nabla_{\theta} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[ \sum_{t=0}^T \nabla_{\phi} \log \pi(a_t|s_t;\phi) \cdot  G_t\right]\\
         = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
@@ -442,7 +454,7 @@ We can use this to update the $Q$ function using the learning rate $\alpha$ with
 function, this update rule is guaranteed to converge to $Q_{\pi}$ with sufficiently small $\alpha$.
 
 \subsubsection{Actor}
-Once we have an estimate of the state value function, we can use policy gradient to update our policy $\pi_{\phi}$ with parametrs $\phi$:
+Once we have an estimate of the state value function, we can use policy gradient to update our policy $\pi_{\phi}$ with parameters $\phi$:
 \begin{equation}
     \label{AC_general_update}
     \nabla_{\phi} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta}(a_t, s_t) \right]
@@ -455,7 +467,7 @@ unroll of the rewards, this value becomes $A_t = Q(a_t, s_t) - V(s_t)$.
 Intuitively, the advantage $A$ is a measure for how good a specific action $a$ is compared to the average action taken by the current policy. 
 A proof for the convergence and optimality of this estimator can be found in \cite{proof_A}.
 
-\subsection{Soft Actor-Critic}
+\subsection{Soft Actor Critic}
 \label{SAC}
 Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
 is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
@@ -477,7 +489,8 @@ In the original implementation, SAC uses two $Q$ value estimates and a state val
 \begin{equation}
     V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}],
 \end{equation}
-with the minimum value of the two $Q$ critics $Q_\text{min}$ to compensate the overestimation bias of critics in actor critic algorithms. We will 
+with the minimum value of the two $Q$ critics $Q_\text{min}$ to compensate for the overestimation bias of critics in actor critic 
+algorithms. We will 
 go into more detail on this bias in section \ref{sec:TQC}.
 The $Q$ values are trained with TD learning:
 
@@ -499,12 +512,12 @@ The KL divergence is a measure of the alikeness of two distributions $P(x)$ and 
     \label{KL}
     \mathrm{KL}(P\|Q) = \int_{x\in X} P(x) \log \frac{P(x)}{Q(x)} \mathrm{d}x
 \end{equation}
-It is non negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
+It is non-negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
 a common choice in deep learning applications.\\
 
 This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper \cite{haarnoja2018soft}. \\
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
-To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrisation trick is used:
+To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrization trick is used:
 
 \begin{equation}
     \label{SAC_update_rule}
@@ -526,7 +539,7 @@ Recall we defined the reinforcement learning objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
 \end{equation}
-The authors show that we can compute $J(\tile{\pi})$ for a different policy $\tilde{\pi}$ using $J(\pi)$ like:
+We can compute $J(\tile{\pi})$ for a different policy $\tilde{\pi}$ using $J(\pi)$ like:
 \begin{equation}
     J(\tilde{\pi}) = J(\pi) + \mathbb{E}_{s_0, a_0, ... \propto \tilde{\pi}}\left[ \sum_{t=0}^{\infty}  \gamma^t A_{\pi}(s_t, a_t)\right],
 \end{equation}
@@ -540,10 +553,10 @@ With this, we can define a local approximation $L$ to $J(\tilde{\pi})$:
 \begin{equation}
     L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tilde{\pi}(a|s) A_{\pi}(s,a),
 \end{equation}
-where we used the ocupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
-Let's say we have policy $\pi$ and collect statistics by generating trajectores from it to approximate $J(\pi)$ and $\rho(\pi)$. We now want to change the policy 
-such that our expected value $J$ improves $J(\tilde{\pi}) > J(\pi)$, but we don't have an estimate of $J(\tilde{\pi})$, before we use $\tilde{\pi}$. 
-However, we can compute $L_{\pi}(\tilde{\pi})$, given our current data from policy $\pi$. It has been shown, that the following lower bound on policy 
+where we used the occupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
+Let's say we have policy $\pi$ and collect statistics by generating trajectories from it to approximate $J(\pi)$ and $\rho(\pi)$. We now want to change the policy 
+such that our expected value $J$ improves $J(\tilde{\pi}) > J(\pi)$, but we don't have an estimate of $J(\tilde{\pi})$ before we use $\tilde{\pi}$. 
+However, given the current data from policy $\pi$ we can compute $L_{\pi}(\tilde{\pi})$. It has been shown, that the following lower bound on policy 
 improvement holds:
 \begin{equation*}
     J(\tilde{\pi}) \geq L_{\pi}(\tilde{\pi}) - C D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}),
@@ -573,7 +586,7 @@ Recall the advantage estimator was defined as:
 \begin{equation}
     A(s,a) = Q(s,a) - V(s).
 \end{equation}
-Plugging in the advantage estmiator into \ref{reinf_update} gives the update rule:
+Plugging in the advantage estimator into \ref{reinf_update} gives the update rule:
 \begin{equation}
     \nabla_{\theta} J(\pi_{\theta}) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[\nabla_{\theta} log(\pi_{\theta}(a|s))A(s,a)]
 \end{equation}
@@ -590,7 +603,7 @@ Most common implementations of PPO use a stochastic policy, like in SAC, with th
 
 In TRPO, ensuring the KL constraint requires a second order approximation to it. PPO is an on-policy algorithm that uses only first order approximations, while 
 also making sure that the policy update does not change the policy too much. Instead of the hard KL constraint, it clips the gradient of the policy update within 
-an $\epsilon$ region around the old policy. This way, chainging the policy further does not improve the objective.\\
+an $\epsilon$ region around the old policy.\\
 Let
 \begin{equation}
     r_t = \frac{\pi_{\theta}(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}
@@ -623,9 +636,9 @@ Overall, PPO is a robust and effective algorithm for deep reinforcement learning
 
 \subsection{TQC}
 \label{section:TQC}
-Arsenii Kuznetsov, et al. develop "Truncated Mixture of Continuous Distributional Quantile Critics" (TQC) \cite{TQC_Paper} to compensate the over estimation bias of critics in actor critic methods.\\
-Emperically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
-two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the over estimation bias by 
+Arsenii Kuznetsov, et al. develop "Truncated Mixture of Continuous Distributional Quantile Critics" (TQC) \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
+Empirically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
+two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the overestimation bias by 
 Thrun and Schwartz \cite{thrun1993issues} it is found that:
 \begin{equation}
     \label{eq:overestimation}
@@ -634,11 +647,11 @@ Thrun and Schwartz \cite{thrun1993issues} it is found that:
     \end{align}
 \end{equation}
 where $U(a)$ is action dependent random noise with zero mean. \\
-The main idea of TQC is to learn the probability distribution of the $Q$ value, rather then approximating the expectation of the $Q$ value. 
-It is then possible to drop the "right tail", that is the highest estimates for the $Q$ value, to lower the estimate.\\
+The main idea of TQC is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
+It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.\\
 Formally, the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
 $Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.\\
-The kth $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the comulative distribution function crosses $k/M$:
+The $k$th $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the cumulative distribution function crosses $k/M$:
 \begin{equation}
     Pr[X \leq x] \leq k/M
 \end{equation}
@@ -660,7 +673,7 @@ The temporal difference target can then be written as:
 \begin{equation}
     y_i(s,a) := r(s,a) + \gamma \mathbb{E}_{s' \propto \mathcal{D}, a' \propto \pi(\cdot|s')}[\theta^i(s',a') - \alpha \log \pi_{\varphi}(a'|s')]
 \end{equation}
-with the tagret distribution
+with the target distribution
 \begin{equation}
     Y(s,a)(v) = \frac{1}{N} \sum_{i=1}^N 1_{y_i(s,a) > v} | v \in \mathcal{R}
 \end{equation}
@@ -669,7 +682,7 @@ Finally this expression leads us to the loss function for the quantiles $\theta_
 \begin{equation}
     L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right),
 \end{equation}
-where $\psi$ deontes the parametrisation of $\theta$.\\
+where $\psi$ denotes the parameterization of $\theta$.\\
 From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right].
@@ -698,11 +711,12 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
         \State \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
     \end{algorithmic}
 \end{algorithm}
-TQC achieves state of the art performance in a wide variety of challenging tasks, like robotic maipulation in the open AI gym environment. It is specifically suited 
+TQC achieves state-of-the-art performance in a wide variety of challenging tasks, like robotic manipulation in the open AI gym environment. It is specifically suited 
 for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps. In this sense, it is a successor to the 
 SAC algorithm, where the overestimation problem in off policy learning was the main focus. \\
 
 \section{Model Based Learning}
+\label{sec:mod_based_ref}
 In model based reinforcement learning, the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
 $a_{1, ..., T}$ to optimize the expected reward $J(a) = \mathbb{E}_{\tau}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
