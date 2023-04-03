@@ -1,0 +1,73 @@
+% !TEX root = ../main.tex
+
+\chapter{Discussion}
+\label{chapter:Discussion}
+In this chapter we will summarize our findings and discuss advantages as well es remaining limitations of our approach.
+\section{Applicability and Advantages}
+\subsection{Imitation Learning}
+Our results demonstrate that our imitation learning approach outperforms recurrent algorithms in continuous action space, 
+given a single observation per trajectory. This is due to the encoding of a sequence from which we generate a sequence in one step, 
+rather than using an autoregressive approach. This method does not break the i.i.d. assumption, making predictions more robust and effective 
+for planning in continuous space. \\
+\subsection{Reinforcement Learning}
+We explored the effectiveness of reinforcement learning in improving the performance of our approach as compared to pure imitation learning. 
+We demonstrate that our algorithm can effectively utilize data from reinforcement learning, as evidenced by our results presented in 
+Section \ref{sec:fine_tuning}.\\
+To further assess the impact of reinforcement learning, we conducted experiments on the "Drawer Close" environment without expert demonstrations. 
+In this environement, a solution can be achieved through random trajectories to some degree. 
+Our analysis revealed that our algorithm outperformed the baselines significantly in this pure reinforcement setting, 
+indicating that our approach is more stable with sparse rewards than traditional actor-critic methods.\\
+Our results demonstrate that our approach can effectively leverage both expert demonstrations and reinforcement learning data to achieve 
+superior performance in the single observation sparse reward POMDP setup.
+
+\subsection{Optimisation Mode}
+In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimization modes employed in the Active Critic algorithm. 
+Our experiments revealed that the optimization mode plays a critical role in determining the reinforcement learning performance. 
+Specifically, we propose leveraging the actor to encode a useful space of candidate solutions that the critic can search on. 
+This approach allows for informed search and leads to faster convergence and more efficient exploration of candidate solutions.
+
+\subsection{MDP Setting}
+In Section \ref{sec:DO_exp}, we evaluated the performance of the "Dense Observation Active Critic" (DOAC) approach in the standard MDP setting, 
+where observations are available after each step. Our experiments demonstrated that our 
+method significantly outperforms the baselines. Furthermore, we observed that TQC benefits greatly 
+from the MDP setting, as it is more efficient at exploration then PPO. This was a disadvantage in the single observation setting, as with no feedback 
+from the environement a less predictable behaviour of an algorithm makes the estimate of the current state of the environment less accurate.\\
+To evaluate the performance of pure reinforcement learning in MDPs, we conducted experiments on the "Window Open" and "Drawer Close" 
+environments without expert demonstrations. Our results showed that TQC and DOAC can find solutions, but DOAC is more stable and achieves 
+faster convergence than TQC. These findings provide further evidence of the general superior performance of our approach over the baselines. 
+
+\subsection{Single Observation and MDP Comparison}
+We compared DOAC to AC in section \ref{sec:comp_dense_sparse} and observed that while DOAC performs better, 
+AC already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
+expert data. Moreover, the inference of AC is i.i.d., while that of DOAC is not, as observations at inference time are dependent on actions. 
+
+In conclusion, our experiments demonstrate that the AC paradigm is highly stable and performs well in settings with sparse rewards. 
+It effectively leverages expert demonstrations for both exploitation and informed search. While DOAC provides improved performance over 
+AC, the latter already achieves high accuracy in solving environments.
+
+\section{Limitations and Drawback}
+\textbf{Exploration}\\
+While better then baselines, it did not achieve near perfect performace in the  "Pick and Place" and "Push" environment. 
+In inital tests, given more exp trajectories 
+solves the environements with no further fine tuning. This indicates that in more challenging environements, search for improved 
+behaviour is still limited. It is possible, that performace would increase given much longer runs of the experiments, 
+but out of time constraints, we could not make them. From the plots, performance seems to level off at about 400 trajectories in the 
+reinforcement phase. 
+Moreover, we did not make extensive studies of exploration from no expert demonstrations except for the "Drawer Close" environement, 
+as we expected in the sparse setting it would not be 
+feasable. We were surpised to find TQC and DOAC could solve the "Window Open" enviroment 
+with no expert demonstrations but we had no time for further investigation. We 
+generally expect DOAC to be less proficient in eploration then TQC from no expert data. 
+This is because DOAC currently has no stochastic actor and does not use entropy regularisation, which has been shown to be crucial for exploration. 
+We believe this addition is possible for the AC algorithm, but in it's current version, exploration 
+is probably less stable then it is in stochastic algorithms. 
+
+\textbg{Indeterminacy}\\
+Our ciritic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
+Choosing the action sequence with the highest posterior reward is not equal to choosing the action with highest posterior expectaion over
+both the environement dynamics and action sequence, given the optimal action sequence would depend on 
+later observations. In the current version, planning with multiple posible action sequences that can depend on later observations is not possible. 
+DOAC of course can change the action sequence given new observations, but the difference is in deterministic MDPs, the 
+greedy action sequence with respect to expected reward is the best possible action sequence given a current state and a perfect model of the 
+environement, which is why DOAC works well 
+in deterministic MDPs like the Meta-World benchmark we used.

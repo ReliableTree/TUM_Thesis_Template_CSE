@@ -13,6 +13,7 @@ baselines aiming to challenge aspects we developed in our methodology.
 
 
 \section{Imitation Learning}
+\label{sec:imi_learning}
 In this section we present our findings on the natural language conditioned robot manipulation task benchmark, that was propsed by Simon Stepputtis et.al 
 \cite{stepputtis2020languageconditioned}. The benchmark consists of a 7 dof simulated robot arm with a table-top setup using CoppeliaSim which allows 
 for accurate dynamics simulations at an update rate of 20Hz. The task is to pick up the correct cup and pour the content into the correct bowl, using 
@@ -305,6 +306,7 @@ subfigure \ref{fig:ac_pl_actions} shows a structured exploration, while subfigur
 \end{figure}
 
 \subsection{Dense Observations}
+\label{sec:DO_exp}
 In this section we test the relaxation of the AC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
 and compare "Dense Observation Active Critic" (DOAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Again, we don't use "HER", as it limits the generality of 
@@ -367,6 +369,7 @@ converges much quicker and has a more robust bahaviour in general.
 \end{figure}
 
 \subsection{Comparison of Dense and Single Observation}
+\label{sec:comp_dense_sparse}
 In this section we compare DOAC and AC, to investigate if DOAC makes use of the additionally provided information. The results are shown in figure \ref{fig:dense_vs_single}.
 We find that in "Reach" and "Drawer Close", DOAC converges quicker. Especially in "Reach", we see a stable improvement from DOAC over AC. In "Drawer Close", the difference is 
 small, which is mainly due to the fact that AC already solves the environment very quickly. Note hoever, that DOAC had worse initial perforance then AC in the shown experiments. 
