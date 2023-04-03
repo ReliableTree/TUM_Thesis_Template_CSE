@@ -105,7 +105,7 @@ is in a state that it has not seen before and acts slightly different to the exp
 different then the training distribution, thus it starts to act unpredictable. As argued in section \ref{COD_AC} this is an advantage of our policy, as it 
 does not break the i.i.d. assumption.
 
-\section{Reinforcement Learning from Sparse Rewads in Single Observation Environments}
+\section{Reinforcement Learning in Sparse Observation Environments}
 In this section we will explore the perforance of the AC algorithm given a single observation per trajectory, one sparse reward per trajectory and some expert demonstrations.  
 We motivated the practical relevance in the introduction. An additional advantage for testing the effectiveness of the search paradigm is that the planning is that planning is most efficient in 
 single observation settings. 
@@ -305,11 +305,11 @@ subfigure \ref{fig:ac_pl_actions} shows a structured exploration, while subfigur
     \label{fig:action_vs_actor}
 \end{figure}
 
-\subsection{Dense Observations}
+\section{Reinforcement Learning in MDPs}
 \label{sec:DO_exp}
 In this section we test the relaxation of the AC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
-and compare "Dense Observation Active Critic" (DOAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Again, we don't use "HER", as it limits the generality of 
+and compare "Continued Observation Active Critic" (COAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Again, we don't use "HER", as it limits the generality of 
 the approach. Apart from 
 providing an observation per time step,
 we use the same setup as discribed in previous sections. The results are shown in figure \ref{fig:dense_ref}. First, we find that both base line algorithms 
@@ -333,12 +333,12 @@ the authos mentioned in the paper, that GAIL is not more efficient in terms of e
 environment interactions is needed, before the discriminator of GAIL provides useful rewards for the learner. We suppose that is a reason, why GAIL does not perform 
 well in our setting, where relatively small amount of environment interactions are used. \\
 
-Overall, DOAC is the only algorithm that can greatly benefit from expert demonstration in the sparse reward setting and 
+Overall, COAC is the only algorithm that can greatly benefit from expert demonstration in the sparse reward setting and 
 it significantly outperforms all baselines including additional tests with GAIL. \\
 
 We also included results for the "Drawer Close" environment with no expert demonstrations. All algorithms perform better then in the single observation environment, 
-but DOAC is the only algorithm with stable perforance. It found a solution with near perfect success rate in all three runs quickly. \\
-Overall, DOAC performs well in all shown environments. Especially in the "Reach" environment it is the only algorithm that finds a feasable solution while it 
+but COAC is the only algorithm with stable perforance. It found a solution with near perfect success rate in all three runs quickly. \\
+Overall, COAC performs well in all shown environments. Especially in the "Reach" environment it is the only algorithm that finds a feasable solution while it 
 converges much quicker and has a more robust bahaviour in general. 
 
 \begin{figure}[htbp]
@@ -363,30 +363,30 @@ converges much quicker and has a more robust bahaviour in general.
     \caption{Comparison between TQC with no expert demonstrations and expert guided baselines.}
     \label{fig:TQC_0_vs_exp}
   \end{subfigure}
-  \caption{Comparison between DOAC and various baselines given one or no expert demonstrations. The environment state was provided after each step.
+  \caption{Comparison between COAC and various baselines given one or no expert demonstrations. The environment state was provided after each step.
   Each experiment was repeated three times with 50 evaluation episodes per data point.}
   \label{fig:dense_ref}
 \end{figure}
 
-\subsection{Comparison of Dense and Single Observation}
+\subsection{Comparison of Dense and Single Observations}
 \label{sec:comp_dense_sparse}
-In this section we compare DOAC and AC, to investigate if DOAC makes use of the additionally provided information. The results are shown in figure \ref{fig:dense_vs_single}.
-We find that in "Reach" and "Drawer Close", DOAC converges quicker. Especially in "Reach", we see a stable improvement from DOAC over AC. In "Drawer Close", the difference is 
-small, which is mainly due to the fact that AC already solves the environment very quickly. Note hoever, that DOAC had worse initial perforance then AC in the shown experiments. 
-As we discussed earlier, the initial perforance comes from the random initialisation and varies greatly. We take the fact that DOAC converged quicker then AC even though it had 
-worse starting initialisations in the three runs as further evidence, that DOAC makes effective use of the additional information. In the "Window Open" environment, DOAC initially converged slower but 
+In this section we compare COAC and AC, to investigate if COAC makes use of the additionally provided information. The results are shown in figure \ref{fig:dense_vs_single}.
+We find that in "Reach" and "Drawer Close", COAC converges quicker. Especially in "Reach", we see a stable improvement from COAC over AC. In "Drawer Close", the difference is 
+small, which is mainly due to the fact that AC already solves the environment very quickly. Note hoever, that COAC had worse initial perforance then AC in the shown experiments. 
+As we discussed earlier, the initial perforance comes from the random initialisation and varies greatly. We take the fact that COAC converged quicker then AC even though it had 
+worse starting initialisations in the three runs as further evidence, that COAC makes effective use of the additional information. In the "Window Open" environment, COAC initially converged slower but 
 reached near pefect performance quicker then AC. We suppose this is due to the different optimisation modes used for the two algorithms. Recall that AC optimizes the whole 
-trajectory at the beginning, while DOAC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
-AC can make larger changes to the trajectory proposed by the actor. In other words, while the actor converges DOAC makes smaller moves towards the critic target then AC. Also out of time constraints, we could 
-not conduct a hyper parameter search for DOAC. It is possible that DOAC would converge quicker, given more optimisation steps per inference step or a higher inference optimisation 
+trajectory at the beginning, while COAC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
+AC can make larger changes to the trajectory proposed by the actor. In other words, while the actor converges COAC makes smaller moves towards the critic target then AC. Also out of time constraints, we could 
+not conduct a hyper parameter search for COAC. It is possible that COAC would converge quicker, given more optimisation steps per inference step or a higher inference optimisation 
 learning rate $\alpha_{inf}$.\\ 
-AC already performs close to the MDP setup used by DOAC. We propose this is due to the fact, that AC uses the information about the environment 
+AC already performs close to the MDP setup used by COAC. We propose this is due to the fact, that AC uses the information about the environment 
 from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, AC searches on a preimposed subspace given the "knowledge" of the 
-actor. This means it does not conduct random search even though it does not not get any feedback from the environment. This is probably a key for the good perforance of AC and DOAC and explains 
-the relative close perforance of both algorithms. We expect a major advantage of DOAC over AC in non deterministic environments, as AC sould not be able to solve those from the initial 
-observation alone. DOAC already has a method to disambiguate action sequences given the same observations as discussed in section \ref{avr_action_problem}, which is key, if the same initial 
+actor. This means it does not conduct random search even though it does not not get any feedback from the environment. This is probably a key for the good perforance of AC and COAC and explains 
+the relative close perforance of both algorithms. We expect a major advantage of COAC over AC in non deterministic environments, as AC sould not be able to solve those from the initial 
+observation alone. COAC already has a method to disambiguate action sequences given the same observations as discussed in section \ref{avr_action_problem}, which is key, if the same initial 
 observations and actions can lead to different observations at later time steps. However out of time constraints, we leave this research question to future work.\\
-Overall we find that DOAC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewads.
+Overall we find that COAC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewads.
 
 \begin{figure}[htbp]
   \centering
@@ -404,7 +404,7 @@ Overall we find that DOAC works well in the tested environments and outperforms 
     \includegraphics[width=\textwidth]{images/dense_vs_sparse_0/Window Open.png}
     \caption{0 expert demonstrations.}
   \end{subfigure}
-  \caption{Comparison of AC in single observation and DOAC in mdp environments. Each experiment was repeated three times with 50 evaluation episodes per data point.
+  \caption{Comparison of AC in single observation and COAC in mdp environments. Each experiment was repeated three times with 50 evaluation episodes per data point.
   }
   \label{fig:dense_vs_single}
 \end{figure}

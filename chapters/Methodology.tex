@@ -409,7 +409,7 @@ are used to update the actor from timestep $t$ to \color{black!50!green!80} $t+1
 
 \section{Algorithm}
 \label{sec:algorithm}
-The inference of the actor critic algorithm is depicted in algorithm \ref{AC_Inference}. \\
+The inference of the actor critic algorithm is depicted in algorithm \ref{AC_Inference}. All models use a transformer encoder architecture. \\
 
 \begin{algorithm}[H]
     \caption{Active Critic Inference}
@@ -550,13 +550,15 @@ critic score will be lower.
     \end{algorithmic}
 \end{algorithm}
 
-\section{Dense Observations}
+\section{Continued Observations}
 \label{sec:relax_dense}
-We now want to relax the constraint that we only use one obervsation per trajectory. To do this, we develop an addition to the active critic algorithm we call dense observation active critic (DOAC). 
-We will first discuss how a straight forward adaption of AC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of DOAC.\\
+We now want to relax the constraint that we only use one obervsation per trajectory to the MDP setting. 
+We refer to the typical MDP setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
+Following, we develop an addition to the active critic algorithm we call continued observation active critic (COAC). 
+We will first discuss how a straight forward adaption of AC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of COAC.\\
 
 So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
-length $T$ from it. A straight forward adaptation of this algorithm to dense observations would be to use a different encoding of the observations. We propose to use a special token to indicate an 
+length $T$ from it. A straight forward adaptation of this algorithm to continued observations would be to use a different encoding of the observations. We propose to use a special token to indicate an 
 observation from the future that was not yet measured $t_f$. We then build the current observation sequence at time $t$ by filling the $T - t$ unseen observations with $t_f$, use positional encoding and 
 the planner and 
 generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the AC algorithm, the new loss of the actor becomes: 

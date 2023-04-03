@@ -321,7 +321,24 @@ author = {Takayuki Osa and Joni Pajarinen and Gerhard Neumann and J. Andrew Bagn
     pages={4561-4568}
  }
 
- 
+ @misc{ho2016generative,
+      title={Generative Adversarial Imitation Learning}, 
+      author={Jonathan Ho and Stefano Ermon},
+      year={2016},
+      eprint={1606.03476},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+ @misc{brown2020language,
+      title={Language Models are Few-Shot Learners}, 
+      author={Tom B. Brown and Benjamin Mann and Nick Ryder and Melanie Subbiah and Jared Kaplan and Prafulla Dhariwal and Arvind Neelakantan and Pranav Shyam and Girish Sastry and Amanda Askell and Sandhini Agarwal and Ariel Herbert-Voss and Gretchen Krueger and Tom Henighan and Rewon Child and Aditya Ramesh and Daniel M. Ziegler and Jeffrey Wu and Clemens Winter and Christopher Hesse and Mark Chen and Eric Sigler and Mateusz Litwin and Scott Gray and Benjamin Chess and Jack Clark and Christopher Berner and Sam McCandlish and Alec Radford and Ilya Sutskever and Dario Amodei},
+      year={2020},
+      eprint={2005.14165},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}
+
 @misc{stepputtis2020languageconditioned,
       title={Language-Conditioned Imitation Learning for Robot Manipulation Tasks}, 
       author={Simon Stepputtis and Joseph Campbell and Mariano Phielipp and Stefan Lee and Chitta Baral and Heni Ben Amor},
@@ -383,6 +400,20 @@ author = {Takayuki Osa and Joni Pajarinen and Gerhard Neumann and J. Andrew Bagn
       primaryClass={cs.LG}
 }
 
+@inproceedings{10.5555/3104322.3104481,
+author = {Ziebart, Brian D. and Bagnell, J. Andrew and Dey, Anind K.},
+title = {Modeling Interaction via the Principle of Maximum Causal Entropy},
+year = {2010},
+isbn = {9781605589077},
+publisher = {Omnipress},
+address = {Madison, WI, USA},
+abstract = {The principle of maximum entropy provides a powerful framework for statistical models of joint, conditional, and marginal distributions. However, there are many important distributions with elements of interaction and feedback where its applicability has not been established. This work presents the principle of maximum causal entropy—an approach based on causally conditioned probabilities that can appropriately model the availability and influence of sequentially revealed side information. Using this principle, we derive models for sequential data with revealed information, interaction, and feedback, and demonstrate their applicability for statistically framing inverse optimal control and decision prediction tasks.},
+booktitle = {Proceedings of the 27th International Conference on International Conference on Machine Learning},
+pages = {1255-1262},
+numpages = {8},
+location = {Haifa, Israel},
+series = {ICML'10}
+}
 
 §Theorem 1 shows quadratic error for imitation, 
 
@@ -391,15 +422,8 @@ author = {Takayuki Osa and Joni Pajarinen and Gerhard Neumann and J. Andrew Bagn
 
 
 
-§Overview over reinforcement learning including from imiation: https://arxiv.org/pdf/2205.00824.pdf
 §Related Work: 
 §Leveraging Demonstrations for Deep Reinforcement Learning on Robotics Problems with Sparse Rewards: https://arxiv.org/abs/1707.08817
 §https://en.wikipedia.org/wiki/Curse_of_dimensionality
 
 §Policy gradient theorem: (Sutton et al., 2000) 
-
-%Related work
-%Planning: MuZero, MuEsli
-%Monte-Carlo Tree Search in Continuous Action Spaces with Value Gradients
-%Background
-%Model based Model free-
