@@ -33,7 +33,7 @@ Supervised learning is a learning paradigm where the input-output pairs $(x,y) \
 $f^*$ that maps inputs $x \in X$ to outputs $y \in Y$. The objective function is typically a loss function that measures the difference between 
 the predicted output $f(x)$ and the true output $y$.
 
-Formally, the signal or loss function $L = g^*$ is defined on a training set $D_{train} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
+Formally the signal or loss function $L = g^*$ is defined on a training set $D_{train} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
 labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimizing $f$ for $L$ 
 over $D_{train}$ should be aligned with optimizing $f$ for $g$ over $D$:
 
@@ -143,7 +143,7 @@ parameter that determines the importance of future rewards relative to immediate
 only immediate rewards are important and 1 means that future rewards are equally important. \\
 
 Importantly, the transition function $T$ satisfies the markov property. The Markov property characterizes stochastic processes where the future state of the 
-process depends only on the current state and not on any past states. Formally, a stochastic process has the Markov property if, 
+process depends only on the current state and not on any past states. Formally a stochastic process has the Markov property if, 
 for all time steps $t$, states $s_t$, and actions $a_t$, the following condition holds:
 
 \begin{equation*}
@@ -538,7 +538,7 @@ policies in a number of challenging tasks including robot manipulation tasks wit
 
 \subsection{TRPO}
 \label{sec:TQC}
-Trust Region Policy Optimisation \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
+Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
 Recall we defined the reinforcement learning objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
@@ -578,7 +578,7 @@ similar or better performance then TRPO.
 \subsection{PPO}
 \label{section:PPO}
 The paper "Proximal Policy Optimization Algorithms" (PPO) \cite{PPO} introduced by Schulman, et al. 
-builds upon the ideas of Trust Region Policy Optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
+builds upon the ideas of Trust Region Policy optimization (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
 \begin{flalign}
         \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
@@ -653,7 +653,7 @@ Thrun and Schwartz \cite{thrun1993issues} it is found that:
 where $U(a)$ is action dependent random noise with zero mean. \\
 The main idea of TQC is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
 It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.\\
-Formally, the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
+Formally the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
 $Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.\\
 The $k$th $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the cumulative distribution function crosses $k/M$:
 \begin{equation}
@@ -686,7 +686,7 @@ Finally this expression leads us to the loss function for the quantiles $\theta_
 \begin{equation}
     L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right),
 \end{equation}
-where $\psi$ denotes the parameterization of $\theta$.\\
+where $\psi$ denotes the parametrization of $\theta$.\\
 From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right].
@@ -721,12 +721,12 @@ SAC algorithm, where the overestimation problem in off policy learning was the m
 
 \section{Model Based Learning}
 \label{sec:mod_based_ref}
-In model based reinforcement learning, the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
+In model based reinforcement learning the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
 $a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
 expectation is build with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
 $J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu, et al. \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
-model of the environment has a quadratic error in $\gamma$. Formally, let $V_{\pi}^{M^*}$ be the optimal value function for the enviroment with model $M^*$ and
+model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
 and let $V_{\pi}^{M_\theta}$ be the value function, given $\pi$ is the optimal policy for the learned model $M_{\theta}$. It is shown, that 
 $|V_{\pi}^{M^*} - V_{\pi}^{M_\theta}| \le c \cdot \frac{1}{(1 - \gamma^2)}$, where $c$ is dependent on the KL divergence between the model $M_{\theta}$ and $M^*$. 
 Intuitively, with higher $\gamma$, the value function $V_{\pi}^{M_\theta}$ can further deviate from the optimal value 
@@ -735,10 +735,10 @@ Considering these findings, it is obvious that most successful applications of t
 the action space is discrete, to make the task of learning the model easier.
 
 \subsection{Proper Value Equivalence}
-So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model based learning. However this is not strictly true. Recall we are 
-interested in optimizing the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state 
-our environment will be in at each timestep $s_t$, but only in the rewards $r_t$. 
-This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equvivalence model class of an MDP. For that 
+So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model based learning. However this is not strictly the case. Recall we are 
+interested in optimizing the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
+of our environment at each timestep, but only in the rewards $r_t$. \\
+This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
 let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the MDP and let 
 $\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equvialent to $m$, 
 if $k$ applications of the Bellman operator result in the same updated value function: 
@@ -748,10 +748,9 @@ if $k$ applications of the Bellman operator result in the same updated value fun
 \end{equation}
 It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall the value function is 
 defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
-equvivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model. From this work we conclude that solving the 
-reinforcement learning problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual MDP with model $m$.
-
-
+equvivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model.\\ 
+From this work we conclude that solving the 
+reinforcement learning problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual MDP with model $m$. 
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
@@ -759,7 +758,7 @@ rather than by trial and error \cite{IL}. In this approach, the data distributio
 breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
-Formally, imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
+Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
 
 \begin{equation}
     \pi^* = \underset{\pi}{\text{argmax}}\left[\mathbb{E} [\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]\right]
@@ -767,8 +766,9 @@ Formally, imitation learning can be defined as the task of learning a policy $\p
 
 where $s_t$ is the state at time step $t$, $a_t$ is the action taken by the agent at time step $t$, $r(s_t, a_t)$ is the reward received for taking action $a_t$ in state $s_t$, and $\gamma \in [0,1]$ is the discount factor.
 
-Returning to our general learning paradigm \ref{general_learning_paradigm}, $g^*$ has access to expert Data $D_{\text{expert}}$, but the challenge of imitation learning 
-opposed to the general supervised learning paradigm is, that the data disctibution during test time depends on the learned policy $\pi_{\text{imitaion}}$:
+Returning to our general learning paradigm \ref{general_learning_paradigm}, $g^*$ has access to expert Data $D_{\text{expert}}$. 
+The challenge of imitation learning 
+opposed to the general supervised learning paradigm is, that the data distribution during test time depends on the learned policy $\pi_{\text{imitation}}$:
 \begin{align}
     \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \ propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]
 \end{align}
@@ -781,7 +781,7 @@ and natural language processing \cite{brown2020language}.
 \subsection{Behavioral Cloning}
 Behavioral cloning is a popular technique used in imitation learning. 
 In behavioral cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
-actions predicted by the learned policy. Formally, let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
+actions predicted by the learned policy. Formally let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
 predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
 
 \begin{equation}
@@ -794,9 +794,9 @@ squared error, or the cross-entropy loss.
 
 \subsection{Behavioral Cloning for Stochastic Policies}
 Behavioral cloning for stochastic policies is a variant of behavioral cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
-A common choice to achieve this is to minimze the KL divergence between the expert policy and the trained policy.
+A common choice to achieve this is to minimize the KL divergence between the expert policy and the trained policy.
 
-Formally, let 
+Formally let 
 
 \begin{center}
     \pi_{\text{expert}}(a|s) = 
@@ -826,28 +826,30 @@ expert behaviour to train a policy that imitates the expert policy. This is clos
 with the difference that the learned reward 
 function can be used to train a policy on additional interactions with the environment, 
 while direct imitation learning only acts on the provided expert trajectories. 
-Formally, let $r'$ be a reward function and $\pi_{r'}^*$ be defined as:
+Formally let $r'$ be a reward function and $\pi_{r'}^*$ defined as:
 \begin{equation}
     \pi_{r'}^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
 \end{equation}
-be the optimal policy under the reward function $r'$. We now want to invert this equation, such that we find the reward function $r_{inv} = r'$ for which the 
+be the optimal policy under the reward function $r'$. This equation can be inverted, such that we find the reward function $r_{inv}$ for which the 
 actions under the policy $\pi_{r'}^*$ are optimal:
 \begin{equation}
     r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
 This equation is not convex and there is no unique solutoin for $r_{\text{inv}}$. It can be easily understood by the following example: \\
 Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
-There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning \cite{ho2016generative}, 
-which we will develop in the next section.
+There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning, 
+which is developed in the next section.
 
 \subsection{Generative Adversarial Imitation Learning}
-The main idea of Generative Adversarial Imitation Learning (GAIL) \cite{ho2016generative} is to disambiguate the reward signal 
+For imitation learning, Generative Adversarial Imitation Learning (GAIL) 
+\cite{ho2016generative} presents a key paradigm to make efficient use of expert demonstrations given access to the MDP. 
+The main idea of GAIL is to disambiguate the reward signal 
 by ensuring every policy except the expert policy has a lower expected reward under our inverse reward function, given the expert 
 demonstrations.\\ 
 First, 
 maximum causal entropy IRL \cite{10.5555/3104322.3104481} is a method to regularize policies found from inverse reinforcement learning. The idea is to choose the reward function, for 
-which the optimal policy has the highest entropy with respect to the action distribution. This allows us to choose a policy that is "no more comitted to any 
-particular path" \cite[p.2]{10.5555/3104322.3104481}, then necessary. Formally, the objective is written as:
+which the optimal policy has the highest entropy with respect to the action distribution. This allows us to choose a policy that is "no more committed to any 
+particular path" \cite[p.2]{10.5555/3104322.3104481}, then necessary. Formally the objective is written as:
 \begin{equation*}
     \label{proto_inf_ler}
     \underset{r_{\text{inv}} \in \mathcal{R}}{\text{minimize}} \left( \max_{\pi \in \Pi} \left( - \text{H}(\pi) + \mathbb{E}_{\pi}[r_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{r'}^*}[r_{\text{inv}}(s,a)] \right),
@@ -865,18 +867,18 @@ and the discounted causal entropy as defined by Bloem, et al. \cite{InfCausalEnt
 Here $\pi_{r'}^*$ denotes the expert policy, which indicates the expert policy is assumed to maximize a true 
 reward function ${r'}$. From now, we will refer to the expert policy as $\pi_{\text{E}}$, as it is more in line with the common choice found in 
 literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for reinforcement learning. In the paper, 
-the authors minimize a cost function $c$, instead of maximsing a reward function $r$. The choice does not make a profound 
+the authors minimize a cost function $c$, instead of maximzing a reward function $r$. The choice does not make a profound 
 mathematical difference, but it gives a more natural way to interpret the inverse objective. $c=0$ can be naturally defined as the optimal cost value, while a reward function has 
-no natural upper bound. For this pratical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimisation in 
-\ref{proto_inf_ler} becomes a maximisation and vise versa:
+no natural upper bound. For this practical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimisation in 
+\ref{proto_inf_ler} becomes a maximization and vice versa:
 \begin{equation}
     \label{proto_inf_ler_c}
     \pi_{\text{inv}}^* = \underset{c_{\text{inv}} \in \mathcal{C}}{\text{max}} \left( \min_{\pi \in \Pi} \left(- \text{H}(\pi) + \mathbb{E}_{\pi}[c_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{\text{E}}}[c_{\text{inv}}(s,a)] \right).
 \end{equation}
-The key insight is, that this optimisation problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
+The key insight is, that this optimization problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
 induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the MDP. If two policies visit the same 
 states and choose the same actions, they are similar to each other.\\
-Formally, the occupancy measure for states and actions is defined by: 
+Formally the occupancy measure for states and actions is defined by: 
 \begin{equation*}
     \rho_{\pi}:\mathcal{S} \times \mathcal{A} \rightarrow \mathbb{R} = \pi(a|s)\sum_{t=0}^\infty \gamma^tP(s_t=s|\pi).
 \end{equation*}
@@ -896,8 +898,8 @@ It is then shown that a policy is uniquely identified with its occupancy measure
     \pi_{\text{inv}}^* = \min_{\pi \propto \rho_{\pi}} - \bar{\text{H}}(\rho_{\pi})\quad \text{subject to }\quad \rho_{\pi}(s,a) = \rho_{\text{E}}(s,a) \quad \forall s \in \mathcal{S}, \forall a \in \mathcal{A},
 \end{equation}
 where $\bar{\text{H}}$ is the the discounted causal entropy $\text{H}$ defined on occupancy measures of policies, rather then action distributions. In this sense, equation \ref{proto_inf_ler_c} is the dual problem of equation \ref{const_sat_gail}. 
-This optimisation is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practice we only have a small sample size, which would mean setting 
-the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intendet optimum. Instead, the objective \ref{const_sat_gail} is relaxed:
+This optimization is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practice we only have a small sample size, which would mean setting 
+the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intended optimum. Instead, the objective \ref{const_sat_gail} is relaxed:
 \begin{equation}
     \label{dist_opt}
     \pi_{\text{inv}}^* = \min_{\pi} d_{\psi}(\rho_{\pi_{\text{E}}}, \rho_{\pi}) - \text{H}(\pi)
@@ -926,7 +928,7 @@ parameter $\lambda$, the GAIL objective can be written as:
 \begin{equation}
     J(\rho_{\pi_{\theta}}, D_{\omega}) = \lambda \left(- \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right] \right),
 \end{equation}
-where $\omega$ and $\theta$ denote the parameterization of the discriminator $D$ and the policy $\pi$. Identifying the discounted reward as $Q = \mathbb{E}_{\pi}(r_t) = \mathbb{E}_{\pi}\left[-\text{log}(D_{\omega}(s,a))\right]$ and unsing the policy 
+where $\omega$ and $\theta$ denote the parametrization of the discriminator $D$ and the policy $\pi$. Identifying the discounted reward as $Q = \mathbb{E}_{\pi}(r_t) = \mathbb{E}_{\pi}\left[-\text{log}(D_{\omega}(s,a))\right]$ and unsing the policy 
 gradient theorem, we get the policy update rule:
 \begin{equation}
     \label{GAIL_update_policy}
@@ -937,8 +939,8 @@ and the discrimnator update rule as:
     \label{eq_GAIL_disc}
     \nabla_{\omega} J(\rho_{\pi_{\theta}}, D_{\omega}) = \mathbb{E}_{\tau \propto \pi} [\nabla_w \log(D_w(s,a))] + {E}_{\tau_E} [\nabla_w \log(1 - D_w(s,a))].
 \end{equation}
-Note, because cost $c$ instead of reward $r$ is used in equation \ref{GAIL_update_policy} gradient descent is used, as the cost is minimized and in equation \ref{eq_GAIL_disc} we 
-gradient ascent is used, as we want to maximize the discrimnative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo}.\\ \\
+Note, because cost $c$ instead of reward $r$ is used in equation \ref{GAIL_update_policy} gradient descent is used, as the cost is minimized and in equation \ref{eq_GAIL_disc} 
+gradient ascent is used, as we want to maximize the discriminative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo}.\\ \\
 \begin{algorithm}
     \caption{Generative adversarial imitation learning}
     \label{GAIL_Algo}
@@ -960,17 +962,15 @@ gradient ascent is used, as we want to maximize the discrimnative power of $D$. 
     \end{algorithmic}
     \end{algorithm}
 Tian Xu, et al. proved that if a policy $\pi$ minimizes the $\text{D}_{JS}$ distance 
-between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalisation error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
-$V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalisation error of behavioral cloning is bound by 
+between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalization error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
+$V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioral cloning is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$ \cite{NEURIPS2020_b5c01503} . This explains better performance for GAIL in long horizon tasks, which has 
 been empirically demonstrated. Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behaviour with limited expert demonstrations.
-
-
-
+We will use this approach as a baseline in our experiments.
 
 \section{Partially Observable Markov Decision Processes}
 \label{POMDP}
-So far we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
+So far, we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
 transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
 is only partially observable. Those dynamics are captured in a Partially Observable Markov Decision Processes (POMDP).
 
@@ -987,7 +987,7 @@ A POMDP is defined as a tuple:
 \end{itemize}
 
 To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states of the MDP given the history of 
-actions and observations. Formally, a belief state $b_t(s)$ at time $t$ is the probability of the system to be in state $s$, 
+actions and observations. Formally a belief state $b_t(s)$ at time $t$ is the probability of the system to be in state $s$, 
 given action $a$, observation $o$ and belief state distribution $b_{t}$. The update step is written as:
 \begin{equation*}
     b_{t+1}(s) = p(s|a,o,b_{t}) = 
@@ -1074,7 +1074,7 @@ A problem in dealing with POMDPs is the large input space to a policy, consideri
 The curse of dimensionality describes how the volume of a distribution increases exponentially with the dimension of the distribution. That means in general, 
 that you need exponentially many observations from a distribution with respect to the number of dimensions, to get sufficient evidence for a model of the distribution. 
 To motivate this, assume a simple 
-discrete probability distribution for a two class classifier on n dimensions with two values per dimension:
+discrete probability distribution for a two-class classifier on n dimensions with two values per dimension:
 \begin{equation}
     p(C=i|x_1, ..., x_n)  = \theta_{i,j} | i \in \{0, 1\}, j \ in \{0, ..., 2^n\}.
 \end{equation}
@@ -1087,10 +1087,10 @@ for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon
 \end{equation}
 and $N = \sum_{i, j} N_{i, j} = 2 (2^n-1) N_{i,j}$. While this example uses discrete distributions, continuous distributions also empirically follow a similar 
 power law.\\
-This can be explained, for example, by using the bayesian information criterion (BIC), assuming the parameter number increases linearly with the dimension 
+This can be explained, for example, by using the Bayesian information criterion (BIC), assuming the parameter number increases linearly with the dimension 
 of the problem, which is a natural assumption given that for each degree of freedom, you need at least one parameter. 
-The BIC links the evidence for a model to the number of parameteres in that model, \cite[chapter 12.2.8]{https://www.stat.cmu.edu/~larry/=sml/Bayes.pdf}.
-The idea behind the BIC is to model the posterior distribution $p(\mathcal{M}|\mathcal{D})$ as a functino of the number of parameters of $\mathcal{M}$. 
+The BIC links the evidence for a model to the number of parameters in that model, \cite[chapter 12.2.8]{https://www.stat.cmu.edu/~larry/=sml/Bayes.pdf}.
+The idea behind the BIC is to model the posterior distribution $p(\mathcal{M}|\mathcal{D})$ as a function of the number of parameters of $\mathcal{M}$. 
 Let $\mathcal{L}_n(\theta_j) = p(\mathcal{D}_n|\mathcal{M}_j, \theta_{j})$ with the model $\mathcal{M}_j$ and its parameter values $\theta_j$ be the likelihood 
 of measuring some data $\mathcal{D}_n$ under the assumption of model $\mathcal{M}_j$ with parameters $\theta_j$. The BIC is defined as:
 \begin{equation}
@@ -1102,22 +1102,21 @@ It can be shown that, under certain regularity conditions of $D_n$ and $\mathcal
     p(\mathcal{M_j}|\mathcal{D}_n) \approx \frac{\text{exp}(BIC(\mathcal{M}_j))}{\sum_{i=i}^K(\text{exp}(BIC(\mathcal{M}_i)))}
 \end{equation}
 , which is exponential in the number of parameters $d$.
-In summary, evidence for a model is approximately inverse proportional to the exponent of the number of dimension of the dataset it is trained on.
-
+In summary, evidence for a model is approximately inverse proportional to the exponent of the number of dimensions of the dataset it is trained on.
 
 \section{Sequence Models}
-A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same lenght. For exmaple, 
-a sequence model could take as input a sequence of n observations and return one action. Sequence models are a natural choice to model POMDPs, as mentioned in 
-\ref{POMDP}.\\ 
-Naviely, the input sequence of n tokens with dimension d could be modeled by stacking the n inputs together and use the stacked obersvation sequence as one 
-input to a model. The dimension of the input then scales linear with the sequence length. As motivated in \ref{COD}, this means exponentially more evedience is 
-needed to achieve the same confidence with the sequence lenght n. Such approaches are sometimes called frame stacking and can solve a POMDP 
+Sequence models are a natural choice to model POMDPs. 
+A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
+a sequence model could take as input a sequence of n observations and return one action. \\ 
+Naively, the input sequence of n tokens with dimension d could be modeled by stacking the n inputs together and use the stacked observation sequence as one 
+input to a model, as already mentioned. The dimension of the input then scales linear with the sequence length. As motivated in \ref{COD}, this means exponentially more evidence is 
+required with sequence length n to achieve the same confidence. Such approaches are sometimes called frame stacking and can solve a POMDPs 
 \cite{https://wandb.ai/sb3/no-vel-envs/reports/PPO-vs-RecurrentPPO-aka-PPO-LSTM-on-environments-with-masked-velocity-SB3-Contrib---VmlldzoxOTI4NjE4}, though 
-their performance decreases with the number of frames needed to accuraltely represent the POMDP. \\
-Frame stacking handels the input sequence uniformely without regard for structure of the input data. We know however, that consecutive observations share a common 
+their performance decreases with the number of frames needed to accurately represent the POMDP. \\
+Frame stacking handels the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
 structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
 sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically in %\cite{https://www-i6.informatik.rwth-aachen.de/publications/download/843/SundermeyerMartinOparinIlyaGauvainJean-LucFreibergBenSchl%7Bu%7DterRalfNeyHermann--ComparisonofFeedforwardRecurrentNeuralNetworkLanguageModels--2013.pdf}. 
-Currently there are two types of squence models widely used:
+Currently there are two types of sequence models widely used:
 \begin{itemize}
     \item Recurrent Neural Networks
     \item Attention Based Neural Networks
@@ -1144,7 +1143,7 @@ If $\omega != 1$, this becomes zero (vanishing gradient) or infinity (exploding 
 To address this issue, Long Short-Term Memory (LSTM) and Gated Recurrent Units (GRU) were proposed as more effective RNN variants. 
 LSTMs introduce a memory cell that can selectively store and erase information, and a set of gates to control the flow of information. 
 GRUs simplify the LSTM architecture by introducing only two gates, the reset gate and update gate, while also allowing the cell to learn when to reset its state. 
-GRUs have been emirically shown to have comparable performance to LSTMs \cite{https://arxiv.org/pdf/2107.02248.pdf}.
+GRUs have been empirically shown to have comparable performance to LSTMs \cite{https://arxiv.org/pdf/2107.02248.pdf}.
 
 \begin{figure}
     \label{RNN_diag}
@@ -1238,7 +1237,7 @@ This weighted sum of inputs is then used as a representation of the input sequen
 parts of the input sequence while ignoring the rest.
 
 One of the most successful architectures for attention based sequence models is the Transformer \cite{vaswani2017attention}. In the original paper, the transformer 
-consists of an encoder and a decoder. For the purpose of this thesis, we are only interested in the encoder \ref{fig:encoder}, as it captures all functionality of attention based 
+consists of an encoder and a decoder. In this thesis, we will use encoder networks as dipicted in figure \ref{fig:encoder} for our models, as it captures all functionality of attention based 
 algorithms for sequence generation. 
 The Transformer is a self-attention based model that can be used for a variety of sequence-to-sequence tasks such as machine translation,
 text summarization, and language modeling.
@@ -1270,4 +1269,4 @@ This is because the self-attention mechanism allows the model to directly access
 Thus, the Transformer can process input sequences in parallel and does not suffer from the long-term dependencies problem that plagues RNNs. Self attention type 
 architectures have been shown to outperform recurrent networks on a number of sequence based tasks. For example they are used in the GPT-3 architecture, which has 
 shown impressive results the natural language prediction \cite{https://arxiv.org/abs/2005.14165}. While they were developed for natural language tasks, they have 
-shown promising results in a multitude of areas, including image generation, image classification, imitation learning and reinforcement learning.
+shown promising results in a multitude of areas, including image generation, image classification, imitation learning and reinforcement learning. 
