@@ -2225,13 +2225,13 @@
     <bcf:citekey order="41">vaswani2017attention</bcf:citekey>
     <bcf:citekey order="42">brown2020language</bcf:citekey>
     <bcf:citekey order="43">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="44">pennington-etal-2014-glove</bcf:citekey>
+    <bcf:citekey order="44">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="45">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="46">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="47">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="48">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="48">gangwani2019learning</bcf:citekey>
     <bcf:citekey order="49">https://arxiv.org/pdf/1511.05952.pdf</bcf:citekey>
-    <bcf:citekey order="50">https://arxiv.org/pdf/1906.09510.pdf</bcf:citekey>
+    <bcf:citekey order="50">andrychowicz2018hindsight</bcf:citekey>
     <bcf:citekey order="51">Lee_Jeon_Kim_Kim_2020</bcf:citekey>
     <bcf:citekey order="52">ho2016generative</bcf:citekey>
     <bcf:citekey order="53">NEURIPS2020_b5c01503</bcf:citekey>

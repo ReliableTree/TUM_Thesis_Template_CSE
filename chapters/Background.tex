@@ -841,6 +841,7 @@ There are different approaches to disambiguate the reward function and the resul
 which is developed in the next section.
 
 \subsection{Generative Adversarial Imitation Learning}
+\label{sec:GAIL}
 For imitation learning, Generative Adversarial Imitation Learning (GAIL) 
 \cite{ho2016generative} presents a key paradigm to make efficient use of expert demonstrations given access to the MDP. 
 The main idea of GAIL is to disambiguate the reward signal 
@@ -965,7 +966,8 @@ Tian Xu, et al. proved that if a policy $\pi$ minimizes the $\text{D}_{JS}$ dist
 between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalization error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioral cloning is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$ \cite{NEURIPS2020_b5c01503} . This explains better performance for GAIL in long horizon tasks, which has 
-been empirically demonstrated. Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behaviour with limited expert demonstrations.
+been empirically demonstrated. Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behaviour with limited expert demonstrations. It shows outstanding 
+asymptotical performance with respect to the amount of expert demonstrations but requires a high number of enviroment interactions to train the discriminator and actor as stated by the authors. 
 We will use this approach as a baseline in our experiments.
 
 \section{Partially Observable Markov Decision Processes}
