@@ -1,17 +1,25 @@
 % !TEX root = ../main.tex
 \chapter{Problem Statement}
 \label{chapter:Problem}
-In this thesis, we consider the problem of developing an algorithm for solving a single observation partially observable Markov decision process (POMDP) with sparse reward and fixed horizon. 
-In this setup, we assume that the agent receives a single initial observation and must select a sequence of actions to maximize the expected cumulative reward over a trajectory of length $T$. 
-We also assume that the reward is sparse, i.e., the agent receives a reward of zero at each time step except for the final time step, where the reward is either zero or one depending on whether the 
-goal state was reached at any timestep along the trajectory.\\
+In this thesis, we aim to develop an algorithm that uses search in inference time on a continuous action space. 
+A focus is to efficiently laverage expert demonstrations to solve environments with sparse feedback signals. We will use fixed horizon continuous 
+deterministic MDPs with sparse rewards and fixed horizon deterministic POMDPs, where only a single initial observation is provided, along with sparse rewards. \\
 
-Formally, we define a single observation POMDP as a tuple $<S,A,T,O,R,\gamma>$, where $S$ is the set of states, $A$ is the set of actions, $T$ is the fixed 
-time horizon, $O$ is the observation space, $R$ is the reward function, and $\gamma$ is the discount factor (in this case, $\gamma=1$). 
-At each time step $t=1,...,T$, the agent has access to the observation observation $o_0\in O$ and selects an action $a_t\in A$, and receives a 
-reward $r_t\in {0,1}$, where $r_{t<T} = 0$, $r_T=1$ if the goal state is reached and $r_T=0$ otherwise.
+Formally we define a continuous fixed horizon single observation POMDP as a tuple \\
+$<S,A,T,O,R,G, h>$, where $S$ is the state space, $A$ is the action space, $T$ is the transition 
+function, $O$ is the observation space, $R$ is the reward function, $G$ is the set of states for which the reward is $1$, and $h$ is the time horizon.\\ 
+At each time step $t=1,...,T$, the agent has access to the observation $o_t = s_1$ and selects an action $a_t$.  
+It then receives a 
+reward $r_t\in \{0,1\}$, where 
+\begin{cases}
+    r_t = 0 \quad  |t < T\\
+    r_T = 1 \quad  |g \in \{ s_t \}\\
+    r_T = 0 \quad \text{else.}
+\end{cases} \\
+Intuitively, the rewad is $1$ only if a goal state was reached along the trajectory. We also relax the single 
+observation constraint, where the agent receives the state of the environment after each step: $o_t = s_t$, as defined for MDPs. The rest of the setting is equal.\\
 
-The goal of our algorithm is to learn a policy $\pi(a_t|o_0, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
+The goal of our algorithm is to learn a policy $\pi(a_t|o_{1:t}, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
 some expert trajectories $D_{\text{expert}}$. 
 That is, we seek to solve the following optimization problem:
 
@@ -19,27 +27,32 @@ That is, we seek to solve the following optimization problem:
 \max_{\pi} \mathbb{E}_{\pi}[r_T]\quad \text{given}\quad D_{\text{expert}}
 \end{equation}
 
-where the expectation is taken over trajectories of length $T$ induced by the policy\\ $\pi(a_t|o_0, a_0, ..., a_{t-1})$.\\
+where the expectation is taken over trajectories of length $T$ induced by the policy\\ $\pi(a_t|o_1, a_1, ..., a_{t-1})$.\\
 
-Furthermore, we aim to design an algorithm that is sample efficient with respect to both expert trajectories and enviroment interactions. 
+Our algorithm aims to be sample efficient with respect to both expert trajectories and enviroment interactions. \\
 
-Currently, the state of the art imitation learning algorithm is GAIL \cite{ho2016generative}, which has good asymptotical performance with repsect to the number of expert trajecotries, but is not sample efficient 
-with respect to enviroment interactions during training time. Moreover, it does not make use of reward signals from the enviroment but only relies on the expert demonstrations.\\ 
-An approaches to laverage expert demonstrations by sampling them with higher priority \ref{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyper parameters. 
+Currently, GAIL, a state of the art imitation learning algorithm, has good asymptotical performance with repsect to the number of expert trajecotries, but is not sample efficient 
+with respect to enviroment interactions during train time. Moreover, it does not make use of reward signals from the enviroment but only relies on the expert demonstrations.\\ 
+
+An approaches to laverage expert demonstrations by sampling them with higher priority \cite{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyper parameters. 
 An additional problem with mixing expert demonstrations and reinfocement data in actor critic algorithms is, that they induce two different distributions, one from the expert and one from 
 the learner. This leads to overestimation by the critic, further hindering the learning process. \\
-Apart from the expert demonstrations, critics in actor critic methods generally overestimate the expected reward. TQC \ref{TQC_Paper} aims to solve this issue by learning the 
-probability distribution of the expected reward and ignore the highest tail of it. While it shows good performance in reinfocement learning environments, it does not make use of expert demonstrations, 
-which makes finding solutions in difficult tasks with sparse rewards inefficient. To solve this problem, we aim to develop a critic that is unbiased using transitions from expert demonstrations 
-and reinfocement learning.\\\\
+
+Apart from the expert demonstrations, critics in actor critic methods generally overestimate the expected reward. TQC \cite{TQC_Paper} aims to solve this issue by learning the 
+probability distribution of the expected reward and ignore the highest tail of it. While it shows good performance in reinfocement learning environments 
+it is also relient on additional hyperparameters 
+specifying the coarsity of the learned probability distribution and the cutoff point. To solve this problem , we aim to develop a critic that is inherently unbiased using transitions from expert demonstrations 
+and reinfocement learning.\\
+
 A third difficulty with actor critic methods is that the update step of the policy must be carefully tuned. Apart from the general overestimation of the critic, it has a variance in the estimate, 
 as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, PPO ensures limited change of the policy 
-between update steps, making it more robust. The tradeoff is less exploration compared to TQC, making it less sample efficient in environments where exploration is important. To have good exploration 
+between update steps, making it more robust. The tradeoff is less exploration compared to TQC. To have good exploration 
 and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
 proposed trajectory of the actor, without changing the actor itself. \\
 
-While there are approaches using search in inference time, they require a model of the enviroment, which is either discrete \ref{MUZero} or differentiable \ref{Lee_Jeon_Kim_Kim_2020}. In our approach we 
-don't make the assumption that such a model is provided, as in real world applications for robot manipulations, this is typically not the case.
+While there are approaches using search in inference time, they either require discrete action spaces \cite{MUZero} or a given differentiable model of the enviroment \cite{Lee_Jeon_Kim_Kim_2020}. 
+In our approach we 
+don't make the assumption that such a model is provided, as in real world robotic applications, this is typically not the case.\\
 
 We are interested in investigating the effectiveness of our search paradigm, which requires a learned weakly grounded model of the enviroment. We first develop the approach 
 for single observation environments, 

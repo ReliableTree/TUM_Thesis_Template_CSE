@@ -248,7 +248,7 @@ $J_{c, a, o} = (c(a, 0) - 1)^2$. This is a natural choice, as we can
 choose reward 1 for the success cases and reward 0 for the failure cases. In this sence, we aim to optimize the predicted probability, that actions $a$ will lead 
 to a success, given observations $o$. The new trajectory $a_{c, o}$ found by unsing the critic, will 
 be added to the set of trajectories for the critic and to the set of expert trajectories, if it was a success. \\
-With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during training time. 
+With this setup, our algorithm is truly on policy, while beeing able to use all data collected from expert demonstrations and during train time. 
 
 The actor is model free, while the critic is weakly grounded model based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
 but our architecture enables search on continuous action space, which is not possible in MuZero. 
