@@ -144,7 +144,7 @@ With these experiments, we aim to test both exploitation and exploration of our 
 behaviour across a wide range of use cases. \\
 
 In all plots, the first data point is sampled from the policy before any environment interaction. For the plots with behavioural cloning, it indicates learned performance from expert trajectories.
-In plots with no provided expert trajectory, it displays the behaviour following random initialization.
+In plots with no provided expert trajectory, it displays the behaviour following random initialisation.
 
 
 \subsection{Fine Tuning}
@@ -251,14 +251,15 @@ The AVC algorithm was able to solve all environments with high success rates aft
 of behavioural cloning was not improved in the reinforcement phase by any of the baselines. Similar to our discussion in section \ref{sec:fine_tuning},
 we had to choose small learning rates to prevent catastrophic forgetting. With higher learning rates, all algorithms dropped to $0 \%$ success rate and did
 not recover in initial tests. We find from the experiments that the challenging one observation sparse reward environment is difficult to learn in for
-traditional actor-critic algorithms. In these setups, AVC shows a significant improvement.\\
+traditional actor critic algorithms. In these setups, AVC shows a significant improvement.\\
 
-First wanted to rule out that the performance difference comes mainly from our behavioural cloning setup. As PPO and TQC natively don't make use of expert demonstrations,
+First we wanted to rule out that the performance difference comes mainly from our behavioural cloning setup. As PPO and TQC natively don't make use of expert demonstrations,
 we pretrained them using behavioural cloning. We expected that from the pretraining, at least one successful trajectory would be sampled in the training phase, thus
 helping to overcome the initial search problem. We find that all algorithms perform significantly above $0\%$ success rate, so we conclude that all algorithms had
-access to guidance to find successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms on the
-"Drawer Close" environment. We found that random trajectories can already solve the environment with about $20\%$ success rate, so no expert guidance is needed to learn a feasible behaviour.
-The results are shown in subfigure \ref{fig:drawerclose}. The difference in performance at 0 environment interactions comes from random initialization. As we only had time for three runs per
+access to guidance to find successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms with 
+zero expert demonstrations on the 
+"Drawer Close" environment. We find that random trajectories can already solve the environment with about $20\%$ success rate, so no expert guidance is needed to learn a feasible behaviour.
+The results are shown in subfigure \ref{fig:drawerclose}. The difference in performance at 0 environment interactions comes from random initialisation. As we only had time for three runs per
 experiment, there is some noise in the data. However, all algorithms sample trajectories randomly in the initial training phase. We set the initial random phase to
 1000 steps or 10 trajectories, so all algorithms had access to some successful trajectories with high probability. \\
 
