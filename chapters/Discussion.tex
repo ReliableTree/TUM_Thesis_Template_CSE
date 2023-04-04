@@ -33,28 +33,28 @@ method significantly outperforms the baselines. Furthermore, we observed that TQ
 from the MDP setting, as it is more efficient at exploration then PPO. This was a disadvantage in the single observation setting, as with no feedback 
 from the environement a less predictable behaviour of an algorithm makes the estimate of the current state of the environment less accurate.\\
 To evaluate the performance of pure reinforcement learning in MDPs, we conducted experiments on the "Drawer Close" 
-environments without expert demonstrations. Our results show that all baselines and COAC can find solutions, but COAC is more stable and achieves 
+environments without expert demonstrations. Our results show that all baselines and COAVC can find solutions, but COAVC is more stable and achieves 
 faster convergence. These findings provide further evidence of the general superior performance of our approach over the baselines. 
 
 \subsection{Single Observation and MDP Comparison}
-We compared COAC to AC in section \ref{sec:comp_dense_sparse} and observed that while COAC performs better, 
+We compared COAVC to AVC in section \ref{sec:comp_dense_sparse} and observed that while COAVC performs better, 
 AC already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
-expert data. Moreover, the inference of AC is i.i.d., while that of COAC is not, as observations at inference time are dependent on actions. 
+expert data. Moreover, the inference of AVC is i.i.d., while that of COAVC is not, as observations at inference time are dependent on actions. 
 
-In conclusion, our experiments demonstrate that the AC paradigm is highly stable and performs well in settings with sparse rewards. 
-It effectively leverages expert demonstrations for both exploitation and informed search. While COAC provides improved performance over 
+In conclusion, our experiments demonstrate that the AVC paradigm is highly stable and performs well in settings with sparse rewards. 
+It effectively leverages expert demonstrations for both exploitation and informed search. While COAVC provides improved performance over 
 AC, the latter already achieves high accuracy in solving environments.
 
 \section{Limitations and Drawbacks}
 \subsection{Exploration}
-Although COAC outperformed baselines, its performance in the "Pick and Place" and "Push" environments did not reach near-perfect levels, 
+Although COAVC outperformed baselines, its performance in the "Pick and Place" and "Push" environments did not reach near-perfect levels, 
 indicating limitations in more challenging environments. While a longer reinforcement phase might improve performance, this was not explored 
 due to time constraints. Additionally, exploration from no expert demonstrations was not extensively studied, except for the "Drawer Close" 
 environment, as we expected pure reinforcement learning is not feasable for more challenging environments given sparse rewards. 
 However, we found TQC was able to solve the "Window Open" environment without expert demonstrations, but further investigation on whether 
-COAC performs well in this environment was not possible due to time constraints. It is expected that COAC would be less proficient in exploration 
-compared to TQC from no expert data, as COAC currently lacks a stochastic actor and does not use entropy regularization, which has been shown to 
-be crucial for exploration. Therefore, incorporating these features into the COAC algorithm is key for future improvements.
+COAC performs well in this environment was not possible due to time constraints. It is expected that COAVC would be less proficient in exploration 
+compared to TQC from no expert data, as COAVC currently lacks a stochastic actor and does not use entropy regularization, which has been shown to 
+be crucial for exploration. Therefore, incorporating these features into the COAVC algorithm is key for future improvements.
 
 \subsection{Indeterminacy}
 In COAC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
@@ -62,6 +62,6 @@ However, choosing the action sequence with the highest expected reward is not eq
 expectation over both the environment dynamics and action sequences, as the optimal action sequence may depend on later observations. To 
 search for the best current action in a non-deterministic MDP requires the estimate of possible observations and action sequences, respectively. 
 In the current version, planning with multiple possible action sequences that can depend on later observations is not possible. 
-Although COAC can change the action sequence given new observations, in deterministic MDPs, the greedy action sequence with respect to expected 
-reward is the best possible action sequence given a current state and a perfect model of the environment. This is why COAC performs well in 
+Although COAVC can change the action sequence given new observations, in deterministic MDPs, the greedy action sequence with respect to expected 
+reward is the best possible action sequence given a current state and a perfect model of the environment. This is why COAVC performs well in 
 deterministic MDPs such as the Meta-World benchmark used in this study.

@@ -2,58 +2,74 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
-We identify two main challenges with the single observation sparse reward setup. \\
-
-\section{Curse of Dimensionality}
+In the following chapter, we will first develop the active critic (AC) algorithm defined on single observation POMDPs and then relax 
+the constraint to the MDP setting. To indicate an observation after each step, we will refer to the MDP setting as "continuous observation" 
+and call the AVC algorithm for MDPs "Continuous Observation Active Critic" (COAC).\\
+The active critic architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that AVC is defined on the whole sequence of 
+actions and all available observations, rather then on the current observation and action.\\ 
+Formally, let $o_{1:t}$ be the observations until timestep $t$ and let $a:{1:T}$ be an action sequence, where $a:{1:t}$ are the actions already taken until timestep $t$. 
+We define a whole sequence actor as a model, that takes $o_{1:t}$ as input and returns actions $a:{1:T}: \pi(o_{1:t}) = a_{1:T}$. Similar, we define a whole sequence critic 
+as $C(o_{1:t}, a_{1:T}) = c_{1:T}$, where $c_t$ is the expected immediate reward at timestep $t$. 
+\section{Single Observation POMDP}
+We identify two main challenges in dealing with SOPOMDPs. \\
+The first challenge is the curse of dimensionality from the large preimange of the policy, given it has to ceep track 
+of the past. \\
+The second challenge is unstable update behaviour of actor critic mehtods which comes from update errors by the policy gradient. This problem 
+is specifically pronounced in settings with highly non smooth feedback from the environment like in our case given sparse rewards 
+and no further observations.
+\subsection{Curse of Dimensionality}
 \label{COD_AC}
 As introduces in \ref{COD}, the evidence for a model scales approximately inversly proportinal to the exponent of the dimension on which it acts. In MDPs, the 
 actor $\pi$ acts on the observation space and returns an action from the action space. A probabalistic actor defines a probability distribution on the set 
-of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. 
-Thus the dimension on which the actor acts on, is $n \times m$ with $\pi:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$.\\
+of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. This also holds for 
+deterministic actors with integer probabilities $\pi(a|s) \in \{0,1\}$.
+Thus the dimension of the preimage of the actor is $n \times m$ with $\pi:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$.\\
 Similarely, the critic $Q$ usually defines a function on $\mathcal{A}$ and $\mathcal{O}$ to the comulative discounted expected value 
-$Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$, while TQC defines the critic as a quantile distribution: 
-$Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}^k$ with $k$ quantiles.\\
-We have shown in \ref{POMDP}, that in a POMDP, the observation space grows linear in time. Together with the result from \ref{COD} we conclude, that we have 
+$Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$\\
+We have shown in \ref{POMDP}, that in a POMDP, the observation space grows linear in time, as the belief state depends on the history: 
+$$\pi(a| b_t(o_{1:t}, a_{1:t})):\mathcal{R}^{m \times T} \times \mathcal{R}^{n \times T} \rightarrow \mathcal{R},$$
+$$Q(a, o_{t}| b_{t-1}(o_{1:t-1}, a_{1:t-1})):\mathcal{R}^{m} \times \mathcal{R}^{n} \times \mathcal{R}^{m \times T-1} \times \mathcal{R}^{n \times T-1} \rightarrow \mathcal{R}.$$
+Together with the result from \ref{COD} we conclude, that we have 
 exponentially less evidence with sequence length $T$ for our model in the POMDP setting.\\
-To counter this problem, we want to get rid of the time dependency of the belief state. To do this, 
-we make the observation, that our case with the single observation at the beginning is a special case of a POMDP. Usually, 
-we need to know all previous obervsations, as they can give us additional information about the believe state. However, as we don't have subsequent information 
-after the initial observation, the only knowledge we have to include to calculate our believe state are the actions, that the policy took. As introduced in \ref{pomdp_bayes}, the optimal believe state 
-update in the general POMDP case using bayes theorem is given by:
+To counter this problem, we want to get rid of the time dependency of the belief state. 
+We make the observation, that our case with the single observation at the beginning is a special case of a POMDP. Usually, 
+we need to know all previous obervsations, as they can give us additional information about the believe state. However, as we don't have subsequent observations 
+after the initial, we only need the actions of the trajectory to update our belief $b_t$. Formally, as introduced in \ref{pomdp_bayes}, the optimal believe state 
+update in POMDPs using bayes theorem is given by:
 \begin{equation}
-    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}.
 \end{equation}
-. In our case, we can rewrite this as:
+In our case, we can rewrite this as:
 \begin{equation}
-    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{0}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(s'', o_{0}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
+    b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(s'', o_{1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}.
 \end{equation}
-. $\mathcal{Z}(s'', o_{0})$ is constant for $t>0$, so we get:
-\begin{equation}
-    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s) \quad | t > 0
-\end{equation}
+$\mathcal{Z}(s', o_{1})$ is constant in $t$, so we get:
 \begin{equation*}
-    b_{0}(s') \propto \mathcal{Z}(s', o_{0})
+    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s),
 \end{equation*}
-. If we assume a deterministic policy $\pi(a|b) \rightarrow a_{\pi}(b)$, the update step can be written as:
 \begin{equation}
-    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_{\pi}(b_t), s') b_t(s)
+    b_{1}(s') \propto \mathcal{Z}(s', o_{1})
 \end{equation}
-. By using this update step recursively until we get to $b_{0}$, we see, that the believe state at time $t$ only depends on the initial observation $o_0$
-the transition probability $\mathcal{T}$ and the number of recursion steps $t$. Using this insight, we can rewrite the belief state at timestep $t$ like:
+If we assume a deterministic policy $\pi(a|b) \rightarrow a_{\pi}(b)$, the update step can be written as:
 \begin{equation}
-    b_{t+1}(s') \propto \mathcal{Z}(s_0, o_{0}) \mathcal{T}(s_0, s', t)_{\pi}
+    b_{t+1}(s') \propto \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_{\pi}(b_t), s') b_t(s).
 \end{equation}
-, where $\mathcal{T}(s_0, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
-With this formulation, we can rewrite the policy 
-
+By using this update step recursively until we get to $b_{1}$, we see, that the believe state at time $t$ only depends on the initial observation $o_1$
+the transition probability $\mathcal{T}$, the policy $\pi$ and the number of recursion steps $t$. Using this insight, we can rewrite the belief state at timestep $t$ like:
 \begin{equation}
-    \pi(a|b) : \mathcal{R}^m \times \mathcal{R}^{n T} = \pi(a|o_0, t): \mathcal{R}^m \times \mathcal{R}^{n} \times 1.
+    b_{t+1}(s') \propto \mathcal{Z}(s_1, o_{1}) \mathcal{T}(s_1, s', t)_{\pi}
 \end{equation}
-We call this a strong inductive belief state bias for the single observatino POMDP, as it forces the assumption of a deterministic and constant policy $\pi$. 
-In our method, we implement a weak inductive bias, which is motivated by this observation: We use transformer encoder type architecture, which inputs are 
-the repeated initial observation plus a positional encoding. We then use a single pass through the network, which means it does not work autoregressively and 
-relies less on former actions to determin action at time point $t$. We test this hypothesis by using baselines that have the strong inductive bias, as well as 
-using a recurrent policy.\\ 
+, where $\mathcal{T}(s_1, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
+With this formulation, we find that the preimage of the policy given deterministic actions can be reduced to:
+$$\pi(a|b_t) = \pi(a|o_1, t): \mathcal{R}^m \times \mathcal{R}^{n} \times \mathcal{R} \rightarrow \mathcal{R}.$$
+We call this a strong inductive belief state bias for the SOPOMDP, as it forces the assumption of a deterministic and constant policy $\pi$. Here we see, 
+why this setup is specifically interesting for planning. Planning ahead fulfills the same constraint, namely that we can plan the actions, but we don't get feedback of the 
+obervations we would receive, if we acted out a planned sequence. \\
+In our method, we implement a weak inductive bias, which is motivated by this observation. We use a transformer encoder type architecture, which inputs are 
+the repeated initial observation plus a positional encoding. To generate the action sequence, we use a single pass through the network. While through the attention mechanism, 
+information between timesteps can be exchanged, earlier actions are not part of the input of later actions. 
+We will discuss the architecture in more details in the comming sections. For now, we only want to motivate the single pass through 
+our network to generate an action sequence, rather then generating it autoregressively like recurent methods would.\\ 
 Another benfit of computing the whole trajectory in one pass is that the independent and identically distributed (i.i.d.) input data 
 assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution durng infernece time 
 then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
@@ -62,8 +78,8 @@ the policy, thus the i.i.d. assumption holds.\\
 
 \section{Update Error}
 \label{inference_time_planning}
-As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. In \cite{NEURIPS2020_b5c01503} 
-it has been shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
+As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. Xu et al. \cite{NEURIPS2020_b5c01503} 
+have shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
 However, we identify that this challange also grants us a unique improvement over previous actor critic methods. By predicting whole sequences of actions at once, 
 we show that we can eliminate errors in the update step of the actor and critic.\\
 
@@ -104,7 +120,7 @@ value equvivalent model $m'$ for a model $m$ is defined in \ref{eq_kthVE} as:
 As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence. Using this, we can compute the value function for 
 any action sequence $a_1, ..., a_T$ induced by a policy $\pi$:
 \begin{equation*}
-    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right].
+    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right].
 \end{equation*}
 As it has been shown by Christopher Grimm et. al \cite{grimm2021proper}, a policy that is optimal with respect to a proper value equivalent model $m'$ is optimal 
 in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy.
@@ -188,7 +204,7 @@ expected value $J(\pi)$. Using our whole sequence critic $C$, this error is zero
 
 Recall when we write $\theta(\phi)$ we mean $Q_{\theta}(a,s|\pi_{\phi})$:
 \begin{equation*}
-    Q_{\theta}(a,s|\pi_{\phi}) = \mathbb{E}_{(a_t \propto \pi_{\phi}(s_t), s_t \propto T(s_{t-1}, a_{t-1}, s_t))|a_0=a, s_0=s}\left[\sum_t \gamma^t r(a_t, s_t)\right]
+    Q_{\theta}(a,s|\pi_{\phi}) = \mathbb{E}_{(a_t \propto \pi_{\phi}(s_t), s_t \propto T(s_{t-1}, a_{t-1}, s_t))|a_0=a, s_1=s}\left[\sum_t \gamma^t r(a_t, s_t)\right]
 \end{equation*}
 from that we get
 \begin{equation}
@@ -323,7 +339,7 @@ paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
 
 \subsection{Inference Time Search}
 \label{sec:inf_time_search}
-In the derivation of the AC algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
+In the derivation of the AVC algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
 the gradient with respect to the actor, the planner, and also the observation and the plan. In "Noether Networks: Meta-Learning Useful Conserved Quantities" \cite{https://arxiv.org/abs/2112.03321}, 
 the authors aim to reconstruct a video sequence 
 using conserved properties of the underlying physics. While a different problem setup, they also have a high dimensional derivative with respect to a 
@@ -353,7 +369,7 @@ algorithm is shown in \ref{fig:inference}
         
         \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
             \begin{cases}
-                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>0}\\
+                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>1}\\
                 [0]_{t=0}
             \end{cases}
             };
@@ -447,17 +463,17 @@ of the actor $\pi$:
 \end{equation}
 . The initial action sequence $a^0$ is then optimized given the critic. For example, if we optimize the actions directly, we get:
 \begin{equation*}
-    a_{i+1} = a_i + \alpha_{inf}\nabla_{a} (c(o_0, a_i) - 1)^2
+    a_{i+1} = a_i + \alpha_{inf}\nabla_{a} (c(o_1, a_i) - 1)^2
 \end{equation*}
 , with the learning rate for the inference time search $\alpha_{inf}$. Then, the trajectory is added to the respective data sets:
 \begin{equation}
-    \mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{critic}} \cup (o_0, a_k, r_k)
+    \mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{critic}} \cup (o_1, a_k, r_k)
 \end{equation}
 \begin{equation*}
-    \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_0, a_k, r_k)\quad |\quad r_k = 1
+    \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_1, a_k, r_k)\quad |\quad r_k = 1
 \end{equation*}
 . Note that with expert actions and expert dataset, we don't mean action sequences that were computed by 
-a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The AC learner might add 
+a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The AVC learner might add 
 addtional successful trajectories to the expert dataset. \\
 
 
@@ -555,13 +571,13 @@ critic score will be lower.
 We now want to relax the constraint that we only use one obervsation per trajectory to the MDP setting. 
 We refer to the typical MDP setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
 Following, we develop an addition to the active critic algorithm we call continued observation active critic (COAC). 
-We will first discuss how a straight forward adaption of AC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of COAC.\\
+We will first discuss how a straight forward adaption of AVC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of COAC.\\
 
 So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
 length $T$ from it. A straight forward adaptation of this algorithm to continued observations would be to use a different encoding of the observations. We propose to use a special token to indicate an 
 observation from the future that was not yet measured $t_f$. We then build the current observation sequence at time $t$ by filling the $T - t$ unseen observations with $t_f$, use positional encoding and 
 the planner and 
-generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the AC algorithm, the new loss of the actor becomes: 
+generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the AVC algorithm, the new loss of the actor becomes: 
 \begin{equation}
     \label{dense_actor_objective}
     J_{\phi, \zeta} = \mathbb{E}_{(o_{1:t}, a_{1:T}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left[\left( \pi_{\phi}(o_{1, ..., t}, t_{f, t+1:T}, p_{\zeta}(a))(t) - a(t)\right)^2\right]
@@ -608,14 +624,14 @@ disambiguate action sequences with additinal proxy losses, like choose the actio
 action space. For now, we will ensure convergence by choosing the action sequence ${a^t}^*$ as a starting point for the optimisation to get ${a^{t+1}}^*$, thus if $C^t = C^{t+1}$ we will find 
 ${a^t}^* = {a^{t+1}}^*$. 
 The update 
-steps are adapted straight forward from AC using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
+steps are adapted straight forward from AVC using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
 
 \subsection{Inference Time Optimisation}
 A pratical issue we came across is the inference time per step. This is a typical problem of model based algorithms, as they need to optimize the trajectory given 
 the current observations. In our case for each step, the actor and planner are optimized given the critic predictions, thus the inference time 
 per step is dependent on the number of optimisation steps. If the number is low, learning is slwo, as the proposed actions from the actor are barely changed. 
 If the number is high, the computation time per trajectory is too long, as the total number of update steps is $n \times T$, with n updates per step and trajectory length 
-T. This problem did not occure with the AC algorithm, as the action sequence is only optimized 
+T. This problem did not occure with the AVC algorithm, as the action sequence is only optimized 
 once per trajectory, limiting the additional compute cost. Recall in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
 actions, instead of optimizing the actions directly. We found a good solution is to ceep the states of the actor and planner during inference of a trajectory, 
 instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimisation, as we only want to 

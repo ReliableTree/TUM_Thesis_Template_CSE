@@ -97,9 +97,9 @@ On the 100 test environments that were provided, we decreased the overall error 
     \end{subfigure}
     \caption{Comparison of a pour task. The policy learned by the LCIL algorithm (top row) spills the content over the table and moves unpredictable. The task is considered a failure 
     by the benchmark, as most drops did not land in the goal bowl. Active Critic (bottom row) performs the task as intendet with no unexpected movement.}
-    \label{fig: AC vs. Rec}
+    \label{fig: AVC vs. Rec}
 \end{figure}
-Furthermore, in Figure \ref{fig: AC vs. Rec}, we have depicted a case in the test dataset that our policy solved and compared it to the performance 
+Furthermore, in Figure \ref{fig: AVC vs. Rec}, we have depicted a case in the test dataset that our policy solved and compared it to the performance 
 of the recurrent algorithm, which failed at the task.
 While our approach hit the target precisely, the recurrent model was widely off. We assume that this is caused by the fact that during inference 
 time, the
@@ -111,7 +111,7 @@ policy as it
 does not break the i.i.d. assumption.
 
 \section{Reinforcement Learning from Sparse Rewards in Single Observation Environments}
-In this section, we will explore the performance of the AC algorithm given a single observation per trajectory, one sparse reward per trajectory, and some expert demonstrations.
+In this section, we will explore the performance of the AVC algorithm given a single observation per trajectory, one sparse reward per trajectory, and some expert demonstrations.
 We motivated the practical relevance in the introduction. An additional advantage for testing the effectiveness of the search paradigm is that planning is most efficient in
 single observation settings.
 We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the MDP has a quadratic error bound, we don't get any updated information
@@ -125,12 +125,12 @@ only returns the initial observation along the trajectory.\\
 
 The single observation setup is not well-studied in continuous spaces, so we have to find baselines that are best suited to challenge the performance of our algorithm. For sparse rewards, a common
 algorithm is "HER" as discussed in section \ref{sec:HER}, but it assumes a way to compute the goal from an environment state. This is not suitable in our setup, as we don't have access to the environment
-states after the first state. Moreover, this assumption limits the generality of the approach, which AC does not need to.
+states after the first state. Moreover, this assumption limits the generality of the approach, which AVC does not need to.
 We use PPO, a state-of-the-art on-policy algorithm, and TQC, a state-of-the-art off-policy algorithm, together with transformer-style sequential encoding to indicate the timestep. We also include
 RPPO, a recurrent implementation of PPO, where we repeatedly input the initial observation and use the hidden states to encode the position along the action sequence.
 PPO, TQC, and RPPO were pre-trained using behavioural cloning. We chose the best-performing policy during behavioural cloning by testing the policy on 50 test
 trajectories every 400 full cycles through the
-expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best-case comparison to the AC algorithm, which was not pre-trained.\
+expert transitions. Technically, these test trajectories were environment interactions, but we chose not to count them to give the best-case comparison to the AVC algorithm, which was not pre-trained.\
 
 For the base implementations, we use "Stable Baselines3" \ref{stable-baselines3}, which is a common choice, as it provides well-implemented algorithms with tested
 performance and fine-tuned hyperparameters for a wide range of environments. This includes our chosen environments, but with dense rewards and continuous observations,
@@ -138,7 +138,7 @@ thus some hyperparameter tuning was necessary. \\
 
 In the following sections, we will test our algorithm in two different settings, namely fine-tuning and guided reinforcement learning. In fine-tuning, we provide
 enough expert demonstrations, that the environment can be solved with acceptable performance, but with room for improvement. In guided reinforcement learning,
-only one expert demonstration is provided. AC will use the same set of hyperparameters for all experiments to showcase its generality and robustness. Also, we had no choice for time constraints.
+only one expert demonstration is provided. AVC will use the same set of hyperparameters for all experiments to showcase its generality and robustness. Also, we had no choice for time constraints.
 We will use limited fine-tuning for the baselines, however.
 With these experiments, we aim to test both exploitation and exploration of our algorithm and show stable
 behaviour across a wide range of use cases. \\
@@ -170,7 +170,7 @@ the best achievable performance. PPO tends to do better than TQC in the single o
 fact that TQC's strength as an off-policy algorithm lies in exploration. In our chosen setup, exploration is specifically hard, given no 
 information from the environment during the trajectories.\\
 
-We find that AC is the only algorithm that can meaningfully improve its performance given the limited amount of environment interactions. 
+We find that AVC is the only algorithm that can meaningfully improve its performance given the limited amount of environment interactions. 
 We propose this is due to the fact that catastrophic forgetting is not a problem with AC, as discussed earlier in this section, which makes 
 it specifically suitable for fine-tuning.
 
@@ -205,7 +205,7 @@ it specifically suitable for fine-tuning.
 
 \subsection{Guided Reinforcement Learning}
 \label{sec:g_ref_ler}
-In this section, we test the performance of AC given minimal expert guidance. We use the "Reach" and "Window Open" environments with 2000 training episodes per run and three runs per experiment and learner.
+In this section, we test the performance of AVC given minimal expert guidance. We use the "Reach" and "Window Open" environments with 2000 training episodes per run and three runs per experiment and learner.
 Per data point, we sampled 30 trajectories to evaluate the success rate.\\
 With this setting, the algorithms must learn most of the behavior from reinforcement learning, but the expert
 demonstration is needed to overcome the initial search problem. We only provide sparse reward and one observation per trajectory, thus finding the first viable solution by unguided
@@ -247,11 +247,11 @@ are shown in figure \ref{fig:guided_ref}.
     \label{fig:guided_ref}
 \end{figure}
 
-The AC algorithm was able to solve all environments with high success rates after 1000 or 2000 sampled trajectories. In "Reach" and "Window Open" the initial performance
+The AVC algorithm was able to solve all environments with high success rates after 1000 or 2000 sampled trajectories. In "Reach" and "Window Open" the initial performance
 of behavioural cloning was not improved in the reinforcement phase by any of the baselines. Similar to our discussion in section \ref{sec:fine_tuning},
 we had to choose small learning rates to prevent catastrophic forgetting. With higher learning rates, all algorithms dropped to $0 \%$ success rate and did
 not recover in initial tests. We find from the experiments that the challenging one observation sparse reward environment is difficult to learn in for
-traditional actor-critic algorithms. In these setups, AC shows a significant improvement.\\
+traditional actor-critic algorithms. In these setups, AVC shows a significant improvement.\\
 
 We wanted to rule out that the performance difference comes mainly from our behavioural cloning setup. As PPO and TQC natively don't make use of expert demonstrations,
 we pretrained them using behavioural cloning. We expected that from the pretraining, at least one successful trajectory would be sampled in the training phase, thus
@@ -268,17 +268,17 @@ We find it to be more dependent on hyperparameters than PPO and RPPO.
 The high variance shown from the baselines in the plot can be explained by the sparse rewards, which provide highly nonlinear feedback.
 AC rapidly improved to perfect performance within about 400 steps. \\
 
-Next, we wanted to rule out that the observed performance gain of AC over the baselines comes mostly from the different underlying neural network architectures. AC uses transformers for the actor and
-critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU. To do this, we tested the performance of AC using pure imitation learning shown on the bottom row of
+Next, we wanted to rule out that the observed performance gain of AVC over the baselines comes mostly from the different underlying neural network architectures. AVC uses transformers for the actor and
+critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU. To do this, we tested the performance of AVC using pure imitation learning shown on the bottom row of
 figure \ref{fig:guided_ref}. We expect the main improvement of behavioural cloning in AC, TQC and PPO over a recurrent policy comes from the sequence encoding, as proposed in section \ref{COD_AC}.
 We find that the pure imitation learning performance
-of AC is about the same as behavioural cloning for PPO and TQC. While in the Window Open environment, both PPO and TQC outperformed RPPO, we find that in the Reach environment RPPO performs
+of AVC is about the same as behavioural cloning for PPO and TQC. While in the Window Open environment, both PPO and TQC outperformed RPPO, we find that in the Reach environment RPPO performs
 similar to PPO. As only one expert trajectory was provided and we repeated the experiment three times, we find the difference between RPPO, PPO and TQC in the Reach
 environment too small to make conclusions about their relative performance, given the variance from the data. \\
 
-Overall, we take this finding as evidence for the effectiveness of the AC algorithm. It is highly unlikely that the observed improvement
-over the baselines comes only from the transformer architecture underlying the AC actor and critic, given the similar behavioural cloning performance. We also find clear improvement of AC with
-reinforcement learning over AC with pure imitation learning, which demonstrates the AC algorithm makes effective use from the additional feedback. 
+Overall, we take this finding as evidence for the effectiveness of the AVC algorithm. It is highly unlikely that the observed improvement
+over the baselines comes only from the transformer architecture underlying the AVC actor and critic, given the similar behavioural cloning performance. We also find clear improvement of AVC with
+reinforcement learning over AVC with pure imitation learning, which demonstrates the AVC algorithm makes effective use from the additional feedback. 
 
 \subsection{Comparison of Optimisation Modes}
 \label{ref:com_opt_modes}
@@ -318,7 +318,7 @@ subfigure \ref{fig:ac_pl_actions} shows a structured exploration, while subfigur
 \end{figure}
 
 \subsection{Dense Observations}
-In this section we test the relaxation of the AC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
+In this section we test the relaxation of the AVC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
 and compare "Dense Observation Active Critic" (DOAC) to PPO and TQC on the "Reach", "Window Open" and "Drawer Close" environments. Again, we don't use "HER", as it limits the generality of 
 the approach. Apart from 
@@ -382,18 +382,18 @@ converges much quicker and has a more robust bahaviour in general.
 \subsection{Comparison of Dense and Single Observation}
 In this section we compare DOAC and AC, to investigate if DOAC makes use of the additionally provided information. The results are shown in figure \ref{fig:dense_vs_single}.
 We find that in "Reach" and "Drawer Close", DOAC converges quicker. Especially in "Reach", we see a stable improvement from DOAC over AC. In "Drawer Close", the difference is 
-small, which is mainly due to the fact that AC already solves the environment very quickly. Note hoever, that DOAC had worse initial perforance then AC in the shown experiments. 
-As we discussed earlier, the initial perforance comes from the random initialisation and varies greatly. We take the fact that DOAC converged quicker then AC even though it had 
+small, which is mainly due to the fact that AVC already solves the environment very quickly. Note hoever, that DOAC had worse initial perforance then AVC in the shown experiments. 
+As we discussed earlier, the initial perforance comes from the random initialisation and varies greatly. We take the fact that DOAC converged quicker then AVC even though it had 
 worse starting initialisations in the three runs as further evidence, that DOAC makes effective use of the additional information. In the "Window Open" environment, DOAC initially converged slower but 
-reached near pefect performance quicker then AC. We suppose this is due to the different optimisation modes used for the two algorithms. Recall that AC optimizes the whole 
+reached near pefect performance quicker then AC. We suppose this is due to the different optimisation modes used for the two algorithms. Recall that AVC optimizes the whole 
 trajectory at the beginning, while DOAC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
 AC can make larger changes to the trajectory proposed by the actor. In other words, while the actor converges DOAC makes smaller moves towards the critic target then AC. Also out of time constraints, we could 
 not conduct a hyper parameter search for DOAC. It is possible that DOAC would converge quicker, given more optimisation steps per inference step or a higher inference optimisation 
 learning rate $\alpha_{inf}$.\\ 
-AC already performs close to the MDP setup used by DOAC. We propose this is due to the fact, that AC uses the information about the environment 
-from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, AC searches on a preimposed subspace given the "knowledge" of the 
-actor. This means it does not conduct random search even though it does not not get any feedback from the environment. This is probably a key for the good perforance of AC and DOAC and explains 
-the relative close perforance of both algorithms. We expect a major advantage of DOAC over AC in non deterministic environments, as AC sould not be able to solve those from the initial 
+AC already performs close to the MDP setup used by DOAC. We propose this is due to the fact, that AVC uses the information about the environment 
+from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, AVC searches on a preimposed subspace given the "knowledge" of the 
+actor. This means it does not conduct random search even though it does not not get any feedback from the environment. This is probably a key for the good perforance of AVC and DOAC and explains 
+the relative close perforance of both algorithms. We expect a major advantage of DOAC over AVC in non deterministic environments, as AVC sould not be able to solve those from the initial 
 observation alone. DOAC already has a method to disambiguate action sequences given the same observations as discussed in section \ref{avr_action_problem}, which is key, if the same initial 
 observations and actions can lead to different observations at later time steps. However out of time constraints, we leave this research question to future work.\\
 Overall we find that DOAC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewads.
@@ -414,7 +414,7 @@ Overall we find that DOAC works well in the tested environments and outperforms 
     \includegraphics[width=\textwidth]{images/dense_vs_sparse_0/Window Open.png}
     \caption{0 expert demonstrations.}
   \end{subfigure}
-  \caption{Comparison of AC in single observation and DOAC in mdp environments. Each experiment was repeated three times with 50 evaluation episodes per data point.
+  \caption{Comparison of AVC in single observation and DOAC in mdp environments. Each experiment was repeated three times with 50 evaluation episodes per data point.
   }
   \label{fig:dense_vs_single}
 \end{figure}

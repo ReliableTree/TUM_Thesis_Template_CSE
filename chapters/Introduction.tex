@@ -12,9 +12,9 @@ using search on continuous action spaces \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim
 Also currently there are no vast datasets for robot trajectories public, so data availability is limited.\\ 
 In this thesis we develop a new reinforcement learning 
 paradigm called "Active Critic" (AC). It learns relevant dynamics of the world model, conducts search in inference time, and makes efficient use of expert demonstrations. 
-To the authors knowledge, AC is the only algorithm that uses inference time search on continuous action space with no given model of the environment.\\
+To the authors knowledge, AVC is the only algorithm that uses inference time search on continuous action space with no given model of the environment.\\
 To test our algorithm, we choose a setup where a single observation per trajectory is provided along with a sparse reward signal and expert demonstrations for guidance. 
-We also relax this constraint and test AC on an MDP setting with observations after each step.\\
+We also relax this constraint and test AVC on an MDP setting with observations after each step.\\
 
 We find the single observation to be an interesting setting. This setup is interesting, as it is plausible that robots may not have time to perform complex computations 
 on the input signal after each time step, and sparse rewards are typically easy to define in real-world application.\\
