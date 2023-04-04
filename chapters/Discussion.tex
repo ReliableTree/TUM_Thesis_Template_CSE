@@ -21,13 +21,13 @@ Our results demonstrate that our approach can effectively leverage both expert d
 superior performance in the single observation sparse reward POMDP setup.
 
 \subsection{Optimisation Mode}
-In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimization modes employed in the Active Critic algorithm. 
+In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimization modes employed in the active critic algorithm. 
 Our experiments revealed that the optimization mode plays a critical role in determining the reinforcement learning performance. 
 Specifically, we propose leveraging the actor to encode a useful space of candidate solutions that the critic can search on. 
 This approach allows for informed search and leads to faster convergence and more efficient exploration of candidate solutions.
 
 \subsection{MDP Setting}
-In Section \ref{sec:DO_exp}, we evaluated the performance of the "Continued Observation Active Critic" (COAC) approach in the standard MDP setting, 
+In Section \ref{sec:DO_exp}, we evaluated the performance of the continued observation active critic" (COAVC) approach in the standard MDP setting, 
 where observations are available after each step. Our experiments demonstrated that our 
 method significantly outperforms the baselines. Furthermore, we observed that TQC benefits greatly 
 from the MDP setting, as it is more efficient at exploration then PPO. This was a disadvantage in the single observation setting, as with no feedback 

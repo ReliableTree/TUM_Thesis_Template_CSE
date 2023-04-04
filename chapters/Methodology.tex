@@ -2,20 +2,26 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
-In the following chapter, we will first develop the active critic (AC) algorithm defined on single observation POMDPs and then relax 
-the constraint to the MDP setting. To indicate an observation after each step, we will refer to the MDP setting as "continuous observation" 
-and call the AVC algorithm for MDPs "Continuous Observation Active Critic" (COAC).\\
+In the following chapter, we will first develop the active critic (AVC) algorithm defined on single observation POMDPs and then relax 
+the constraint to the MDP setting. To indicate an observation after each step, we will refer to the MDP setting as continued observation 
+and call the AVC algorithm for MDPs continuous observation active critic (COAVC).\\
+
 The active critic architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that AVC is defined on the whole sequence of 
 actions and all available observations, rather then on the current observation and action.\\ 
-Formally, let $o_{1:t}$ be the observations until timestep $t$ and let $a:{1:T}$ be an action sequence, where $a:{1:t}$ are the actions already taken until timestep $t$. 
-We define a whole sequence actor as a model, that takes $o_{1:t}$ as input and returns actions $a:{1:T}: \pi(o_{1:t}) = a_{1:T}$. Similar, we define a whole sequence critic 
-as $C(o_{1:t}, a_{1:T}) = c_{1:T}$, where $c_t$ is the expected immediate reward at timestep $t$. 
+
+Formally, let $o_{1:t}$ be the observations until timestep $t$ and let $a_{1:T}$ be an action sequence, where $a_{1:t}$ are the actions already taken until timestep $t$. 
+We define a whole sequence actor as a model, that takes $o_{1:t}$ as input and returns actions $a_{1:T}: \pi(o_{1:t}) = a_{1:T}$. Similar, we define a whole sequence critic 
+as $C(o_{1:t}, a_{1:T}) = c_{1:T}$, where $c_t$ is the expected immediate reward at timestep $t$. Note, that while typical methods defined on POMDPs take the history until 
+timestep $t$ into account and compute an action for the actual timestep $t$, we compute the whole action sequence for all future timesteps and predict the expected rewards 
+accordingly. This feature is key for efficient planning. We motivate our architectual choices in detail and develop the search algorithm in the following sections.
+
+
 \section{Single Observation POMDP}
 We identify two main challenges in dealing with SOPOMDPs. \\
 The first challenge is the curse of dimensionality from the large preimange of the policy, given it has to ceep track 
 of the past. \\
 The second challenge is unstable update behaviour of actor critic mehtods which comes from update errors by the policy gradient. This problem 
-is specifically pronounced in settings with highly non smooth feedback from the environment like in our case given sparse rewards 
+is specifically pronounced in settings with highly non smooth feedback from the environment, like in our case, given sparse rewards 
 and no further observations.
 \subsection{Curse of Dimensionality}
 \label{COD_AC}
@@ -62,16 +68,19 @@ the transition probability $\mathcal{T}$, the policy $\pi$ and the number of rec
 , where $\mathcal{T}(s_1, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
 With this formulation, we find that the preimage of the policy given deterministic actions can be reduced to:
 $$\pi(a|b_t) = \pi(a|o_1, t): \mathcal{R}^m \times \mathcal{R}^{n} \times \mathcal{R} \rightarrow \mathcal{R}.$$
-We call this a strong inductive belief state bias for the SOPOMDP, as it forces the assumption of a deterministic and constant policy $\pi$. Here we see, 
+We call this a strong inductive belief state bias for the SOPOMDP, as it forces the assumption of a deterministic and constant policy $\pi$, so that the prior action sequence is known. 
+Here we see, 
 why this setup is specifically interesting for planning. Planning ahead fulfills the same constraint, namely that we can plan the actions, but we don't get feedback of the 
 obervations we would receive, if we acted out a planned sequence. \\
+
 In our method, we implement a weak inductive bias, which is motivated by this observation. We use a transformer encoder type architecture, which inputs are 
 the repeated initial observation plus a positional encoding. To generate the action sequence, we use a single pass through the network. While through the attention mechanism, 
 information between timesteps can be exchanged, earlier actions are not part of the input of later actions. 
 We will discuss the architecture in more details in the comming sections. For now, we only want to motivate the single pass through 
 our network to generate an action sequence, rather then generating it autoregressively like recurent methods would.\\ 
+
 Another benfit of computing the whole trajectory in one pass is that the independent and identically distributed (i.i.d.) input data 
-assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution durng infernece time 
+assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution durng inference time 
 then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
 However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the POMDP, which is independent of 
 the policy, thus the i.i.d. assumption holds.\\
@@ -87,24 +96,26 @@ we show that we can eliminate errors in the update step of the actor and critic.
 \label{sec:AC_Critic}
 To train the critic in actor critic mehtods, we can either use on policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
 in the current episode is used for training, or we can use off policy data as in TQC \ref{section:TQC}, where the critic has an overestimation bias. This 
-leads to sub optimal data usage and the reliance on an addtional hyper parameter. We find that in our setup with a single observation, we can use all data 
+leads to sub optimal data usage and the reliance on an addtional hyper parameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
 collected without introducing a bias on the critic. \\
-Recall that the overestimation bias comes from the reliance on the estimation of the $Q$ value for the bootstrapped temporal difference target \ref{eq:overestimation}:
+Recall that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation bias comes from action noise $U(a)$ in the update step of the $Q$ value:
+\begin{equation*}
+    \max_{a}Q(s,a) = \max_{a}\ \mathbb{E}_U \left[Q(s,a) + U(a)\right]
+\end{equation*}
 \begin{equation}
-    \label{eq:TD_Methodology}
-    J_{\theta}(\pi) = \mathbb{E}_{a,a' \propto \pi, s' \propto T(s,a,s')}(r(a,s) + \gamma Q_\theta(a', s') - Q_\theta(a,s))^2
+    \leq \mathbb{E}_U \left[\max_a \{Q(s,a) + U(a)\}\right]
 \end{equation}
-, where the estimator is $Q_\theta(a', s')$. We propose to use a whole sequence critic $C_{\text{whole sequence}}$, which predicts all immediate rewards given a current observation 
+We propose to use a whole sequence critic $C_{\text{whole sequence}}$, which predicts all immediate rewards given a current observation 
 and the planned action sequence for the whole trajectory:
 \begin{equation}
-    C_{\text{whole sequence}}(t, o, a_{1, ..., T}) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right]
+    C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right],
 \end{equation}
-, where $\tau_t$ indicates the sequence until timestep $t$. 
-The objective function is then defined as 
+where $\tau_t$ indicates the sequence until timestep $t$. 
+With $c_t = C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t)$ the objective function is then defined as
 \begin{equation}
-    J_\theta = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right]
+    J = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right].
 \end{equation}
-. This is an unbiased estimate of the expected rewards at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
+This is an unbiased estimate of the expected rewards at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
 over the rewards. Because the 
 first observation is all the information we have during inference time, we find this aproach to be well suited for our setup.\\
 
@@ -258,7 +269,7 @@ This leaves us with the question of how to improve our policy beyond what it can
 a search based method using the critic in inference time. Let $a_{\pi}(o)$ be the actions proposed by the actor and $c(a_{\pi}(o), o)$ be the immediate predicted rewards by the critic. 
 We can now find the gradient of the critic values $c$ by the actions to define new actions: $a_{i+1} = a_i + \nabla_{a}c(a, o)$, as the predicted rewards are a 
 function of the actions. This step is repeated k times, to find new actions using the critic in inference time. This usage of the critic in inference time 
-is the reason, why we call this method "active critic". To be more precise, in our setup we use the critic to predict only the reward of the last state, as we are 
+is the reason, why we call this method active critic. To be more precise, in our setup we use the critic to predict only the reward of the last state, as we are 
 in the sparse reward setting. A generalisation to dense rewards is straight forward. Moreover, we don't use gradient ascent, but gradient descent on 
 $J_{c, a, o} = (c(a, 0) - 1)^2$. This is a natural choice, as we can 
 choose reward 1 for the success cases and reward 0 for the failure cases. In this sence, we aim to optimize the predicted probability, that actions $a$ will lead 
@@ -570,7 +581,7 @@ critic score will be lower.
 \label{sec:relax_dense}
 We now want to relax the constraint that we only use one obervsation per trajectory to the MDP setting. 
 We refer to the typical MDP setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
-Following, we develop an addition to the active critic algorithm we call continued observation active critic (COAC). 
+Following, we develop an addition to the active critic algorithm we call continued observation active critic (COAVC). 
 We will first discuss how a straight forward adaption of AVC will have an unwanted failure mode. Then we will develop an additional loss term and prove the convergence of COAC.\\
 
 So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
