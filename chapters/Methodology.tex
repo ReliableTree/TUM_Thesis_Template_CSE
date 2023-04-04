@@ -63,9 +63,9 @@ If we assume a deterministic policy $\pi(a|b) \rightarrow a_{\pi}(b)$, the updat
 By using this update step recursively until we get to $b_{1}$, we see, that the believe state at time $t$ only depends on the initial observation $o_1$
 the transition probability $\mathcal{T}$, the policy $\pi$ and the number of recursion steps $t$. Using this insight, we can rewrite the belief state at timestep $t$ like:
 \begin{equation}
-    b_{t+1}(s') \propto \mathcal{Z}(s_1, o_{1}) \mathcal{T}(s_1, s', t)_{\pi}
+    b_{t+1}(s') \propto \mathcal{Z}(s_1, o_{1}) \mathcal{T}(s_1, s', t)_{\pi},
 \end{equation}
-, where $\mathcal{T}(s_1, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
+where $\mathcal{T}(s_1, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
 With this formulation, we find that the preimage of the policy given deterministic actions can be reduced to:
 $$\pi(a|b_t) = \pi(a|o_1, t): \mathcal{R}^m \times \mathcal{R}^{n} \times \mathcal{R} \rightarrow \mathcal{R}.$$
 We call this a strong inductive belief state bias for the SOPOMDP, as it forces the assumption of a deterministic and constant policy $\pi$, so that the prior action sequence is known. 
@@ -108,20 +108,20 @@ Recall that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation 
 We propose to use a whole sequence critic $C_{\text{whole sequence}}$, which predicts all immediate rewards given a current observation 
 and the planned action sequence for the whole trajectory:
 \begin{equation}
+    \label{eq:emp_mean_c}
     C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right],
 \end{equation}
 where $\tau_t$ indicates the sequence until timestep $t$. 
-With $c_t = C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t)$ the objective function is then defined as
+With $c_t = C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t)$ the objective function of the critic is defined as:
 \begin{equation}
     J = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right].
 \end{equation}
-This is an unbiased estimate of the expected rewards at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
-over the rewards. Because the 
-first observation is all the information we have during inference time, we find this aproach to be well suited for our setup.\\
+Optimizing $J$ will lead to an unbiased estimate of the expected reward $r_t$ at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
+over the rewards.\\
 
 Next we want to show that the wohle sequence critic can be used to find an optimal policy. 
-To do this, we show the critic learns a proper value equvialent model of the POMDP. Recall the defining property of a proper 
-value equvivalent model $m'$ for a model $m$ is defined in \ref{eq_kthVE} as:
+To do this, we show the critic learns a proper value equvialent model of the POMDP. Recall a proper 
+value equvivalent model $m'$ for a model $m$ is defined in equation \ref{eq_kthVE} as:
 \begin{equation*}
    \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k = \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m}_{\pi}(V)\right)^k
 \end{equation*}
@@ -131,32 +131,34 @@ value equvivalent model $m'$ for a model $m$ is defined in \ref{eq_kthVE} as:
 As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence. Using this, we can compute the value function for 
 any action sequence $a_1, ..., a_T$ induced by a policy $\pi$:
 \begin{equation*}
-    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right].
+    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right]
 \end{equation*}
+$$=\mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
 As it has been shown by Christopher Grimm et. al \cite{grimm2021proper}, a policy that is optimal with respect to a proper value equivalent model $m'$ is optimal 
 in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy.
 
 \subsection{Actor}
 \label{sec:AC_actor}
+In this section, we will assume a deterministic policy $\pi$. We propose the argument can be generalized for stochastic actors, as the gradient computation, on which it relies, 
+is similar afte using the reparameterisation trick. 
+We will leave the formal derivation for future work and focus on the deterministic case of now.\\
+
 All parametrized actor critic mehtods are technically speaking off policy, as the critic value is bootstrapped with estimates sampled from former policies $\pi_{old}$ during the training process. 
 Once the actor is updated, the 
 critic target moved, on which the actor was updated. Intuitively, when the policy is changed to choose a different action at time point $t$, it might also change 
 the policy to choose different actions at 
 all subsequent time points, which changes the value function. \\
 
-We assume this update instability is specifically challenging in our one observation environment, as the policy does not 
-get updates of the state of the environment it is currently in. \\
-Formally, define the objective function $J(\phi, \theta(\phi)) = \mathbb{E}_{\tau \propto \pi(\phi)}\left[Q_{\theta(\phi)}\right]$ for actor critic methods 
-as the function we whish to optimize to learn the optimal policy. While there are other choices, like using the value estimate $V$ instead, the general argument holds.\\
-$Q_{\theta(\phi_i)}$ indicates the $Q$ function for policy $\pi_{\phi_{i}}$ parametrized by parameters 
-$\theta(\phi_i)$. For example, DDPGs policy update rule \ref{AC_general_update} is written as:
+Recall from equation \ref{ac policy update} the policy gradient in actor critic methods is calculated as:
 \begin{equation}
     \nabla_{\phi} J(\phi, Q(\theta(\phi))) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[\nabla_{\phi} \log \pi(a_t|s_t;\phi) Q_{\theta, \pi_\phi}(a_t, s_t) \right].
 \end{equation}
-. Note that generally, we do not have access to $\theta(\phi)$, but only an approximation given the limited data we have collected. Let us denote the actual 
+$Q_{\theta(\phi_i)}$ indicates the $Q$ function for policy $\pi_{\phi_{i}}$ with parameters 
+$\theta(\phi_i)$. 
+Generally, we do not have access to $\theta(\phi)$, but only an approximation given the limited data we have collected. Let us denote the actual 
 $Q$ function we have as $Q(\theta(\phi) + \epsilon)$, where $\epsilon$ indicates an error between the optimal parameters and the actual parameters.
 Let us now for simplicity assume, that $\phi$ and $\theta$ are one dimensional. A generalisation to n dimensions is straight forward. We want 
-to estimate the update error to $\pi$ from the objective $J$. The proper derivative is given by:
+to estimate the update error to $\pi$ from the objective $J$. The proper derivative is approximated by:
 \begin{equation}
     \nabla_{\phi} J(\phi, \theta(\phi)) = \frac{J(\phi + \delta \phi, \theta(\phi + \delta \phi)) - J(\phi, \theta(\phi))}{\delta \phi} + \mathcal{O}(\delta)
 \end{equation}
@@ -164,17 +166,17 @@ with
 \begin{equation}
     J(\phi + \delta \phi, \theta(\phi + \delta \phi)) = J(\phi, \theta(\phi)) + \left[ 
         \frac{\partial J}{\partial \phi} + \frac{\partial J}{\partial \theta} \frac{\partial \theta}{\partial \phi}
-    \right] \delta \phi  + \mathcal{O}(\delta^2)
+    \right] \delta \phi  + \mathcal{O}(\delta^2),
 \end{equation}
-, where we used the chain rule and Taylor's theorem. 
+where we used the chain rule and Taylor's theorem. 
 We can express this in terms of the parametrs $\theta(\phi) + \epsilon$:
 \begin{equation}
     \nabla_{\phi} J(\phi, \theta(\phi)) = \nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \nabla_{\phi} J(\phi, \theta(\phi)) + \nabla_{\phi} J(\phi, \theta(\phi))
 \end{equation}
 \begin{equation*}
-    = \nabla_{\phi} J(\phi, \theta(\phi)) + \epsilon_{\nabla_{\theta}}
+    = \nabla_{\phi} J(\phi, \theta(\phi)) + \epsilon_{\nabla_{\theta}}.
 \end{equation*}
-. Note that $\nabla_{\phi} J(\phi, \theta(\phi) + \epsilon)$ is not a properly defined derivative. To rigorously capture the stochastic dependence of $\theta(\phi)$ 
+Note that $\nabla_{\phi} J(\phi, \theta(\phi) + \epsilon)$ is not a properly defined derivative. To rigorously capture the stochastic dependence of $\theta(\phi)$ 
 given a dataset $\mathcal{D}^n$ with $n$ transitions, 
 we could formulate $\theta(\phi)|\mathcal{D}_n$ as n boundary conditions. Together with a suitable regularizor, we can then find $\theta_{\epsilon, n}(\phi)$. We omit 
 this step, as we are only interested in the fact that there is an error, not the exact value of it.\\

@@ -259,27 +259,27 @@ helping to overcome the initial search problem. We find that all algorithms perf
 access to guidance to find successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms with 
 zero expert demonstrations on the 
 "Drawer Close" environment. We find that random trajectories can already solve the environment with about $20\%$ success rate, so no expert guidance is needed to learn a feasible behaviour.
-The results are shown in subfigure \ref{fig:drawerclose}. The difference in performance at 0 environment interactions comes from random initialisation. As we only had time for three runs per
-experiment, there is some noise in the data. However, all algorithms sample trajectories randomly in the initial training phase. We set the initial random phase to
-1000 steps or 10 trajectories, so all algorithms had access to some successful trajectories with high probability. \\
+The results are shown in subfigure \ref{fig:drawerclose}.\\ 
 
-From the plot, it can be seen that PPO steadily improves performance, which is expected, as on-policy algorithms tend to be more stable.
-TQC learns rapidly in some sections but seems to overshoot and fall back to bad performance frequently.
-We find it to be more dependent on hyperparameters than PPO and RPPO.
-The high variance shown from the baselines in the plot can be explained by the sparse rewards, which provide highly nonlinear feedback.
+Notable, AVC performs significantly better then the baselines at the first datapoint of the plot. This is unexpected, since it indicates 
+random behaviour from randomly initialisation of the policies. In further tests, we found that the initial success rate is either close to one or close to zero for all policies. This is likely 
+due to the fact, that the initial observations for the "Drawer Close" environment are close in $L_2$ distance, thus a random policy will act similar in all environments. We find if that behaviour 
+solves one enviroment, it solves all with high probability. In the three runs of the experiment, AVC was randomly initialized to have a high success rate in two runs, while PPO and TQC had no 
+initial success. We did not have time to repeat the experiment until the initial performance of the algorithms converge. However, in train mode, 
+all algorithms sample trajectories randomly in the initial training phase. 
+We set the initial random phase to 1000 steps or 10 trajectories, so all algorithms had access to some successful trajectories with high probability. While the initialisation was an advantage 
+for our algorithm in these experiment runs, it can still clearly be seen, that our algorithm is more stable and small variance in its perforance compared to the baselines. In a later 
+section, we also conduct an experiment on the "Drawer Close" enviroment with continued observations, as seen in figure \ref{fig:dense_ref}. We will discuss the figure in more detail later, but 
+notice, that in the runs AVC started from $0 \%$ success rate and managed to find a good policy quickly, which we take as further evidence that the results of the "Drawer Close" experiment were not 
+mainly due to luck. The overall high variance in the runs shown from the baselines can be explained by the sparse rewards, which provide highly non-linear feedback. 
 AVC rapidly improved to perfect performance within about 400 steps. \\
 
-Next, we wanted to rule out that the observed performance gain of AVC over the baselines comes mostly from the different underlying neural network architectures. AVC uses transformers for the actor and
-critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU. To do this, we tested the performance of AVC using pure imitation learning shown on the bottom row of
-figure \ref{fig:guided_ref}. We expect the main improvement of behavioural cloning in AVC, TQC and PPO over a recurrent policy comes from the sequence encoding, as proposed in section \ref{COD_AC}.
-We find that the pure imitation learning performance
-of AVC is about the same as behavioural cloning for PPO and TQC. While in the Window Open environment, both PPO and TQC outperformed RPPO, we find that in the Reach environment RPPO performs
-similar to PPO. As only one expert trajectory was provided and we repeated the experiment three times, we find the difference between RPPO, PPO and TQC in the Reach
-environment too small to make conclusions about their relative performance, given the variance from the data. \\
-
-Overall, we take these finding as evidence for the effectiveness of the AVC algorithm. It is highly unlikely that the observed improvement
-over the baselines comes only from the transformer architecture underlying the AVC actor and critic, given the similar behavioural cloning performance. We also find clear improvement of AVC with
-reinforcement learning over AVC with pure imitation learning, which demonstrates the AVC algorithm makes effective use from the additional feedback. 
+Next, we wanted to rule out that the observed performance gain of AVC over the baselines in the environments with expert demonstrations comes mostly from increased perforamce in imitation learning 
+from the different underlying neural network architectures. AVC uses transformer encoders for the actor and 
+critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU.\\ 
+We tested the performance of AVC using pure imitation learning shown on the bottom row of
+figure \ref{fig:guided_ref}. We find AVC significantly benifits from the reinfocement phase over pure imitation learning. \\
+Overall, we take these finding as evidence for the effectiveness of the reinfocement aspect of the AVC algorithm.
 
 \subsection{Comparison of Optimisation Modes}
 \label{ref:com_opt_modes}

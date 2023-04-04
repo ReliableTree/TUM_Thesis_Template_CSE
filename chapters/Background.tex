@@ -422,15 +422,15 @@ rather then after the whole trajectory. This approximation is referred to as a "
 In this section, we will derive an expression to approximate $G_t$ by using an iterative update step with guaranteed convergence.
 Revisiting \ref{nabla_reinforce}: 
 \begin{equation}
-    \label{ac policy update}simular
+    \label{ac policy update}
     \begin{aligned}
         \nabla_{\theta} J(\phi) = \mathbb{E}_{\tau \sim p(\tau | \pi_{\phi})} \left[ \sum_{t=0}^T \nabla_{\phi} \log \pi(a_t|s_t;\phi) \cdot  G_t\right]\\
         = \mathbb{E}_{s_0, a_0, ... ,s_T, a_T \propto \pi} \left[
             \sum_{t=0}^{T}\nabla_{\phi} log \pi_{\phi}(a_t|s_t) \mathbb{E}_{r_t...r_T \propto \pi} \left[ G_t \right]
-        \right]
+        \right],
     \end{aligned}
 \end{equation}
-, where 
+where 
 \begin{equation}
     \begin{align}
         \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
