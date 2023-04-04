@@ -538,7 +538,7 @@ policies in a number of challenging tasks including robot manipulation tasks wit
 
 \subsection{TRPO}
 \label{sec:TQC}
-Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
+Trust Region Policy optimisation \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
 Recall we defined the reinforcement learning objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
@@ -635,9 +635,9 @@ The goal of imitation learning is to learn a policy that performs as well as the
 This approach has been applied successfully in a variety of domains, including robotics \cite{stepputtis2020languageconditioned}, video games \cite{MUZero}, 
 and natural language processing \cite{brown2020language}.
 
-\subsection{Behavioral Cloning}
-Behavioral cloning is a popular technique used in imitation learning. 
-In behavioral cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
+\subsection{Behavioural Cloning}
+Behavioural cloning is a popular technique used in imitation learning. 
+In behavioural cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
 actions predicted by the learned policy. Formally let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
 predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
 
@@ -649,8 +649,8 @@ where $d(\cdot, \cdot)$ is a distance metric, and $\theta$ are the parameters of
 squared error, or the cross-entropy loss.
 
 
-\subsection{Behavioral Cloning for Stochastic Policies}
-Behavioral cloning for stochastic policies is a variant of behavioral cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
+\subsection{Behavioural Cloning for Stochastic Policies}
+Behavioural cloning for stochastic policies is a variant of behavioural cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
 A common choice to achieve this is to minimize the KL divergence between the expert policy and the trained policy.
 
 Formally let 

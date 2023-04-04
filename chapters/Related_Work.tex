@@ -16,8 +16,8 @@ discuss how inference time search is used in current algorithms. Some of the pre
 \section{General Purpose Reinforcement Lerning Algorithms}
 \subsection{PPO}
 \label{section:PPO}
-Schulman, et al. \cite{PPO} introduce "Proximal Policy Optimization" (PPO), which 
-builds upon the ideas of Trust Region Policy optimization (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
+Schulman, et al. \cite{PPO} introduce "Proximal Policy optimisation" (PPO), which 
+builds upon the ideas of Trust Region Policy optimisation (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
 \begin{flalign}
         \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
@@ -77,7 +77,7 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \end{algorithm}
 Overall, PPO is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.\\
 
-A GRU can be used in the recurrent implementation of PPO called Recurrent Proximal Policy Optimization (RPPO) as analyzed by Pleines, et al. 
+A GRU can be used in the recurrent implementation of PPO called Recurrent Proximal Policy Optimisation (RPPO) as analyzed by Pleines, et al. 
 \cite{RPPO}. Here the policy $\pi$ is defined on the history of observations and actions using a recurrent hidden state $h_t : o_{1:t} \times a_{1:t}$ with $\pi : o_{1:t} \times a_{1:t} \rightarrow \mathcal{R}$.
 The adapted loss function from PPO is defined as:
 \begin{equation}

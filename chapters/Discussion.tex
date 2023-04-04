@@ -21,8 +21,8 @@ Our results demonstrate that our approach can effectively leverage both expert d
 superior performance in the single observation sparse reward POMDP setup.
 
 \subsection{Optimisation Mode}
-In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimization modes employed in the active critic algorithm. 
-Our experiments revealed that the optimization mode plays a critical role in determining the reinforcement learning performance. 
+In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimisation modes employed in the active critic algorithm. 
+Our experiments revealed that the optimisation mode plays a critical role in determining the reinforcement learning performance. 
 Specifically, we propose leveraging the actor to encode a useful space of candidate solutions that the critic can search on. 
 This approach allows for informed search and leads to faster convergence and more efficient exploration of candidate solutions.
 
@@ -38,12 +38,12 @@ faster convergence. These findings provide further evidence of the general super
 
 \subsection{Single Observation and MDP Comparison}
 We compared COAVC to AVC in section \ref{sec:comp_dense_sparse} and observed that while COAVC performs better, 
-AC already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
+AVC already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
 expert data. Moreover, the inference of AVC is i.i.d., while that of COAVC is not, as observations at inference time are dependent on actions. 
 
 In conclusion, our experiments demonstrate that the AVC paradigm is highly stable and performs well in settings with sparse rewards. 
 It effectively leverages expert demonstrations for both exploitation and informed search. While COAVC provides improved performance over 
-AC, the latter already achieves high accuracy in solving environments.
+AVC, the latter already achieves high accuracy in solving environments.
 
 \section{Limitations and Drawbacks}
 \subsection{Exploration}
@@ -57,7 +57,7 @@ compared to TQC from no expert data, as COAVC currently lacks a stochastic actor
 be crucial for exploration. Therefore, incorporating these features into the COAVC algorithm is key for future improvements.
 
 \subsection{Indeterminacy}
-In COAC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
+In COAVC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
 However, choosing the action sequence with the highest expected reward is not equivalent to choosing the action with the highest posterior 
 expectation over both the environment dynamics and action sequences, as the optimal action sequence may depend on later observations. To 
 search for the best current action in a non-deterministic MDP requires the estimate of possible observations and action sequences, respectively. 

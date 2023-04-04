@@ -21,7 +21,7 @@ observation constraint, where the agent receives the state of the environment af
 
 The goal of our algorithm is to learn a policy $\pi(a_t|o_{1:t}, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
 some expert trajectories $D_{\text{expert}}$. 
-That is, we seek to solve the following optimization problem:
+That is, we seek to solve the following optimisation problem:
 
 \begin{equation}
 \max_{\pi} \mathbb{E}_{\pi}[r_T]\quad \text{given}\quad D_{\text{expert}}

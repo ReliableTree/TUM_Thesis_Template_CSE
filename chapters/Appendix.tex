@@ -108,7 +108,7 @@ no natural upper bound. For this practical reason, we will make use of $c$ inste
     \label{proto_inf_ler_c}
     \pi_{\text{inv}}^* = \underset{c_{\text{inv}} \in \mathcal{C}}{\text{max}} \left( \min_{\pi \in \Pi} \left(- \text{H}(\pi) + \mathbb{E}_{\pi}[c_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{\text{E}}}[c_{\text{inv}}(s,a)] \right).
 \end{equation}
-The key insight is, that this optimization problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
+The key insight is, that this optimisation problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
 induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the MDP. If two policies visit the same 
 states and choose the same actions, they are similar to each other.\\
 Formally the occupancy measure for states and actions is defined by: 
@@ -131,7 +131,7 @@ It is then shown that a policy is uniquely identified with its occupancy measure
     \pi_{\text{inv}}^* = \min_{\pi \propto \rho_{\pi}} - \bar{\text{H}}(\rho_{\pi})\quad \text{subject to }\quad \rho_{\pi}(s,a) = \rho_{\text{E}}(s,a) \quad \forall s \in \mathcal{S}, \forall a \in \mathcal{A},
 \end{equation}
 where $\bar{\text{H}}$ is the the discounted causal entropy $\text{H}$ defined on occupancy measures of policies, rather then action distributions. In this sense, equation \ref{proto_inf_ler_c} is the dual problem of equation \ref{const_sat_gail}. 
-This optimization is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practice we only have a small sample size, which would mean setting 
+This optimisation is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practice we only have a small sample size, which would mean setting 
 the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intended optimum. Instead, the objective \ref{const_sat_gail} is relaxed:
 \begin{equation}
     \label{dist_opt}
@@ -196,7 +196,7 @@ gradient ascent is used, as we want to maximize the discriminative power of $D$.
     \end{algorithm}
 Tian Xu, et al. proved that if a policy $\pi$ minimizes the $\text{D}_{JS}$ distance 
 between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalization error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
-$V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioral cloning is bound by 
+$V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioural cloning is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$ \cite{NEURIPS2020_b5c01503} . This explains better performance for GAIL in long horizon tasks, which has 
 been empirically demonstrated. Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behaviour with limited expert demonstrations. It shows outstanding 
 asymptotical performance with respect to the amount of expert demonstrations but requires a high number of enviroment interactions to train the discriminator and actor as stated by the authors. 
@@ -209,7 +209,7 @@ corresponding robot actions. The authors also introduce a novel dataset of langu
 their method. The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
 tasks when language instructions are given.\\
 
-In more detail, a policy $\pi(v,I)$ is learned to imitate expert behavior in a set of demonstrations $D = \{d_0,...,d_m\}$, each containing a trajectory 
+In more detail, a policy $\pi(v,I)$ is learned to imitate expert behaviour in a set of demonstrations $D = \{d_0,...,d_m\}$, each containing a trajectory 
 $R \in R^{T \times N}$ over $T$ time steps and with $N$ control variables, an rgb image $I \in \mathcal{R}^{569 \times 320 \times 3}$ of the agent's surroundings, 
 and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language. The proposed method takes the image $I$ and task description $v$ 
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
