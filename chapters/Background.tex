@@ -2,7 +2,7 @@
 
 \chapter{Background}
 \label{chapter:Background}
-In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ to maximize the expectation of an objective function 
+In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ to maximise the expectation of an objective function 
 ${g: X \times Y \to \mathbb{R}}$ using a signal function $g^*$, which is available during train time:
 \begin{equation}
     \label{general_learning_paradigm}
@@ -63,11 +63,11 @@ for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}.
 \section{Reinforcement Learning}
 \label{section:rl}
 
-Reinforcement learning is a learning paradigm where an agent interacts with an environment and learns to take actions that maximize a 
+Reinforcement learning is a learning paradigm where an agent interacts with an environment and learns to take actions that maximise a 
 cumulative reward signal. In this paradigm, the input $x$ is typically the state $s$ of the environment, the output $y$ is the action $a$ taken by the agent, 
 and the the objective function $g$ is a reward signal $r$.
 
-The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximize the expected cumulative reward:
+The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximise the expected cumulative reward:
 
 \begin{equation*}
     \label{rl_objective}
@@ -106,8 +106,8 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \end{itemize}
     \item \textbf{Time horizon:}
     \begin{itemize}
-    \item Infinite horizon: the algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
-    \item Finite horizon: the algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
+    \item Infinite horizon: the algorithm aims to maximise the expected sum of rewards over an infinite time horizon.
+    \item Finite horizon: the algorithm aims to maximise the expected sum of rewards over a fixed time horizon.
     \end{itemize}
     \item \textbf{inference type:}
     \begin{itemize}
@@ -142,7 +142,7 @@ This function specifies the expected immediate reward obtained after taking acti
 parameter that determines the importance of future rewards relative to immediate rewards. It is typically a value between 0 and 1, where 0 means that 
 only immediate rewards are important and 1 means that future rewards are equally important. \\
 
-Importantly, the transition function $T$ satisfies the markov property. The Markov property characterizes stochastic processes where the future state of the 
+Importantly, the transition function $T$ satisfies the Markov property. The Markov property characterizes stochastic processes where the future state of the 
 process depends only on the current state and not on any past states. Formally a stochastic process has the Markov property if, 
 for all time steps $t$, states $s_t$, and actions $a_t$, the following condition holds:
 
@@ -190,7 +190,7 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
 \end{figure}
 
 \section{Policy Gradient}
-There are numerous ways to arrive at a policy that maximizes the reinforcement learning objective as defined in equation 
+There are numerous ways to arrive at a policy that maximises the reinforcement learning objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function.\\ 
 In this thesis we use neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
@@ -202,7 +202,7 @@ J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_
 where  $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$. 
 $T$ can either be finite or infinite. If $T$ is infinite, $\gamma$ must be smaller then 1.
 
-Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
+Our goal is to maximise $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
 \begin{equation}
     \label{nabla_reinforce}
     \begin{aligned}
@@ -220,7 +220,7 @@ This finally gives us the gradient of the approximated expected reward with resp
     \label{reinf_update}
     \theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
 \end{equation}
-where $\alpha$ is the learning rate. This update rule is used in the REINFORCE #TODO citation algorithm depicted in algorithm \ref{fig:REINFORCE}.
+where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm as developed by Sutton et al. \cite{NIPS1999_464d828b} depicted in algorithm \ref{fig:REINFORCE}.
 The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. 
 It continues until convergence.
 
@@ -474,11 +474,11 @@ A proof for the convergence and optimality of this estimator can be found in \ci
 \subsection{Soft Actor Critic}
 \label{SAC}
 Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
-is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
+is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximise the cumulative reward it receives 
 over the course of its interactions with the environment. Also, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of RL algorithms, and different methods aim to find a good compromise between them.
 
-SAC extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximizes a modified 
+SAC extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximises a modified 
 version of the expected cumulative reward that takes into account both the expected reward and the entropy of the policy. The modified objective is given by:
 
 \begin{equation}
@@ -572,7 +572,7 @@ improvement holds:
     \label{eq:pol_impr_TRPO}
     \text{and} \quad  D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}) = \max_s D_{\operatorname{KL}} (\pi(\cdot|s),\tilde{\pi}(\cdot|s)).
 \end{equation}
-Following this insight, the authors propose an algorithm that aims to maximize expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
+Following this insight, the authors propose an algorithm that aims to maximise expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
 We will not explain their algorithm here, as the PPO algorithm builds upon this insight, but is computationally cheaper and has been empirically shown to have 
 similar or better performance then TRPO.
 
@@ -615,7 +615,7 @@ rather than by trial and error \cite{IL}. In this approach, the data distributio
 breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
-Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
+Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximises the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
 
 \begin{equation}
     \pi^* = \underset{\pi}{\text{argmax}}\left[\mathbb{E} [\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]\right]
@@ -650,7 +650,7 @@ squared error, or the cross-entropy loss.
 
 
 \subsection{Behavioural Cloning for Stochastic Policies}
-Behavioural cloning for stochastic policies is a variant of behavioural cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
+Behavioural cloning for stochastic policies is a variant of behavioural cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximise the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
 A common choice to achieve this is to minimize the KL divergence between the expert policy and the trained policy.
 
 Formally let 
@@ -693,7 +693,7 @@ actions under the policy $\pi_{r'}^*$ are optimal:
     r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
 This equation is not convex and there is no unique solutoin for $r_{\text{inv}}$. It can be easily understood by the following example: \\
-Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
+Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximises the expected discounted reward.\\
 There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning, 
 which is developed in the next section.
 

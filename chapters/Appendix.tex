@@ -35,9 +35,9 @@
       \caption{Pick and Place environment.}
       \label{fig:plot4}
     \end{subfigure}
-    \caption{Each learner had access to 15 expert demonstrations. 
-    The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 4 demonstrations. 
-    The x-axis shows the number of sampled environment episodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
+    \caption{All learners were pretrained using behavioural cloning with the given 15 expert demonstrations. 
+    The x-axis shows the number of sampled environment episodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided. 
+    The shaded area indicates the standard deviations from four runs per experiment.}
     \label{fig:4}
 \end{figure}
 
@@ -66,7 +66,7 @@
     \caption{Pick and Place environment.}
     \label{fig:plot4}
   \end{subfigure}
-  \caption{All learners were pretrained using behavioural cloning with the given number of expert demonstrations. 
+  \caption{All learners were pretrained using behavioural cloning with the given 4 expert demonstrations. 
   The x-axis shows the number of sampled environment episodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided. 
   The shaded area indicates the standard deviations from four runs per experiment.}
   \label{fig:4}
@@ -97,7 +97,7 @@ and the discounted causal entropy as defined by Bloem, et al. \cite{InfCausalEnt
 \begin{equation*}
     \mathbb{H}(\pi) = \mathbb{E}_{s_0, a_0} \left(\text{H}_{\pi}(a_{0...\infty}, s_{0,...\infty})\right) = \mathbb{E}_{\pi}\left[\sum_{t=0}^\infty -\gamma^t log \pi(a_t|s_t)\right].
 \end{equation*}
-Here $\pi_{r'}^*$ denotes the expert policy, which indicates the expert policy is assumed to maximize a true 
+Here $\pi_{r'}^*$ denotes the expert policy, which indicates the expert policy is assumed to maximise a true 
 reward function ${r'}$. From now, we will refer to the expert policy as $\pi_{\text{E}}$, as it is more in line with the common choice found in 
 literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for reinforcement learning. In the paper, 
 the authors minimize a cost function $c$, instead of maximzing a reward function $r$. The choice does not make a profound 
@@ -173,7 +173,7 @@ and the discrimnator update rule as:
     \nabla_{\omega} J(\rho_{\pi_{\theta}}, D_{\omega}) = \mathbb{E}_{\tau \propto \pi} [\nabla_w \log(D_w(s,a))] + {E}_{\tau_E} [\nabla_w \log(1 - D_w(s,a))].
 \end{equation}
 Note, because cost $c$ instead of reward $r$ is used in equation \ref{GAIL_update_policy} gradient descent is used, as the cost is minimized and in equation \ref{eq_GAIL_disc} 
-gradient ascent is used, as we want to maximize the discriminative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo}.\\ \\
+gradient ascent is used, as we want to maximise the discriminative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo}.\\ \\
 \begin{algorithm}
     \caption{Generative adversarial imitation learning}
     \label{GAIL_Algo}

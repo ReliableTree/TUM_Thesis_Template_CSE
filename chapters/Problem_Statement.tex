@@ -19,7 +19,7 @@ reward $r_t\in \{0,1\}$, where
 Intuitively, the rewad is $1$ only if a goal state was reached along the trajectory. We also relax the single 
 observation constraint, where the agent receives the state of the environment after each step: $o_t = s_t$, as defined for MDPs. The rest of the setting is equal.\\
 
-The goal of our algorithm is to learn a policy $\pi(a_t|o_{1:t}, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
+The goal of our algorithm is to learn a policy $\pi(a_t|o_{1:t}, a_{0,...,t-1})$ that maximises the expected cumulative reward over a trajectory of length $T$ given 
 some expert trajectories $D_{\text{expert}}$. 
 That is, we seek to solve the following optimisation problem:
 
@@ -46,7 +46,7 @@ and reinforcement learning.\\
 
 A third difficulty with actor critic methods is that the update step of the policy must be carefully tuned. Apart from the general overestimation of the critic, it has a variance in the estimate, 
 as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, PPO ensures limited change of the policy 
-between update steps, making it more robust. The tradeoff is less exploration compared to TQC. To have good exploration 
+between update steps, making it more robust. The trade-off is less exploration compared to TQC. To have good exploration 
 and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
 proposed trajectory of the actor, without changing the actor itself. \\
 

@@ -51,26 +51,35 @@ AVC, the latter already achieves high accuracy in solving environments.
 
 \section{Limitations and Drawbacks}
 \subsection{Baselines}
+We have chosen general-purpose reinforcement learning algorithms for our baselines, because our paradigm is also generally applicable 
+and we wanted to test it in a wide range of experiments, including those with no expert demonstrations.\\ 
 
+However, we think it is interesting to test the specific strength in finetuning against baselines which are 
+tailored for it. In section Guided Reinforcement Learning with Sparse Rewards \ref{sec:rel_work_finetuning} of our related work, we introduced 
+a candidate. While we argued why we expect our algorithm to perform better in cases with provided expert demonstrations than the featured algorithm, we have to 
+leave testing it for future work.\\
 
+Another aspect that we would like to test in more depths is the sparse reward setting. In section \ref{sec:HER}, we have introduced two concepts that are used for sparse reinforcement learning, namely 
+HER and curiosity driven exploration. While HER is not generally applicable, we would like to both test our approach against a baseline using curiosity, as well as incorporate 
+curiosity into our algorithm as an additional reward signal. 
 
 \subsection{Exploration}
 Although COAVC outperformed baselines, its performance in the Pick and Place and Push environments did not reach near-perfect levels, 
 indicating limitations in more challenging environments. While a longer reinforcement phase might improve performance, this was not explored 
-due to time constraints. Additionally, exploration from no expert demonstrations was not extensively studied, except for the Drawer Close 
-environment, as we expected pure reinforcement learning is not feasable for more challenging environments given sparse rewards. 
-However, we found TQC was able to solve the Window Open environment without expert demonstrations, but further investigation on whether 
-COAVC performs well in this environment was not possible due to time constraints. It is expected that COAVC would be less proficient in exploration 
-compared to TQC from no expert data, as COAVC currently lacks a stochastic actor and does not use entropy regularization, which has been shown to 
-be crucial for exploration. Therefore, incorporating these features into the COAVC algorithm is key for future improvements.
+due to time constraints. AVC currently does not use a stochasitc actor, which we expect to be key for improved exploration.\\ 
 
+Additionally, exploration from no expert demonstrations was not extensively studied, except for the Drawer Close 
+environment. We expected pure reinforcement learning is not feasable for more challenging environments given sparse rewards. 
+However, we found TQC was able to solve the Window Open environment without expert demonstrations, but further investigation on whether 
+COAVC performs well in this environment was not possible due to time constraints.\\ 
+
+  
 
 \subsection{Indeterminacy}
 In COAVC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
 However, choosing the action sequence with the highest expected reward is not equivalent to choosing the action with the highest posterior 
-expectation over both the environment dynamics and action sequences, as the optimal action sequence may depend on later observations. To 
-search for the best current action in a non-deterministic MDP requires the estimate of possible observations and action sequences, respectively. 
+expectation over both the environment dynamics and action sequences. In indeterministic environments, the optimal action sequence may depend on later observations. To 
+search for the best current action in an indeterministic MDP requires the estimate of multiple possible observations and action sequences, respectively. \\
+
 In the current version, planning with multiple possible action sequences that can depend on later observations is not possible. 
-Although COAVC can change the action sequence given new observations, in deterministic MDPs, the greedy action sequence with respect to expected 
-reward is the best possible action sequence given a current state and a perfect model of the environment. This is why COAVC performs well in 
-deterministic MDPs such as the Meta-World benchmark used in this study.
+Although COAVC can update the action sequence given new observations, it can not plan for multiple possible future observations.

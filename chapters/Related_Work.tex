@@ -184,7 +184,7 @@ The entropy regularized IRL objective is written as:
 \end{equation}
     
 where $\text{H}(\pi)$ denotes the discounted causal 
-entropy, $c_{\text{inv}}$ denotes the inverse cost function, $\mathcal{C}$ denotes the set of all possible cost functions and $\pi_{\text{E}}$ denotes the expert policy that is assumed to maximize the true cost function.
+entropy, $c_{\text{inv}}$ denotes the inverse cost function, $\mathcal{C}$ denotes the set of all possible cost functions and $\pi_{\text{E}}$ denotes the expert policy that is assumed to maximise the true cost function.
 To find the cost function that fulfills the disambiguation requirement and optimises equation \ref{proto_inf_ler_c}, a discriminator $D$ is learned, that tries to predict, if a transition is 
 sampled from the expert policy or the learned policy.  
 
@@ -200,6 +200,7 @@ Overall, GAIL is a state-of-the-art imitation learning algorithm which is able t
 asymptotical performance with respect to the amount of expert demonstrations, which is why we will use it as a baseline in our experiments.\\ 
 A downside is that it requires a high number of enviroment interactions to train the discriminator and actor, as stated by the authors. A more detailed derivation of the algorithm and theoretical 
 bounds can be found in appendix \ref{app:GAIL}.
+
 
 \subsection{Generative Adversarial Imitation Learning in POMDPs}
 \label{GAIL_POMDPS}
@@ -242,6 +243,7 @@ and compare the performance of our method in pure imitation learning settings.\\
 The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
 tasks when language instructions are given. A more detailed overview of the method, dataset and benachmark can be found in appendix \ref{LCILRM}.\\
 
+
 \section{Sparse Reward}
 \label{sec:HER}
 Learning with sparse rewards is challenging in a high-dimensional action and observation space, as nearly all trajectories will have a reward of 0.
@@ -255,13 +257,26 @@ the reward for the state is $r(s_t|g) = 0$, which does not provide much informat
 To use the information of which state was actually reached by the trajectory, a new goal is constructed $g' = s_t$. Using this, the new reward is $r(s_t|g') = 1$.
 The agent can then learn from these hindsight goals, which can provide more frequent rewards and enable faster learning. An additional advantage of HER is that it is agnostic with respect to the learning algorithm, as it only provides additional trajectories for the replay buffer.
 
-Overall, HER is a powerful algorithm that addresses the problem of sparse rewards in reinforcement learning by leveraging hindsight. It has been successfully applied to a wide range of tasks, including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard reinforcement learning algorithms.
+Overall, HER is a powerful algorithm that addresses the problem of sparse rewards in reinforcement learning by leveraging hindsight. It has been successfully applied to a wide range of tasks, 
+including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard reinforcement learning algorithms.\\
 
 A downside of HER is that it requires the inverse function $g(s)$, meaning from a visited state, the goal must be reconstructable. This is not always given.
-Consider the goal of not driving into a vehicle or a goal expressed in natural language. \\
+Consider the goal of not driving into a vehicle or a goal expressed in natural language. \\ \\
 
+Another approach is to use curiosity for better exploration in sparse reward settings.\\
+
+One common approach similar to Pathak et al \cite{pathak2017curiositydriven} to curiosity-driven exploration is to use an intrinsic reward function, which is designed to 
+measure how surprising or informative a particular 
+state or action is to the agent. \\
+
+By incorporating this intrinsic reward signal into the overall reinforcement learning objective, the agent is encouraged to explore areas of the environment that are 
+unexpected or uncertain, which can lead to discovering new strategies or behaviors that improve its performance. This approach has been shown to be effective in a variety of 
+domains, including robotics, gaming, and natural language processing.\\
+
+This approach is very general and can be added as an addition to classical reinforcement learning.
 
 \subsection{Guided Reinforcement Learning with Sparse Rewards}
+\label{sec:rel_work_finetuning}
 With guided reinforcement learning we refer to expert knowledge that is provided to the algorithm, for example with expert demonstrations.
 Mel Vecerik et al. \cite{vecerik2018leveraging} describe a priority 
 sampling algorithm in combination with deep deterministic policy gradient (DDPG). The probability with which a 
