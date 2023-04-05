@@ -105,7 +105,7 @@ we show that we can eliminate errors in the update step of the actor and critic.
 \label{sec:AC_Critic}
 To train the critic in actor critic mehtods, we can either use on policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
 in the current episode is used for training, or we can use off policy data as in TQC \ref{section:TQC}, where the critic has an overestimation bias. This 
-leads to sub optimal data usage and the reliance on an addtional hyper parameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
+leads to sub optimal data usage and the reliance on an addtional hyperparameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
 collected without introducing a bias on the critic. \\
 Recall that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation bias comes from action noise $U(a)$ in the update step of the $Q$ value:
 \begin{equation*}
@@ -125,7 +125,7 @@ With $c_t = C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t)$ the objective func
 \begin{equation}
     J = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right].
 \end{equation}
-Optimizing $J$ will lead to an unbiased estimate of the expected reward $r_t$ at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
+optimising $J$ will lead to an unbiased estimate of the expected reward $r_t$ at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
 over the rewards.\\
 
 Next we want to show that the wohle sequence critic can be used to find an optimal policy. 
@@ -357,7 +357,7 @@ the gradient with respect to the actor, the planner, the observation and the pla
 to learn useful conserved quantities to reconstruct a video sequence 
 using conservation laws of the underlying physics. While a different problem setup, they also have a high dimensional derivative with respect to a 
 generated output. The authors find, that 
-calculating the gradient with respect to the generator and then regenerating the output performs better, then directly optimizing the output. They hypothesize this 
+calculating the gradient with respect to the generator and then regenerating the output performs better, then directly optimising the output. They hypothesise this 
 may be, because the generator has some knowledge about the action space. Following this insight, we found that updating the weights of the actor and planner 
 with respect to the critic gradient works best. This update rule can be written as:
 \begin{equation*}
@@ -656,7 +656,7 @@ per step is dependent on the number of optimisation steps. If the number is low,
 If the number is high, the computation time per trajectory is too long, as the total number of update steps is $n \times T$, with n updates per step and trajectory length 
 T. This problem did not occure with the AVC algorithm, as the action sequence is only optimized 
 once per trajectory, limiting the additional compute cost. Recall in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
-actions, instead of optimizing the actions directly. We found a good solution is to ceep the states of the actor and planner during inference of a trajectory, 
+actions, instead of optimising the actions directly. We found a good solution is to ceep the states of the actor and planner during inference of a trajectory, 
 instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimisation, as we only want to 
 train it using imitation learning from expert trajectories. With this adaptation, we can use a low number of optimisation steps per time step and still change the trajectory meaningfully, 
 as the update steps on the actor and planner accumulate during inference time.

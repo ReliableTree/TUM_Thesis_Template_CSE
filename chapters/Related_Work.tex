@@ -238,7 +238,7 @@ into account natural language instructions.
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the enviroment.
 The proposed method involves using a neural network to map natural language instructions to 
 corresponding robot actions, using a GRU to unroll the trajectory. The authors also introduce a novel dataset of language-conditioned robot manipulation tasks, which we will use to evaluate 
-and compare the perforance of our method in pure imitation learning settings.\\ 
+and compare the performance of our method in pure imitation learning settings.\\ 
 The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
 tasks when language instructions are given. A more detailed overview of the method, dataset and benachmark can be found in appendix \ref{LCILRM}.\\
 
@@ -296,7 +296,7 @@ domain-specific algorithm. MuZero learns to play games by combining deep neural 
 It does not have access to the game states, but only to observations covering a limited amount of information in a POMDP setting.
 To plan ahead, it predicts the expected rewards $r_{t:T}$ for a proposed action sequence $a_{t:T}$ given a history of obervsations $o_{1:t}$.\\
 For the search, the planner needs access to a model predicting the reward after n steps. To learn this model, the authors use an end to end trained recurrent neural network, which 
-compares it's prediction to the actual rewards from the environment. The prediction and search proves to be crucial for the perforance of MuZero.\\ 
+compares it's prediction to the actual rewards from the environment. The prediction and search proves to be crucial for the performance of MuZero.\\ 
 While MuZero achieves state-of-the-art performance on the challenging ATARI 57 benchmark, it requires discrete actions for the MCTS based algorithm.
 
 \subsection{Continuous Action Space}

@@ -34,7 +34,7 @@ Our algorithm aims to be sample efficient with respect to both expert trajectori
 Currently, GAIL, a state of the art imitation learning algorithm, has good asymptotical performance with repsect to the number of expert trajecotries, but is not sample efficient 
 with respect to enviroment interactions during train time. Moreover, it does not make use of reward signals from the enviroment but only relies on the expert demonstrations.\\ 
 
-An approaches to laverage expert demonstrations by sampling them with higher priority \cite{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyper parameters. 
+An approaches to laverage expert demonstrations by sampling them with higher priority \cite{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyperparameters. 
 An additional problem with mixing expert demonstrations and reinfocement data in actor critic algorithms is, that they induce two different distributions, one from the expert and one from 
 the learner. This leads to overestimation by the critic, further hindering the learning process. \\
 
