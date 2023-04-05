@@ -135,16 +135,32 @@ value equvivalent model $m'$ for a model $m$ is defined in equation \ref{eq_kthV
    \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k = \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m}_{\pi}(V)\right)^k
 \end{equation*}
 \begin{equation}
-    = V_{\pi}.
+    = V^*_{\pi}.
 \end{equation}
-As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence. Using this, we can compute the value function for 
-any action sequence $a_1, ..., a_T$ induced by a policy $\pi$:
+Let $m'$ be the learned model of the critic. As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence: 
+Using this, we can compute the expected commulative reward for 
+any action sequence $a_1, ..., a_T$:
 \begin{equation*}
-    V_{\pi}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right]
+    V_{a_{1:T}}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right]
 \end{equation*}
-$$=\mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
+$$=\mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m'}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
+In a deterministic MDP, the optimal action sequence $a^*_{1:T}$ induced by the optimal policy $\pi^*$ can be computed from the state $s_1$ recursively, as 
+$$\pi^*(s_1) = a_1$$
+$$s_2 = T(s_1, a_1)$$
+$$a_2 = \pi(s_2) ..., $$
+where we abused notation and wrote $s_{t+1} = T(s_t, a_t)$ for the deterministic transition function, where 
+\begin{cases}
+    T(s', a_t, s_t) = 1\quad | s' = s_{t+1}\\
+    T(s', a_t, s_t) = 0, \quad \text{else}.
+\end{cases}\\
+From this we can now write 
+$$V^*_{\pi}(s) = V^*_{a^*_{1:T}}(s)$$
+$$=\mathbb{E}_{a^*_{1:T}, s_{1:T} \propto \pi, m'}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
+
 As it has been shown by Christopher Grimm et. al \cite{grimm2021proper}, a policy that is optimal with respect to a proper value equivalent model $m'$ is optimal 
-in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy.
+in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy in a deterministic MDP. 
+Note, that this also holds for deterministic POMDPs, if we have a sufficient statistic, which is given in our SOPOMDP, as the first observation is 
+the first state $o_1 = s_1$.
 
 \subsection{Actor}
 \label{sec:AC_actor}
