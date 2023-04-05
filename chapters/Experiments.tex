@@ -5,10 +5,12 @@
 The goal of our experimental evaluation is to analyse the performance of our algorithm in the key aspects of 
 imitation learnig, reinforcement learning with expert demonstrations and reinforcement learning without expert demonstrations. \\
 
-First we will compare pure imitation learning of our algorithm in the deterministic single observation POMDP (SOPOMDP) of the 
+We will compare pure imitation learning of our algorithm in the deterministic single observation POMDP (SOPOMDP) of the 
 natural language conditioned robot manipulation task benchmark as described in appendix \ref{LCILRM} using the provided baseline.\\
 
 Then we will use environments from the Meta-World benchmark as described in appendix \ref{chapter:MetaWorld} for both SOPOMDPs and MDPs.\\
+
+We first investigate the effect of different search paradigms in inference time for the AVC algorithm, as described in section Inference Time Search \ref{sec:inf_time_search}.
 
 To compare our results, we use PPO and TQC for the reinforcement learning algorithms, as they are state-of-the-art with respect to stability and 
 exploration respectively. For the base implementations, we use "Stable Baselines3" \ref{stable-baselines3}, which is a common choice, as it provides well-implemented algorithms with tested
@@ -32,10 +34,14 @@ section \ref{COD_AC}.\\
 We also include a standard algorithm for POMDPs, namely RPPO. It does not make use of the strong inductive bias but uses a GRU 
 to encode the belief state, giving it access to previous actions and the initial observation.\\
 
-In summary, we will first investigate AVC on pure imitation learning, then we will test AVC in the deterministic SOPOMDP setting and finally we analyze DOAVC in the MDP setting.
+
+In summary, we will first investigate AVC on pure imitation learning. Then we analyse different inference time search 
+paradigms for reinforcement learning. We will compare AVC with reinforcement learning in the deterministic SOPOMDP setting to our chosen baselines and finally we analyse 
+reinforcement learning of DOAVC in the MDP setting.
 
 
 \section{Imitation Learning}
+\label{sec:exp_imi_lr}
 In this section, we present our findings on the natural language conditioned robot manipulation task benchmark as described in appendix \ref{LCILRM} that was proposed by 
 Simon Stepputtis et al. \cite{stepputtis2020languageconditioned}. The benchmark consists of a 7 dof simulated robot arm with a 
 tabletop setup using CoppeliaSim. The task is to pick 
@@ -156,6 +162,57 @@ behaviour across a wide range of use cases. \\
 In all plots, the first data point is sampled from the policy before any environment interaction. For the plots with behavioural cloning, it indicates learned performance from expert trajectories.
 In plots with no provided expert trajectory, it displays the behaviour following random initialisation.
 
+\subsection{Inference Time Search}
+\label{ref:com_opt_modes}
+In section \ref{sec:inf_time_search} we discussed that we can use different modes of optimisation during inference time to optimize the action sequence. In this section, 
+we showcase the difference between optimising the action sequence directly and optimising the actor and planner weights. We tested the two different 
+modes in the reach environment given a single observation per trajectory. For the direct 
+action optimisation runs we used 20000 sampled episodes to see, if reinforcement learning took place at all, as for the first 2000 episodes no improvement above 
+imitation learning performance is seen. For this reason, we only repeated the experiment twice, as it took a long time to compute. The results are depicted in figure 
+\ref{fig:action_vs_actor}. It is obvious, that the optimisation mode is key to the reinforcement learning performance. \\
+
+In the bottom row of Figure \ref{fig:action_vs_actor}, the original generated trajectories (green) for the four action dimensions 
+are shown alongside the optimized trajectories (orange) obtained using the gradient from the critic. We call the optimisation mode 
+where we apply the gradient directly to the actions "action optimisation mode" and the optimisation mode where we apply 
+the gradient to the actor and planner networks and recalculate the trajectories given the changed networks "actor planner 
+optimisation mode".\\
+
+We hypothesise that 
+the actor planner optimisation mode's much faster convergence rate is due to the actor and planner networks ability to 
+encode an informed representation of the useful trajectory space. This informed representation guides the gradient search 
+given by the critic, leading to more efficient exploration. Subfigure \ref{fig:direct_actions} illustrates the trajectory 
+changes resulting from the action optimisation mode, while Subfigure \ref{fig:ac_pl_actions} displays 
+the trajectory changes resulting from the actor planner optimisation mode. \\
+
+We observe that the actor planner 
+optimisation mode produces a structured search, whereas the direct action optimisation mode's trajectory changes are less structured.\\
+
+Following the insights presented in this section, we will use the actor planner optimisation mode for all experiments.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.65\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/Reach.png}
+      \caption{Reach environment, 1 expert demonstration. Comparison of the action optimisation mode (blue) and actor planner optimisation mode (orange).}
+      \label{fig:plot1}
+    \end{subfigure}
+    \medskip
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/actions_1.png}
+      \caption{Optimized trajectories (orange) and trajectories generated by the actor (green). The gradient from the critic was applied to the actions.}
+      \label{fig:direct_actions}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.45\textwidth}
+      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/plans_actor_0.png}
+      \caption{Optimized trajectories (orange) and trajectories generated by the actor (green). The gradient from the critic was applied to the actor and planner.}
+      \label{fig:ac_pl_actions}
+    \end{subfigure}
+    \caption{Each experiment was repeated twice. The shaded region indicates the standard variation between runs. 
+      The experiments have four action dimensions, which are depicted in the 
+      four plots per figure on the buttom row.}
+    \label{fig:action_vs_actor}
+\end{figure}
 
 \subsection{Fine Tuning}
 \label{sec:fine_tuning}
@@ -194,11 +251,11 @@ decouples the actor from the critic, as discussed in section \ref{inference_time
     \label{fig:plot4}
   \end{subfigure}
   \caption{
-  All learners were pretrained using behavioural cloning with the given number of expert demonstrations. 
-  The x-axis shows the number of sampled environment episodes, each with 100 steps. 
-  One initial observation and, for reinforcement learning, a sparse reward signal at the end of each episode was provided. 
-  The shaded area indicates the standard deviations from four runs per experiment.}
-  \label{fig:finetuning}
+    All baselines were pretrained using behavioural cloning with the given number of expert demonstrations. 
+    The x-axis shows the number of sampled environment episodes, each with 100 steps. 
+    One initial observation and, for reinforcement learning, a sparse reward signal at the end of each episode was provided. 
+    The shaded area indicates the standard deviations from four runs per experiment.}
+    \label{fig:finetuning}
 \end{figure}
 
 We present our findings in figure \ref{fig:finetuning}. 
@@ -263,7 +320,7 @@ are shown in figure \ref{fig:guided_ref}.\\
       \caption{Window Open environment. Comparison between pure imitation learning and reinforcement learning.}
     \end{subfigure}
     \caption{
-    All learners were pretrained using behavioural cloning with the given number of expert demonstrations, where demonstrations were provided. 
+    All baselines were pretrained using behavioural cloning with the given number of expert demonstrations, where demonstrations were provided. 
     The x-axis shows the number of sampled environment episodes, each with 100 steps. On the bottom row, 
     the x-axis displays equal amount of compute for the pure imitation learning experiment and the reinforcement learning experiment. 
     One initial observation and, for reinforcement learning, a sparse reward signal at the end of each episode was provided. 
@@ -304,104 +361,23 @@ mainly due to luck. The overall high variance in the runs shown from the baselin
 AVC rapidly improved to perfect performance within about 400 steps. \\
 
 \subsubsection{Neural Network Architecture}
-Next, we wanted to rule out that the observed performance gain of AVC over the baselines comes mostly from increased perforamce in imitation learning 
+Next, we wanted to rule out that the observed performance gain of AVC over the baselines comes mostly from increased performance in imitation learning 
 from the different underlying neural network architectures. AVC uses transformer encoders for the actor and 
 critic, while the TQC and PPO implementations use MLPs and the RPPO implementation uses a GRU.\\ 
 We tested the performance of AVC using pure imitation learning shown on the bottom row of
-figure \ref{fig:guided_ref}. We find AVC significantly benefits from the reinforcement phase over pure imitation learning. \\
-Overall, we take these finding as evidence for the effectiveness of the reinforcement aspect of the AVC algorithm.
+figure \ref{fig:guided_ref}. We find AVC has similar imitation learning performance to behavioural cloning for our baselines with strong inductive bias. However, it significantly benefits from the reinforcement phase.\\
 
-\subsection{Comparison of Optimisation Modes}
-\label{ref:com_opt_modes}
-In section \ref{sec:inf_time_search} we discussed that we can use different modes of optimisation during inference time to optimize the action sequemce. In this section, 
-we showcase the difference between optimising the action sequence directly and optimising the actor and planner weights. We tested the two different 
-modes in the reach environment with the same setup as in section \ref{sec:g_ref_ler}, thus we used the same data for the actor planner optimisation runs. For the direct 
-action optimisation runs we used 20000 sampled episodes to see, if reinforcement learning took place at all, as for the first 2000 episodes no improvement above 
-imitation learning performance is seen. For this reason, we only repeated the experiment twice, as it took a long time to compute. The results are depicted in figure 
-\ref{fig:action_vs_actor}. It is obvious, that the optimisation mode is key to the reinforcement learning performance. \\
+Overall, we take these finding as evidence for the effectiveness of the reinforcement learning aspect of the AVC algorithm.
 
-In the bottom row of Figure \ref{fig:action_vs_actor}, the original generated trajectories (green) for the four action dimensions 
-are shown alongside the optimized trajectories (orange) obtained using the gradient from the critic. We call the optimisation mode 
-where we apply the gradient directly to the actions "action optimisation mode" and the optimisation mode where we apply 
-the gradient to the actor and planner networks and recalculate the trajectories given the changed networks "actor planner 
-optimisation mode".\\
 
-We hypothesise that 
-the actor planner optimisation mode's much faster convergence rate is due to the actor and planner networks ability to 
-encode an informed representation of the useful trajectory space. This informed representation guides the gradient search 
-given by the critic, leading to more efficient exploration. Subfigure \ref{fig:direct_actions} illustrates the trajectory 
-changes resulting from the action optimisation mode, while Subfigure \ref{fig:ac_pl_actions} displays 
-the trajectory changes resulting from the actor planner optimisation mode. \\
 
-We observe that the actor planner 
-optimisation mode produces a structured search, whereas the direct action optimisation mode's trajectory changes are less structured.\\
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[t]{0.65\textwidth}
-      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/Reach.png}
-      \caption{Reach environment. Shown is the difference in learning efficiency of the active critic algorithm using two different optimisation modes.}
-      \label{fig:plot1}
-    \end{subfigure}
-    \medskip
-    \begin{subfigure}[t]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/actions_1.png}
-      \caption{Optimized trajectories (orange) and trajectories generated by the actor (green). The gradient from the critic was applied to the actions.}
-      \label{fig:direct_actions}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.45\textwidth}
-      \includegraphics[width=\textwidth]{images/Plan_vs_Actions/changes/plans_actor_0.png}
-      \caption{Optimized trajectories (orange) and trajectories generated by the actor (green). The gradient from the critic was applied to the actor and planner.}
-      \label{fig:ac_pl_actions}
-    \end{subfigure}
-    \caption{Comparison of two different optimisation modi. The experiments have four action dimensions, which are depicted in the 
-    four plots per figure on the buttom row.}
-    \label{fig:action_vs_actor}
-\end{figure}
-
-\subsection{Dense Observations}
+\subsection{Continued Observations}
+\label{sec_exp_con_obs}
 In this section we test the relaxation of the AVC algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
-and compare continued observation active critic (DOAVC) to PPO and TQC on the Reach, Window Open and Drawer Close environments. Again, we don't use "HER", as it limits the generality of 
-the approach. Apart from 
+and compare continued observation active critic (DOAVC) to PPO and TQC on the Reach, Window Open and Drawer Close environments. Apart from 
 providing an observation per time step,
 we use the same setup as described in previous sections. The results are shown in figure \ref{fig:dense_ref} for three runs per experiment.\\ 
-
-First, we note that both baseline algorithms exhibit similar performance in behavioural cloning as in the single 
-observation setup. This is unsurprising as behavioural cloning does not rely on interactions with the environment. \\
-
-After the first data point, both algorithms sharply drop to near zero success rate, which displays that catastrophic forgetting is more 
-pronounced than in the single observation enviroment. We explain this with the distribution shift after training starts. A policy trained by imitation learning 
-will induce a different distribution of observations then the expert data. This breaks the i.i.d. assumption. In the single observation case for PPO and TQC, this assumption was not broken, 
-since the inputs for the whole trajectory are computed from the first observation. The distribution of the first observations is a constant of the enviroment.\\
-
-PPO did not find solutions to the Reach and Window Open environments, 
-but we find TQC got about $20 \%$ success rate on Reach and achieved about $80 \%$ success rate on Window Open leveling out after about 2500 episodes. 
-The superior performance of TQC over PPO is expected, as TQC tends to perform better in environments where exploration is important. As TQC now gets 
-feedback from it's actions on the environment, the better exploration is an advantage over PPO.\\ 
-
-In particular, as TQCs performance drops to about $0 \%$ for the Window Open 
-environment after the first data point, we wanted to analyze, if TQC uses the guidance from the expert at all, or if it starts from 
-no usable knowledge about the environment. To do this, we also conducted the experiment three times with no initial behavioural cloning. The results are shown in 
-subfigure \ref{fig:TQC_0_vs_exp}. We observe that TQC can solve the environment within 5000 steps from no expert demonstrations in one case, but does not find a good policy in the other two. 
-We propose pretraining from behavioural cloning is a useful bias for the algorithm to find feasable solutions quicker with higher probability.\\ 
-
-Following this insight, 
-we also conducted the Window Open experiment in MDP setting with GAIL to make better use of the provided expert demonstration. We find our initial 
-baseline with pretrained TQC performs best. This is probably due to the fact that GAIL makes no use of the sparse reward. Additionaly, 
-the authors mentioned in the paper, that GAIL is not more efficient in terms of environment interactions then TRPO with rewards. A large number of 
-environment interactions are needed, before the discriminator of GAIL provides useful rewards for the learner. We suppose that is a reason, why GAIL does not perform 
-well in our setting, where relatively small amount of environment interactions are used. \\
-
-We also included results for the Drawer Close environment with no expert demonstrations. All algorithms perform better than in the single observation environment, 
-but DOAVC is the only algorithm with stable performance. It found a solution with near perfect success rate in all three runs quickly. \\
-
-Overall, DOAVC performs well in all shown environments. Especially in the Reach environment it is the only algorithm that finds a feasable solution while it 
-converges much quicker and has a more robust bahaviour in general. 
-
-
-
 
 \begin{figure}[htbp]
   \centering
@@ -425,37 +401,55 @@ converges much quicker and has a more robust bahaviour in general.
     \caption{Comparison between TQC with no expert demonstrations and expert guided baselines.}
     \label{fig:TQC_0_vs_exp}
   \end{subfigure}
-  \caption{Comparison between DOAVC and various baselines given one or no expert demonstrations. The environment state was provided after each step.
-  Each experiment was repeated three times with 50 evaluation episodes per data point.}
-  \label{fig:dense_ref}
+  \caption{All baselines were pretrained using behavioural cloning with the given number of expert demonstrations. 
+    The x-axis shows the number of sampled environment episodes, each with 100 steps. 
+    Continued observations and a sparse reward signal at the end of each episode was provided. 
+    The shaded area indicates the standard deviations from three runs per experiment.}
+    \label{fig:dense_ref}
 \end{figure}
 
+First, we note that both baseline algorithms exhibit similar performance in behavioural cloning as in the single 
+observation setup. This is unsurprising as behavioural cloning does not rely on interactions with the environment. \\
+
+After the first data point, both algorithms sharply drop to near zero success rate, which displays that catastrophic forgetting is more 
+pronounced than in the single observation enviroment. We explain this with the distribution shift after training starts. A policy trained by imitation learning 
+will induce a different distribution of observations then the expert data. This breaks the i.i.d. assumption for observations in addition to the changed distribution of rewards. 
+In the single observation case for PPO and TQC, this assumption was not broken for the observations, 
+since all observations are computed from the first observation. The distribution of the first observations is a constant of the enviroment.\\
+
+PPO did not find solutions to the Reach and Window Open environments, 
+but we find TQC got about $20 \%$ success rate on Reach and achieved about $80 \%$ success rate on Window Open leveling out after about 2500 episodes. 
+The superior performance of TQC over PPO is expected, as TQC tends to perform better in environments where exploration is important. As TQC now gets 
+feedback from it's actions on the environment, the better exploration is an advantage over PPO.\\ 
+
+In particular, as TQCs performance drops to about $0 \%$ for the Window Open 
+environment after the first data point, we wanted to analyze, if TQC uses the guidance from the expert at all, or if it starts from 
+no usable knowledge about the environment. To do this, we also conducted the experiment three times with no initial behavioural cloning. The results are shown in 
+subfigure \ref{fig:TQC_0_vs_exp}. We observe that TQC can solve the environment within 5000 steps from no expert demonstrations in one case, but does not find a good policy in the other two. 
+We propose pretraining from behavioural cloning is a useful bias for the algorithm to find feasable solutions quicker with higher probability.\\ 
+
+Following this insight, 
+we also conducted the Window Open experiment in MDP setting with GAIL to make better use of the provided expert demonstration. We find our initial 
+baseline with pretrained TQC performs best. This is probably due to the fact that GAIL makes no use of the sparse reward. Additionaly, 
+the authors mentioned in the paper, that GAIL is not more efficient in terms of environment interactions then TRPO with rewards. A large number of 
+environment interactions are needed, before the discriminator of GAIL provides useful rewards for the learner. We suppose that is a reason, why GAIL does not perform 
+well in our setting, where a relatively small amount of environment interactions are used. \\
+
+We also included results for the Drawer Close environment with no expert demonstrations. All algorithms perform better than in the single observation environment, 
+but DOAVC is the only algorithm with stable performance. It found a solution with near perfect success rate in all three runs quickly. \\
+
+Overall, DOAVC performs well in all shown environments. Especially in the Reach environment it is the only algorithm that finds a feasable solution while it 
+converges much quicker and has a more robust bahaviour in general. 
+
+
+
+
+
+
 \subsection{Comparison of Continued and Single Observation}
+\label{sec:com_coavc_avc}
 In this section we compare DOAVC and AVC, to investigate if DOAVC makes use of the additionally provided information from the continued observations. 
 The results are shown in figure \ref{fig:dense_vs_single}.\\
-
-We observe that in Reach and Drawer Close, DOAVC converges quicker. Especially in Reach, we see a stable improvement from DOAVC over AC. In Drawer Close, the difference is 
-small, which is mainly due to the fact that AVC already solves the environment very quickly. Note however, that DOAVC had worse initial performance then AVC in the shown experiments. 
-As previously discussed, the initial performance is determined by random initialisation of the networks and can exhibit substantial 
-variance.\\ 
-
-The observation that DOAVC achieved convergence at a faster rate than AVC, despite starting with inferior initializations in 
-all three runs, provides additional support for the proposition that DOAVC makes effective use of the continued observations. \\
-
-In the Window Open environment, DOAVC initially converged slower but 
-reached near perfect performance quicker then AC. We suppose this is due to the different optimisation modes used for the two algorithms. Recall that AVC optimizes the whole 
-trajectory at the beginning, while DOAVC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
-AVC can make larger changes to the trajectory proposed by the actor. In other words, DOAVC makes smaller moves towards the critic target than AC. Also out of time constraints, we could 
-not conduct a hyperparameter search for DOAVC. It is possible that DOAVC would converge quicker, given more optimisation steps per inference step or a higher inference optimisation 
-learning rate $\alpha_{inf}$.\\ 
-
-AVC already performs close to the MDP setup used by DOAVC. We propose this is due to the fact, that AVC uses the information about the environment 
-from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, AVC searches on a prestructured subspace given the "knowledge" of the 
-actor. This means it does not conduct random search even though it does not get any feedback from the environment. This is probably a key for the good performance of AVC and DOAVC and explains 
-the relative close performance of both algorithms. We expect a major advantage of DOAVC over AVC in non-deterministic environments, as AVC will not be able to solve those from the initial 
-observation alone. DOAVC already has a method to disambiguate action sequences given the same observations as discussed in section \ref{avr_action_problem}. This is key, if the same initial 
-observations and actions can lead to different observations at later time steps. However out of time constraints, we leave this research question to future work.\\
-Overall, we find that DOAVC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewards.
 
 \begin{figure}[htbp]
   \centering
@@ -477,3 +471,23 @@ Overall, we find that DOAVC works well in the tested environments and outperform
   }
   \label{fig:dense_vs_single}
 \end{figure}
+
+We observe that in Reach and Drawer Close, DOAVC converges quicker. Especially in Reach, we see a stable improvement from DOAVC over AC. In Drawer Close, the difference is 
+small, which is mainly due to the fact that AVC already solves the environment very quickly. Note however, that DOAVC had worse initial performance then AVC in the shown experiments. 
+As previously discussed, the initial performance is determined by random initialisation of the networks and can exhibit substantial 
+variance.\\ 
+
+The observation that DOAVC achieved convergence at a faster rate than AVC, despite starting with inferior initializations in 
+all three runs, provides additional support for the proposition that DOAVC makes effective use of the continued observations. \\
+
+In the Window Open environment, DOAVC initially converged slower but 
+reached near perfect performance quicker then AC. We suppose this is due to the different optimisation modes used for the two algorithms. Recall that AVC optimises the whole 
+trajectory at the beginning, while DOAVC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
+AVC can make larger changes to the trajectory proposed by the actor. In other words, DOAVC makes smaller moves towards the critic target than AC. Also out of time constraints, we could 
+not conduct a hyperparameter search for DOAVC. It is possible that DOAVC would converge quicker, given more optimisation steps per inference step or a higher inference optimisation 
+learning rate $\alpha_{inf}$.\\ 
+
+AVCs performance is close to DOAVC. We propose this is due to the fact, that AVC uses the information about the environment 
+from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, AVC searches on a prestructured subspace given the "knowledge" of the 
+actor. This means it does not conduct random search even though it does not get any feedback from the environment. This is probably a key for the good performance of AVC and DOAVC and explains 
+the relative close performance of both algorithms. Overall, we find that DOAVC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewards.
