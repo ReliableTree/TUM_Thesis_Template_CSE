@@ -13,7 +13,7 @@ for planning in continuous space. \\
 We explored the effectiveness of reinforcement learning in improving the performance of our approach as compared to pure imitation learning. 
 We demonstrate that our algorithm can effectively utilize data from reinforcement learning, as evidenced by our results presented in 
 Section \ref{sec:fine_tuning}.\\
-To further assess the impact of reinforcement learning, we conducted experiments on the "Drawer Close" environment without expert demonstrations. 
+To further assess the impact of reinforcement learning, we conducted experiments on the Drawer Close environment without expert demonstrations. 
 In this environement, a solution can be achieved through random trajectories to some degree. 
 Our analysis revealed that our algorithm outperformed the baselines significantly in this pure reinforcement setting, 
 indicating that our approach is more stable with sparse rewards than traditional actor critic methods.\\
@@ -32,7 +32,7 @@ where observations are available after each step. Our experiments demonstrated t
 method significantly outperforms the baselines. Furthermore, we observed that TQC benefits greatly 
 from the MDP setting, as it is more efficient at exploration then PPO. This was a disadvantage in the single observation setting, as with no feedback 
 from the environement a less predictable behaviour of an algorithm makes the estimate of the current state of the environment less accurate.\\
-To evaluate the performance of pure reinforcement learning in MDPs, we conducted experiments on the "Drawer Close" 
+To evaluate the performance of pure reinforcement learning in MDPs, we conducted experiments on the Drawer Close 
 environments without expert demonstrations. Our results show that all baselines and COAVC can find solutions, but COAVC is more stable and achieves 
 faster convergence. These findings provide further evidence of the general superior performance of our approach over the baselines. 
 
@@ -47,11 +47,11 @@ AVC, the latter already achieves high accuracy in solving environments.
 
 \section{Limitations and Drawbacks}
 \subsection{Exploration}
-Although COAVC outperformed baselines, its performance in the "Pick and Place" and "Push" environments did not reach near-perfect levels, 
+Although COAVC outperformed baselines, its performance in the Pick and Place and Push environments did not reach near-perfect levels, 
 indicating limitations in more challenging environments. While a longer reinforcement phase might improve performance, this was not explored 
-due to time constraints. Additionally, exploration from no expert demonstrations was not extensively studied, except for the "Drawer Close" 
+due to time constraints. Additionally, exploration from no expert demonstrations was not extensively studied, except for the Drawer Close 
 environment, as we expected pure reinforcement learning is not feasable for more challenging environments given sparse rewards. 
-However, we found TQC was able to solve the "Window Open" environment without expert demonstrations, but further investigation on whether 
+However, we found TQC was able to solve the Window Open environment without expert demonstrations, but further investigation on whether 
 COAVC performs well in this environment was not possible due to time constraints. It is expected that COAVC would be less proficient in exploration 
 compared to TQC from no expert data, as COAVC currently lacks a stochastic actor and does not use entropy regularization, which has been shown to 
 be crucial for exploration. Therefore, incorporating these features into the COAVC algorithm is key for future improvements.

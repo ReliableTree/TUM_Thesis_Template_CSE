@@ -5,7 +5,7 @@
 %\inputminted{c++}{../../src/wos_native.cuh}
 
 \chapter{Meta World}
-\label{chapter:MetaWorld}\label{appendix}
+\label{chapter:MetaWorld}
 
 \chapter{Additional Plots}
 \label{chapter:additional_plots}
@@ -66,9 +66,9 @@
     \caption{Pick and Place environment.}
     \label{fig:plot4}
   \end{subfigure}
-  \caption{Each learner had access to 4 expert demonstrations. 
-  The learner trained by GAIL and RPPO were pretrained using behavioural cloning given the 4 demonstrations. 
-  The x-axis shows the number of sampled environment episodes, each with 100 steps. One initial observation and a sparse reward signal at the end of each episode was provided.}
+  \caption{All learners were pretrained using behavioural cloning with the given number of expert demonstrations. 
+  The x-axis shows the number of sampled environment episodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided. 
+  The shaded area indicates the standard deviations from four runs per experiment.}
   \label{fig:4}
 \end{figure}
 
@@ -203,45 +203,48 @@ asymptotical performance with respect to the amount of expert demonstrations but
 
 \chapter{Language-Conditioned Imitation Learning for Robot Manipulation Tasks}
 \label{LCILRM}
-Simon Stepputtis, et al. \cite{stepputtis2020languageconditioned} propose a method for robot manipulation tasks that takes 
-into account natural language instructions. The proposed method involves using a neural network to map natural language instructions to 
-corresponding robot actions. The authors also introduce a novel dataset of language-conditioned robot manipulation tasks, which they use to evaluate 
-their method. The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
-tasks when language instructions are given.\\
+Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} propose a benchmark for natural language conditioned robot manipulation tasks. \\
+The benchmark consists of a 7 dof simulated robot arm with a 
+tabletop setup using CoppeliaSim, which allows for accurate dynamics simulations at an update rate of 20 Hz. 
+An imitation learning dataset consisting of 44 100 tasks is provieded, where 4000 tasks are used for 
+evaluation and 100 tasks are used for testing.\\
+
+The task consists of picking up objects and pouring their content into other objects. A sentense in natural language describes the task and the object. 
+For example "Pick up the red cup". Additionally, an rgb image of the scene is provided. An overview over 
+all possible objects and an example task can be found in figure \ref{lang_imi_expl}. 
+There is only one observation per trajectory, so the setting is the single observation POMDP.  \\
+
+
+Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} also propose a method to solve the benchmark. 
+The proposed method involves using a neural network to map natural language instructions to 
+corresponding robot actions. The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
+tasks when language instructions are given. \\
 
 In more detail, a policy $\pi(v,I)$ is learned to imitate expert behaviour in a set of demonstrations $D = \{d_0,...,d_m\}$, each containing a trajectory 
 $R \in R^{T \times N}$ over $T$ time steps and with $N$ control variables, an rgb image $I \in \mathcal{R}^{569 \times 320 \times 3}$ of the agent's surroundings, 
 and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language. The proposed method takes the image $I$ and task description $v$ 
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
-which is subsequently used in the control model to generate robot actions at each time in a closed-loop 
-fashion. A schematic overview can be seen in figure \ref{language_imitation}. \\
-
-Crucially, there is only one observation per trajectory, so we have a POMDP, where we only know the state of the system at time point $t=1$. In this paper, the 
-algorithm uses a GRU to ceep track of the former history of the POMDP, similar to the approach described in \ref{POMDP_RNN}. In addition to the hidden state, 
-the task embedding $e$ is used in every timestep, as we know, that the task does not change. \\
+which is subsequently used in the control model to generate robot actions at each timestep in a closed-loop 
+fashion using a GRU to ceep track of the former history. In addition to the hidden state of the GRU, 
+the task embedding $e$ is used in every timestep, as we know, that the task does not change. A schematic overview can be seen in figure \ref{language_imitation}. \\
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/Language_Conditioned/System.pdf}
     \caption{Overview of the general system architecture. (Left) Details of the controller model, which
-    synthesizes robot control signals . (Right) details of the semantic model, which extracts critical
+    synthesises robot control signals . (Right) details of the semantic model, which extracts critical
     information about the task from both perceptual input and language commands. Dark-blue boxes
     indicate pre-trained components of the model. The figure is taken from \cite{stepputtis2020languageconditioned}.}
     \label{language_imitation}
 \end{figure}
 
-The learned behaviour consists of picking up objects and pouring their content into other objects. First, a sentense in natural language describes the object, which 
-the agent should pick up. For example "Pick up the red cup". This command in combination with the rgb image of the scene is used to generate the trajectory to 
-pick up the cup. Then an object is described, into which the robot should pour the content. For example "Pour some of it into the blue bowl". An overview over 
-all possible objects and the described example can be found in figure \ref{lang_imi_expl}. The dataset consists of 45 000 tasks, where 4000 tasks are used for 
-evaluation and 1000 tasks are used for testing. The authors find that their model can perform $98 \%$ of pick tasks, $85 \%$ of pour tasks and $84 \%$ combined 
-tasks, which greatly outperforms a baseline using an end to end RNN model with $58\%$ success rate for picking and $0 \%$ success rate for pouring. In this thesis, we 
-will use this setup to test and compare pure imitation learning performance of our approach.
+The authors find that their model can perform $98 \%$ of pick tasks, $85 \%$ of pour tasks and $84 \%$ combined 
+tasks, which greatly outperforms a baseline using an end to end RNN model with $58\%$ success rate for picking and $0 \%$ success rate for pouring.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.4\textwidth]{images/Language_Conditioned/simulator.pdf}
-    \caption{Overview of a task. (top) - All possible objects and colors. (left) Example trajectory to "pick up the red cup" following the natural language description. 
-    (right) Example trajectory to "pour some of it into the blue bowl". Figure taken from \cite{stepputtis2020languageconditioned}.}
+    \caption{Overview of a task. (top) All possible objects and colors. (left) Example trajectory to "pick up the red cup" following the natural language description. 
+    (right) Example trajectory to "pour some of it into the blue bowl". The figure is taken from \cite{stepputtis2020languageconditioned}.}
     \label{lang_imi_expl}
 \end{figure}
