@@ -299,7 +299,7 @@ With this setup, our algorithm is truly on policy, while being able to use all d
 The actor is model free, while the critic is weakly grounded model based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
 but our architecture enables search on continuous action space, which is not possible in MuZero. 
 
-\subsection{Average Actions Problem}
+\section{Average Actions Problem}
 \label{avr_action_problem}
 In our lower bound for the policy improvement, we have assumed we can find a policy that sets the KL divergence to the expert policy to zero. Our imitation loss is given by the $L_2$ distance to the 
 observed data. This means it will converge to the mean of the trajectories in the dataset, given observation $s$. This will only set the KL divergence to 0, if the actions are chosen deterministically, 
@@ -373,7 +373,7 @@ paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
 
 \end{figure}
 
-\subsection{Inference Time Search}
+\section{Inference Time Search}
 \label{sec:inf_time_search}
 In the derivation of the AVC algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
 the gradient with respect to the actor, the planner, the observation and the plan. Alet et al. \cite{alet2021noether} propose a method that aims 
