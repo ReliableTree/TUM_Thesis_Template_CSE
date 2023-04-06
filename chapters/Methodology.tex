@@ -644,6 +644,9 @@ To counter this, we propose the loss $J_{pred, C}$ defined as:
     \label{proxy_loss_dense}
     J_{pred, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\text{train data}}}\left[ \sum_{i=1}^T(C_{{a^t}}^t(i) - C_{{a^t}}^{t+1}(i))^2 \right].
 \end{equation}
+Following we will motivate how this loss can solve the problem. A rigorous proof 
+is left for future work.\\
+
 Intuitively, we demand that the critic expects the same rewards at time step $t$ and $t+1$, given action sequence $a^t$. When this loss is minimised, always taking the actions sequence ${a^t}^*$ maximising the estimated sum of 
 rewads $C_{{a^t}^*}^t(i)$, 
 the expected values $C^t$ will converge to the actual rewards recieved $r$. This is because minimizing loss \ref{proxy_loss_dense} ensures, that the expected 
