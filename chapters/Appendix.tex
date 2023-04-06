@@ -161,7 +161,7 @@ parameter $\lambda$, the GAIL objective can be written as:
 \begin{equation}
     J(\rho_{\pi_{\theta}}, D_{\omega}) = - \lambda  \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right],
 \end{equation}
-where $\omega$ and $\theta$ denote the parametrization of the discriminator $D$ and the policy $\pi$. Identifying the discounted reward as $Q = \mathbb{E}_{\pi}(r_t) = \mathbb{E}_{\pi}\left[-\text{log}(D_{\omega}(s,a))\right]$ and unsing the policy 
+where $\omega$ and $\theta$ denote the parametrization of the discriminator $D$ and the policy $\pi$. Identifying the discounted reward as $Q = \mathbb{E}_{\pi}(r_t) = \mathbb{E}_{\pi}\left[-\text{log}(D_{\omega}(s,a))\right]$ and using the policy 
 gradient theorem, we get the policy update rule:
 \begin{equation}
     \label{GAIL_update_policy}
@@ -199,7 +199,7 @@ between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalizatio
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioural cloning is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$ \cite{NEURIPS2020_b5c01503} . This explains better performance for GAIL in long horizon tasks, which has 
 been empirically demonstrated. Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behaviour with limited expert demonstrations. It shows outstanding 
-asymptotical performance with respect to the amount of expert demonstrations but requires a high number of enviroment interactions to train the discriminator and actor as stated by the authors. 
+asymptotical performance with respect to the amount of expert demonstrations but requires a high number of environment interactions to train the discriminator and actor as stated by the authors. 
 
 \chapter{Language-Conditioned Imitation Learning for Robot Manipulation Tasks}
 \label{LCILRM}

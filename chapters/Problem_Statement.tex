@@ -29,10 +29,10 @@ That is, we seek to solve the following optimisation problem:
 
 where the expectation is taken over trajectories of length $T$ induced by the policy\\ $\pi(a_t|o_1, a_1, ..., a_{t-1})$.\\
 
-Our algorithm aims to be sample efficient with respect to both expert trajectories and enviroment interactions. \\
+Our algorithm aims to be sample efficient with respect to both expert trajectories and environment interactions. \\
 
 Currently, GAIL, a state of the art imitation learning algorithm, has good asymptotical performance with repsect to the number of expert trajecotries, but is not sample efficient 
-with respect to enviroment interactions during train time. Moreover, it does not make use of reward signals from the enviroment but only relies on the expert demonstrations.\\ 
+with respect to environment interactions during train time. Moreover, it does not make use of reward signals from the environment but only relies on the expert demonstrations.\\ 
 
 An approaches to laverage expert demonstrations by sampling them with higher priority \cite{vecerik2018leveraging} has limited convergence rate towards expert behaviour and is dependent on additional hyperparameters. 
 An additional problem with mixing expert demonstrations and reinforcement data in actor critic algorithms is, that they induce two different distributions, one from the expert and one from 
@@ -50,11 +50,11 @@ between update steps, making it more robust. The trade-off is less exploration c
 and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
 proposed trajectory of the actor, without changing the actor itself. \\
 
-While there are approaches using search in inference time, they either require discrete action spaces \cite{MUZero} or a given differentiable model of the enviroment \cite{Lee_Jeon_Kim_Kim_2020}. 
+While there are approaches using search in inference time, they either require discrete action spaces \cite{MUZero} or a given differentiable model of the environment \cite{Lee_Jeon_Kim_Kim_2020}. 
 In our approach we 
 don't make the assumption that such a model is provided, as in real world robotic applications, this is typically not the case.\\
 
-We are interested in investigating the effectiveness of our search paradigm, which requires a learned weakly grounded model of the enviroment. We first develop the approach 
+We are interested in investigating the effectiveness of our search paradigm, which requires a learned weakly grounded model of the environment. We first develop the approach 
 for single observation environments, 
-as they don't provide additional information during the trajectory is rolled out, making the prediction of the whole enviroment dynamics crucial. We will then relax the constraint to the typcial 
+as they don't provide additional information during the trajectory is rolled out, making the prediction of the whole environment dynamics crucial. We will then relax the constraint to the typcial 
 MDP setting.

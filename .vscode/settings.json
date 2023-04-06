@@ -2,11 +2,16 @@
     "cSpell.words": [
         "approximator",
         "COAVC",
+        "DDPG",
         "hyperparameters",
         "POMDP",
         "POMDPs",
+        "pretrained",
+        "pretraining",
+        "SOPOMDP",
         "SOPOMDPs",
         "timestep",
-        "timesteps"
+        "timesteps",
+        "TRPO"
     ]
 }

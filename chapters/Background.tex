@@ -87,7 +87,7 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \item \textbf{Model type:}
     \begin{itemize}
     \item Model based: the algorithm explicitly models the dynamics of the environment.
-    \item Model free: the algorithm learns a policy without explicitly modeling the environment.
+    \item Model free: the algorithm learns a policy without explicitly modelling the environment.
     \end{itemize}
     \item \textbf{Action/Observation space:}
     \begin{itemize}
@@ -296,7 +296,7 @@ The state value function satisfies the Bellman equation, which expresses the rel
 where $\mathcal{A}$ is the set of possible actions, $\mathcal{S}$ is the set of possible states, $p(s' \mid s,a)$ is the transition probability 
 from state $s$ to state $s'$ under action $a$, $r(s,a)$ is the reward received in state $s$ with action $a$, and $\gamma \in [0,1]$ is the discount factor. 
 This formulation assumes a discrete action space,
-however it can be adapted for continuous cases by changeing the summation with an integral over the probability density function.
+however it can be adapted for continuous cases by changing the summation with an integral over the probability density function.
 
 \subsubsection{State Action Value Function}
 
@@ -439,7 +439,7 @@ where
     \end{align}
 \end{equation}
 
-Plugging in the defintion of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
+Plugging in the definition of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
 \begin{equation}
 q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
 \end{equation}
@@ -538,7 +538,7 @@ policies in a number of challenging tasks including robot manipulation tasks wit
 
 \subsection{TRPO}
 \label{sec:TRPO}
-Trust Region Policy optimisation \cite{TRPO} aims to find a policy update step with a provabal lower bound on value improvement.\\ 
+Trust Region Policy optimisation \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
 Recall we defined the reinforcement learning objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
@@ -580,7 +580,7 @@ similar or better performance then TRPO.
 \label{sec:mod_based_ref}
 In model based reinforcement learning the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
-$a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
+$a_{1, ..., T}$ to optimise the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
 expectation is build with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
 $J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu, et al. \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
 model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
@@ -693,7 +693,7 @@ actions under the policy $\pi_{r'}^*$ are optimal:
 \begin{equation}
     r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
-This equation is not convex and there is no unique solutoin for $r_{\text{inv}}$. It can be easily understood by the following example: \\
+This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: \\
 Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximises the expected discounted reward.\\
 There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning, 
 which is developed in the next section.
@@ -796,7 +796,7 @@ discrete probability distribution for a two-class classifier on n dimensions wit
     p(C=i|x_1, ..., x_n)  = \theta_{i,j} | i \in \{0, 1\}, j \in \{0, ..., 2^n\}.
 \end{equation}
 There are $2^n$ possible values for $x_1, ..., x_n$ and two values for the class label. This gives a total of $2*(2^n-1)$ cases, where the $-1$ comes from using 
-the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empiciral distribution 
+the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empirical distribution 
 with $\sigma_{\theta_{i,j}} \propto \frac{1}{N}$ and thus the standard deviation scales with $\frac{1}{\sqrt{N}}$, where N is the number of samples 
 for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon$, you get
 \begin{equation}
@@ -825,12 +825,12 @@ In summary, evidence for a model is approximately inverse proportional to the ex
 Sequence models are a natural choice to model POMDPs. 
 A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
 a sequence model could take as input a sequence of n observations and return one action. \\ 
-Naively, the input sequence of n tokens with dimension d could be modeled by stacking the n inputs together and use the stacked observation sequence as one 
+Naively, the input sequence of n tokens with dimension d could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
 input to a model. The dimension of the input then scales linear with the sequence length. As motivated in section \ref{COD}, this means exponentially more evidence is 
 required with sequence length n to achieve the same confidence. These approaches are referred to as frame stacking and can solve a POMDPs as shown by Raffin 
 \cite{framestacking}, though 
 their performance decreases with the number of frames needed to accurately represent the POMDP. \\
-Frame stacking handels the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
+Frame stacking handles the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
 structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
 sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically 
 by Sundermeyer, et al. \cite{6639310}.\\
@@ -924,7 +924,7 @@ While GRUs still can have vanishing gradients, they cannot have exploding gradie
 
 \subsection{Attention Based Sequence Models}
 
-While RNNs are a popular choice for sequence modeling, they have some limitations such as difficulties in capturing long-term dependencies and parallelization.
+While RNNs are a popular choice for sequence modelling, they have some limitations such as difficulties in capturing long-term dependencies and parallelization.
 Attention based sequence models, on the other hand, allow parallel processing of the input sequence and can selectively focus on relevant parts of the 
 input sequence. \\
 
