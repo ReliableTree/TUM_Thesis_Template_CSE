@@ -22,19 +22,19 @@ Similar, we define a whole sequence critic as:
 \end{equation}
 where $c_t$ is the expected immediate reward at timestep $t$. Note, that while typical methods defined on POMDPs take the history until 
 timestep $t$ into account and compute an action for the actual timestep $t$, we compute the whole action sequence for all future timesteps and predict the expected rewards 
-accordingly. This feature is key for efficient planning. We motivate our architectual choices in detail and develop the search algorithm in the following sections.
+accordingly. This feature is key for efficient planning. We motivate our architectural choices in detail and develop the search algorithm in the following sections.
 
 
 \section{Single Observation POMDP}
 We identify two main challenges in dealing with SOPOMDPs. \\
-The first challenge is the curse of dimensionality from the large preimange of the policy, given it has to ceep track 
+The first challenge is the curse of dimensionality from the large preimage of the policy, given it has to keep track 
 of the past. \\
-The second challenge is unstable update behaviour of actor critic mehtods which comes from update errors by the policy gradient. This problem 
+The second challenge is unstable update behaviour of actor critic methods which comes from update errors by the policy gradient. This problem 
 is specifically pronounced in settings with highly non smooth feedback from the environment, like in our case, given sparse rewards 
 and no further observations.
 \subsection{Curse of Dimensionality}
 \label{COD_AC}
-As introduces in \ref{COD}, the evidence for a model scales approximately inversly proportinal to the exponent of the dimension on which it acts. In MDPs, the 
+As introduces in \ref{COD}, the evidence for a model scales approximately inversely proportional to the exponent of the dimension on which it acts. In MDPs, the 
 actor $\pi$ acts on the observation space and returns an action from the action space. A probabalistic actor defines a probability distribution on the set 
 of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. This also holds for 
 deterministic actors with integer probabilities $\pi(a|s) \in \{0,1\}$.
@@ -94,18 +94,22 @@ then during train time, which generally does not hold for imitation learning, as
 However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the POMDP, which is independent of 
 the policy, thus the i.i.d. assumption holds.\\
 
-\section{Update Error}
+\section{Approximation Error}
 \label{inference_time_planning}
 As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. Xu et al. \cite{NEURIPS2020_b5c01503} 
 have shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
-However, we identify that this challange also grants us a unique improvement over previous actor critic methods. By predicting whole sequences of actions at once, 
-we show that we can eliminate errors in the update step of the actor and critic.\\
+However, we identify that this challenge also grants us a unique improvement over previous actor critic methods.\\ 
+
+By considering sequences of whole trajectories at once instead of single actions 
+at timestep $t$, 
+we show that we get an unbiased approximation of the reward from the critic and can eliminate errors in the update step of the actor. First, we develop the objective function of the critic and 
+show that it can be used to find optimal actions, then we develop the objective function of the actor and show that we prevent errors in the update step of conventional actor critic methods.\\
 
 \subsection{Critic}
 \label{sec:AC_Critic}
-To train the critic in actor critic mehtods, we can either use on policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
+To train the critic in actor critic methods, we can either use on policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
 in the current episode is used for training, or we can use off policy data as in TQC \ref{section:TQC}, where the critic has an overestimation bias. This 
-leads to sub optimal data usage and the reliance on an addtional hyperparameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
+leads to sub optimal data usage and the reliance on an additional hyperparameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
 collected without introducing a bias on the critic. \\
 Recall that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation bias comes from action noise $U(a)$ in the update step of the $Q$ value:
 \begin{equation*}
@@ -114,61 +118,54 @@ Recall that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation 
 \begin{equation}
     \leq \mathbb{E}_U \left[\max_a \{Q(s,a) + U(a)\}\right]
 \end{equation}
-We propose to use a whole sequence critic $C_{\text{whole sequence}}$, which predicts all immediate rewards given a current observation 
+We propose to use a whole sequence critic $C$, which predicts all immediate rewards given a current observation 
 and the planned action sequence for the whole trajectory:
 \begin{equation}
     \label{eq:emp_mean_c}
-    C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right],
+    C_{s_1, a_{1:T}}(t) = \mathbb{E}_{s_t \propto \tau_{s_1, a_{1:T}}}\left[r(a_t, s_t)\right],
 \end{equation}
-where $\tau_t$ indicates the sequence until timestep $t$. 
-With $c_t = C_{\text{whole sequence}}(o_1, a_{1, ..., T})(t)$ the objective function of the critic is defined as:
+where $\tau_{s_1, a_{1:T}}$ indicates the sequence 
+$$\tau_{s_1, a_{1:T}} = p(s_2, ..., s_T|s_1, a_{1:T}) = p(s_2|s_1, a_1) p(s_3|s_2,a_2)...$$
+ until timestep $T$. 
+We define the objective function of the critic as:
 \begin{equation}
-    J = \mathbb{E}_{o, a_{1, ..., t}, r_{1, ..., t}}\left[\sum_t(c_t - r_t)^2\right].
+    J_C = \mathbb{E}_{s_t \propto \tau_{s_1, a_{1:T}}}\left[(C_{s_1, a_{1:T}}(t) - r_t)^2\right].
 \end{equation}
-optimising $J$ will lead to an unbiased estimate of the expected reward $r_t$ at time step t following trajectory $a_{1, ..., t}$ and observation $o$, as it is simply the empiciral distribution 
-over the rewards.\\
+It is a standard result that the minimum of $J_C$ can be found at $C_{s_1, a_{1:T}}(t) = \mathbb{E}_{s_t \propto \tau_{s_1, a_{1:T}}}\left[r(s_t, a_t)\right]$. 
+With limited sample size $\mathcal{D}$, this value is approximated with the empirical distribution $C_{s_1, a_{1:T}}(t) = \mathbb{E}_{s_t \propto \tau_{s_1, a_{1:T}} \in \mathcal{D}}\left[r(s_t, a_t)\right]$, 
+which is an unbiased estimate.\\
 
-Next we want to show that the wohle sequence critic can be used to find an optimal policy. 
-To do this, we show the critic learns a proper value equvialent model of the POMDP. Recall a proper 
-value equvivalent model $m'$ for a model $m$ is defined in equation \ref{eq_kthVE} as:
-\begin{equation*}
-   \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k = \lim_{k \rightarrow \infty} \left(\mathcal{T}^{m}_{\pi}(V)\right)^k
-\end{equation*}
-\begin{equation}
-    = V^*_{\pi}.
-\end{equation}
-Let $m'$ be the learned model of the critic. As we have argued above, the critic learns an unbiased estimate of the rewards $r_t$ given an action sequence: 
-Using this, we can compute the expected commulative reward for 
-any action sequence $a_1, ..., a_T$:
-\begin{equation*}
-    V_{a_{1:T}}(s) = \mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_1 = s\right]
-\end{equation*}
-$$=\mathbb{E}_{a_{1:T}, s_{1:T} \propto \pi, m'}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
-In a deterministic MDP, the optimal action sequence $a^*_{1:T}$ induced by the optimal policy $\pi^*$ can be computed from the state $s_1$ recursively, as 
+\subsubsection{Optimality}
+We want to show that the whole sequence critic can be used to find an optimal action sequence in a deterministic MDP, with a deterministic transition function $T_{\text{det}}$.\\
+Let $\pi^*$ be an optimal policy. We will use without a proof, that in a dMDP, $\pi^*$ can also deterministic.\\
+With $T_{\text{det}}$ the next state is determined by the current state and the action, so we get:
 $$\pi^*(s_1) = a_1$$
-$$s_2 = T(s_1, a_1)$$
+$$s_2 = T_{\text{det}}(s_1, a_1)$$
 $$a_2 = \pi(s_2) ..., $$
-where we abused notation and wrote $s_{t+1} = T(s_t, a_t)$ for the deterministic transition function, where 
+where we abused notation and wrote $s_{t+1} = T_{\text{det}}(s_t, a_t)$ for the deterministic transition function, where 
 \begin{cases}
-    T(s', a_t, s_t) = 1\quad | s' = s_{t+1}\\
-    T(s', a_t, s_t) = 0, \quad \text{else}.
+    T_{\text{det}}(s', a_t, s_t) = 1\quad | s' = s_{t+1}\\
+    T_{\text{det}}(s', a_t, s_t) = 0, \quad \text{else}.
 \end{cases}\\
-From this we can now write 
-$$V^*_{\pi}(s) = V^*_{a^*_{1:T}}(s)$$
-$$=\mathbb{E}_{a^*_{1:T}, s_{1:T} \propto \pi, m'}\left[\sum_{t=0}^{\infty} \gamma^t c_t \mid s_1 = s\right].$$
 
-As it has been shown by Christopher Grimm et. al \cite{grimm2021proper}, a policy that is optimal with respect to a proper value equivalent model $m'$ is optimal 
-in the actual POMDP with model $m$. We conclude, that our whole sequence critic is suited to learn an optimal policy in a deterministic MDP. 
-Note, that this also holds for deterministic POMDPs, if we have a sufficient statistic, which is given in our SOPOMDP, as the first observation is 
-the first state $o_1 = s_1$.
+We can now uniquely identify $a^*_{1:T} \propto \pi^*(s)$ as 
+$$a^*_{1:T}(s) = \{a_1 = \pi^*(s) , a_2 = \pi^*(s_2|s_1,a_1), ... \},$$
+where we only need $s$. \\
+We can now write 
+$$V_{\pi^*}(s) = V_{a^*_{1:T}(s)}(s)$$
+$$=\mathbb{E}_{s_t \propto \tau_{s, a^*_{1:T}}}\left[\sum_{t=1}^T \gamma^t r(a_t, s_t)\right]$$
+$$=\sum_{t=1}^T \gamma^t C_{s, a^*_{1:T}}(t),$$
+where we used that the expectation commutes with summation. As $V_{\pi^*}(s)$ is the maximal value function, we conclude 
+$$a^*_{1:T} = \max_{a_{1:T}}\gamma^t C_{s, a_{1:T}}(t),$$
+since $C$ is an unbiased estimator of $r$. From this we conclude that finding the optimal action sequence with respect to the critic $C$ ensures the optimal 
+cumulative reward of any policy. Following section \ref{sec:prop_val_eq}, we find for deterministic MDP, $C$ learns a proper value equivalent model $m'$ of the MDP model $m$.
 
 \subsection{Actor}
 \label{sec:AC_actor}
-In this section, we will assume a deterministic policy $\pi$. We propose the argument can be generalized for stochastic actors, as the gradient computation, on which it relies, 
-is similar afte using the reparameterisation trick. 
-We will leave the formal derivation for future work and focus on the deterministic case of now.\\
+In this section, we will assume a deterministic policy $\pi$. We propose the following argument can be generalized for stochastic actors but 
+leave the formal derivation for future work and focus on the deterministic case of now.\\
 
-All parametrized actor critic mehtods are technically speaking off policy, as the critic value is bootstrapped with estimates sampled from former policies $\pi_{old}$ during the training process. 
+All parametrized actor critic methods are technically speaking off policy, as the critic value is bootstrapped with estimates sampled from former policies $\pi_{old}$ during the training process. 
 Once the actor is updated, the 
 critic target moved, on which the actor was updated. Intuitively, when the policy is changed to choose a different action at time point $t$, it might also change 
 the policy to choose different actions at 
@@ -238,7 +235,7 @@ sequence of actions $a_{1:T}$ as:
     C(s, a_{1,...,T})(t) = \mathbb{E}_{s_t \propto \tau_t}\left[r(a_t, s_t)\right],
 \end{equation}
 where $\tau_t(s, a_{1:T}) =  \Pi_{s=1}^t p(s_t+1|s_t, a_t)$ indicates the probability of the trajectory until timestep $t$. \\
-We can now see that, as there is no dependency of $C$ on $\pi$, which shows the distribution shift error \ref{eq:def_di_sh_err} is zero. 
+We can now see the distribution shift error \ref{eq:def_di_sh_err} is zero, as there is no dependency of $C$ on $\pi$. 
 
 \subsubsection{Function Approximation Error}
 \label{func_app_error}
@@ -513,7 +510,7 @@ a specific expert, for example a human, but rather we mean generally an action s
 addtional successful trajectories to the expert dataset. \\
 
 
-Now we want to derive the update step of the wohle sequence actor as motivated in the section "Actor" \ref{sec:AC_actor}.
+Now we want to derive the update step of the whole sequence actor as motivated in the section "Actor" \ref{sec:AC_actor}.
 To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_a_{\zeta} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
 We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$ as described in equation \ref{eq:seq_emb}. We can now compute the actions as:
 \begin{equation*}
@@ -672,7 +669,7 @@ per step is dependent on the number of optimisation steps. If the number is low,
 If the number is high, the computation time per trajectory is too long, as the total number of update steps is $n \times T$, with n updates per step and trajectory length 
 T. This problem did not occure with the AVC algorithm, as the action sequence is only optimized 
 once per trajectory, limiting the additional compute cost. Recall in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
-actions, instead of optimising the actions directly. We found a good solution is to ceep the states of the actor and planner during inference of a trajectory, 
+actions, instead of optimising the actions directly. We found a good solution is to keep the states of the actor and planner during inference of a trajectory, 
 instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimisation, as we only want to 
 train it using imitation learning from expert trajectories. With this adaptation, we can use a low number of optimisation steps per time step and still change the trajectory meaningfully, 
 as the update steps on the actor and planner accumulate during inference time.

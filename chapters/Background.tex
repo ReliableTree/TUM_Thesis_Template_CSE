@@ -592,12 +592,13 @@ Considering these findings, it is obvious that most successful applications of t
 the action space is discrete, to make the task of learning the model easier.
 
 \subsection{Proper Value Equivalence}
+\label{sec:prop_val_eq}
 So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model based learning. However this is not strictly the case. Recall we are 
 interested in optimising the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
 of our environment at each timestep, but only in the rewards $r_t$. \\
 This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
 let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the MDP and let 
-$\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equvialent to $m$, 
+$\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equivalent to $m$, 
 if $k$ applications of the Bellman operator result in the same updated value function: 
 \begin{equation}
     \label{eq_kthVE}
@@ -605,7 +606,7 @@ if $k$ applications of the Bellman operator result in the same updated value fun
 \end{equation}
 It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall the value function is 
 defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
-equvivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model.\\ 
+equivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model.\\ 
 From this work we conclude that solving the 
 reinforcement learning problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual MDP with model $m$. 
 

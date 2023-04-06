@@ -299,7 +299,7 @@ implementation using no expert demonstration but dense reward. The authors find 
 demonstrations on a challenging robotic insertion task.\\ 
 A problem with this approach is, that the critic assumes the demporal difference error approximates the distribution induced by the policy $\pi_{\theta}$, but by 
 mixing in expert demonstrations, the expected $Q$ value will be higher, then that of the policy $\pi_{\theta}$. This overestimation can lead to poor performance. 
-To counter this, the authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversly proportional to the 
+To counter this, the authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversely proportional to the 
 probability of choosing a transition and thus counter acts the improvement rate towards expert behaviour. 
 
 \section{Search in Inference Time}

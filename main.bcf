@@ -2236,24 +2236,23 @@
     <bcf:citekey order="52">Lee_Jeon_Kim_Kim_2020</bcf:citekey>
     <bcf:citekey order="53">NEURIPS2020_b5c01503</bcf:citekey>
     <bcf:citekey order="54">thrun1993issues</bcf:citekey>
-    <bcf:citekey order="55">grimm2021proper</bcf:citekey>
-    <bcf:citekey order="56">haarnoja2018soft</bcf:citekey>
-    <bcf:citekey order="57">alet2021noether</bcf:citekey>
-    <bcf:citekey order="58">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="59">gawlikowski2022survey</bcf:citekey>
-    <bcf:citekey order="59">liu2022simple</bcf:citekey>
-    <bcf:citekey order="60">pathak2017curiositydriven</bcf:citekey>
-    <bcf:citekey order="61">ho2016generative</bcf:citekey>
+    <bcf:citekey order="55">haarnoja2018soft</bcf:citekey>
+    <bcf:citekey order="56">alet2021noether</bcf:citekey>
+    <bcf:citekey order="57">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="58">gawlikowski2022survey</bcf:citekey>
+    <bcf:citekey order="58">liu2022simple</bcf:citekey>
+    <bcf:citekey order="59">pathak2017curiositydriven</bcf:citekey>
+    <bcf:citekey order="60">ho2016generative</bcf:citekey>
+    <bcf:citekey order="61">10.5555/3104322.3104481</bcf:citekey>
     <bcf:citekey order="62">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="63">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="64">InfCausalEnt</bcf:citekey>
-    <bcf:citekey order="65">NEURIPS2020_b5c01503</bcf:citekey>
+    <bcf:citekey order="63">InfCausalEnt</bcf:citekey>
+    <bcf:citekey order="64">NEURIPS2020_b5c01503</bcf:citekey>
+    <bcf:citekey order="65">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="66">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="67">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="68">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="69">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="70">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="71">stepputtis2020languageconditioned</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

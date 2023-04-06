@@ -225,7 +225,7 @@ $R \in R^{T \times N}$ over $T$ time steps and with $N$ control variables, an rg
 and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language. The proposed method takes the image $I$ and task description $v$ 
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
 which is subsequently used in the control model to generate robot actions at each timestep in a closed-loop 
-fashion using a GRU to ceep track of the former history. In addition to the hidden state of the GRU, 
+fashion using a GRU to keep track of the former history. In addition to the hidden state of the GRU, 
 the task embedding $e$ is used in every timestep, as we know, that the task does not change. A schematic overview can be seen in figure \ref{language_imitation}. \\
 
 \begin{figure}[htbp]
