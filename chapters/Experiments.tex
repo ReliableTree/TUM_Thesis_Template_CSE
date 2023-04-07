@@ -37,7 +37,7 @@ to encode the belief state, giving it access to previous actions and the initial
 
 In summary, we will first investigate \ac{avc} on pure imitation learning. Then we analyse different inference time search 
 paradigms for reinforcement learning. We will compare \ac{avc} with \ac{rl} in the deterministic SOPOMDP setting to our chosen baselines and finally we analyse 
-\ac{rl} of COAVC in the MDP setting.
+\ac{rl} of COAVC in the \ac{mdp} setting.
 
 
 \section{Imitation Learning}
@@ -134,7 +134,7 @@ policy as in our inference method, the i.i.d. assumption holds.
 In this section, we will explore the performance of the \ac{avc} algorithm given a single observation per trajectory, one sparse reward, and some expert demonstrations.
 We motivated the practical relevance in the introduction. An additional advantage for testing the effectiveness of the search paradigm is that planning is most efficient in
 single observation settings.
-We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the MDP has a quadratic error bound, we don't get any updated information
+We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the \ac{mdp} has a quadratic error bound, we don't get any updated information
 during the trajectory, and thus no better estimate is possible then the prediction at timestep $1$. \\
 
 We chose environments from the Meta-World benchmark as described in appendix \ref{chapter:MetaWorld}. \\
@@ -372,7 +372,7 @@ Overall, we take these finding as evidence for the effectiveness of the \ac{rl} 
 
 \section{Reinforcement Learning from Sparse Rewards in Continued Observation Environments}
 \label{sec_exp_con_obs}
-In this section we test the relaxation of the \ac{avc} algorithm to MDP environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
+In this section we test the relaxation of the \ac{avc} algorithm to \ac{mdp} environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
 and compare continued observation active critic (DOAVC) to PPO and TQC on the Reach, Window Open and Drawer Close environments. Apart from 
 providing an observation per time step,
@@ -428,7 +428,7 @@ subfigure \ref{fig:TQC_0_vs_exp}. We observe that TQC can solve the environment 
 We propose pretraining from behavioural cloning is a useful bias for the algorithm to find feasible solutions quicker with higher probability.\\ 
 
 Following this insight, 
-we also conducted the Window Open experiment in MDP setting with GAIL to make better use of the provided expert demonstration. We find our initial 
+we also conducted the Window Open experiment in \ac{mdp} setting with GAIL to make better use of the provided expert demonstration. We find our initial 
 baseline with pretrained TQC performs best. This is probably due to the fact that GAIL makes no use of the sparse reward. Additionally, 
 the authors mentioned in the paper, that GAIL is not more efficient in terms of environment interactions then TRPO with rewards. A large number of 
 environment interactions are needed, before the discriminator of GAIL provides useful rewards for the learner. We suppose that is a reason, why GAIL does not perform 
@@ -466,7 +466,7 @@ The results are shown in figure \ref{fig:dense_vs_single}.\\
     \includegraphics[width=\textwidth]{images/dense_vs_sparse_0/Window Open.png}
     \caption{0 expert demonstrations.}
   \end{subfigure}
-  \caption{Comparison of \ac{avc} in single observation and DOAVC in continued observation MDP environments. Each experiment was repeated three times with 30 evaluation episodes per data point.
+  \caption{Comparison of \ac{avc} in single observation and DOAVC in continued observation \ac{mdp} environments. Each experiment was repeated three times with 30 evaluation episodes per data point.
   }
   \label{fig:dense_vs_single}
 \end{figure}
@@ -489,4 +489,4 @@ learning rate $\alpha_{inf}$.\\
 AVCs performance is close to DOAVC. We propose this is due to the fact, that \ac{avc} uses the information about the environment 
 from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, \ac{avc} searches on a prestructured subspace given the "knowledge" of the 
 actor. This means it does not conduct random search even though it does not get any feedback from the environment. This is probably a key for the good performance of \ac{avc} and DOAVC and explains 
-the relative close performance of both algorithms. Overall, we find that DOAVC works well in the tested environments and outperforms all baselines in the MDP setting with sparse rewards.
+the relative close performance of both algorithms. Overall, we find that DOAVC works well in the tested environments and outperforms all baselines in the \ac{mdp} setting with sparse rewards.

@@ -3,7 +3,7 @@
 \chapter{Methodology}
 \label{chapter:Methodology}
 In the following chapter, we will first develop the \ac{avc} algorithm defined on single observation POMDPs and then relax 
-the constraint to the MDP setting. To indicate an observation after each step, we will refer to the MDP setting as continued observation 
+the constraint to the \ac{mdp} setting. To indicate an observation after each step, we will refer to the \ac{mdp} setting as continued observation 
 and call the \ac{avc} algorithm for MDPs continuous observation active critic (COAVC).\\
 
 The \ac{avc} architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that \ac{avc} uses the whole sequence of 
@@ -98,8 +98,8 @@ the policy, thus the i.i.d. assumption holds.\\
 
 \section{Approximation Error}
 \label{inference_time_planning}
-As we only have a single observation, our model has to learn the dynamics of the MDP in order to predict the reward signal at time point $t > 1$. Xu et al. \cite{NEURIPS2020_b5c01503} 
-have shown, that learning a transition model for an mdp has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
+As we only have a single observation, our model has to learn the dynamics of the \ac{mdp} in order to predict the reward signal at time point $t > 1$. Xu et al. \cite{NEURIPS2020_b5c01503} 
+have shown, that learning a transition model for an \ac{mdp} has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
 However, we identify that this challenge also grants us a unique improvement over previous actor critic methods.\\ 
 
 By considering sequences of whole trajectories at once instead of single actions 
@@ -160,7 +160,7 @@ $$=\sum_{t=1}^T \gamma^t C_{s, a^*_{1:T}}(t),$$
 where we used that the expectation commutes with summation. As $V_{\pi^*}(s)$ is the maximal value function, we conclude 
 $$a^*_{1:T} = \max_{a_{1:T}}\gamma^t C_{s, a_{1:T}}(t),$$
 since $C$ is an unbiased estimator of $r$. From this we conclude that finding the optimal action sequence with respect to the critic $C$ ensures the optimal 
-cumulative reward of any policy. Following section \ref{sec:prop_val_eq}, we find for deterministic MDP, $C$ learns a proper value equivalent model $m'$ of the MDP model $m$.
+cumulative reward of any policy. Following section \ref{sec:prop_val_eq}, we find for deterministic MDP, $C$ learns a proper value equivalent model $m'$ of the \ac{mdp} model $m$.
 
 \subsection{Actor}
 \label{sec:AC_actor}
@@ -526,7 +526,7 @@ with the inference time search learning rate $\alpha_{inf}$. Then, the trajector
     \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_1, a^N, r_T)\quad |\quad r_T = 1.
 \end{equation*}
 Note that with expert actions and expert dataset, we don't mean action sequences that were computed by 
-a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The \ac{avc} learner might add 
+a specific expert, for example a human, but rather we mean generally an action sequence, which solves an \ac{mdp} given an observation $o$. The \ac{avc} learner might add 
 additional successful trajectories to the expert dataset. \\
 
 \subsection{Update Step Actor}
@@ -624,8 +624,8 @@ critic score will be lower. Note, this hyperparameter has no effect on the perfo
 
 \section{Continued Observations}
 \label{sec:relax_dense}
-We now want to relax the constraint that we only use one observations per trajectory to the deterministic MDP setting. 
-We refer to the typical MDP setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
+We now want to relax the constraint that we only use one observations per trajectory to the deterministic \ac{mdp} setting. 
+We refer to the typical \ac{mdp} setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
 Following, we develop the addition to the \ac{avc} algorithm we call continued observation active critic (COAVC). 
 We will first discuss how a straight forward adaption of \ac{avc} will have an unwanted failure mode. Then we will develop an additional loss term to counter this problem.\\
 

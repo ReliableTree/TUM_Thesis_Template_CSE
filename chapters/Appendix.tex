@@ -26,7 +26,7 @@ Max size replaybuffer for dense observations: 50000 trajectoreis
 
 SOPOMDP:
 100 opt with lr 1e-6
-MDPs:
+\ac{mdp}s:
 3 opt steps with lr 1e-6, until 1 positive sample is found, than 1e-5. We found otherwise it over optimizes in early stages leading to no 
 exploration. 
 in environments with no provided expert trajectories, we set a random exploration phase according to the baselines of 10 Epsiodes or 1000 steps, where 
@@ -147,7 +147,7 @@ Meta-World uses the MuJoCo simulation environment \cite{todorov2012mujoco}. In o
 \chapter{Generative Adversarial Imitation Learning}
 \label{app:GAIL}
 For imitation learning, Generative Adversarial Imitation Learning (GAIL) 
-\cite{ho2016generative} presents a key paradigm to make efficient use of expert demonstrations given access to the MDP. 
+\cite{ho2016generative} presents a key paradigm to make efficient use of expert demonstrations given access to the \ac{mdp}. 
 The main idea of GAIL is to disambiguate the reward signal 
 by ensuring every policy except the expert policy has a lower expected reward under our inverse reward function, given the expert 
 demonstrations.\\ 
@@ -181,7 +181,7 @@ no natural upper bound. For this practical reason, we will make use of $c$ inste
     \pi_{\text{inv}}^* = \underset{c_{\text{inv}} \in \mathcal{C}}{\text{max}} \left( \min_{\pi \in \Pi} \left(- \text{H}(\pi) + \mathbb{E}_{\pi}[c_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{\text{E}}}[c_{\text{inv}}(s,a)] \right).
 \end{equation}
 The key insight is, that this optimisation problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
-induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the MDP. If two policies visit the same 
+induced policy. Intuitively, an occupancy measure is a measure for how likely a policy visits a state action pair given the \ac{mdp}. If two policies visit the same 
 states and choose the same actions, they are similar to each other.\\
 Formally the occupancy measure for states and actions is defined by: 
 \begin{equation*}
@@ -203,7 +203,7 @@ It is then shown that a policy is uniquely identified with its occupancy measure
     \pi_{\text{inv}}^* = \min_{\pi \propto \rho_{\pi}} - \bar{\text{H}}(\rho_{\pi})\quad \text{subject to }\quad \rho_{\pi}(s,a) = \rho_{\text{E}}(s,a) \quad \forall s \in \mathcal{S}, \forall a \in \mathcal{A},
 \end{equation}
 where $\bar{\text{H}}$ is the the discounted causal entropy $\text{H}$ defined on occupancy measures of policies, rather then action distributions. In this sense, equation \ref{proto_inf_ler_c} is the dual problem of equation \ref{const_sat_gail}. 
-This optimisation is intractable, as we get as many constraints, as we have action state pairs in our MDP. Moreover, in practice we only have a small sample size, which would mean setting 
+This optimisation is intractable, as we get as many constraints, as we have action state pairs in our \ac{mdp}. Moreover, in practice we only have a small sample size, which would mean setting 
 the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intended optimum. Instead, the objective \ref{const_sat_gail} is relaxed:
 \begin{equation}
     \label{dist_opt}
