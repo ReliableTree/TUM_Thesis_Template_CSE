@@ -2,10 +2,10 @@
 
 \chapter{Related Work}
 \label{chapter:RelWork}
-Our work focuses on using search in inference time. Importantly, we consider MDPs and \ac{pomdp}s where only a single observation is given. 
+Our work focuses on using search in inference time. Importantly, we consider \ac{mdp}s and \ac{pomdp}s where only a single observation is given. 
 We assume some expert demonstrations and access to a sparse
 reward of whether the task was successfully solved. \\
-While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic MDPs and deterministic \ac{pomdp}s. That is why we compare our 
+While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic \ac{mdp}s and deterministic \ac{pomdp}s. That is why we compare our 
 findings to two state-of-the-art general purpose \ac{rl} algorithms, which we will develop in this section in detail, as we find it key to analyze experimental results. 
 Another key aspect is imitation learning, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. \\
 
@@ -172,7 +172,7 @@ for off policy learning with a focus on exploration, in contrast to PPO, which w
 
 \section{Imitation Learning}
 \subsection{Generative Adversarial Imitation Learning}
-Generative Adversarial Imitation Learning (GAIL) \cite{ho2016generative} is a key paradigm for efficient imitation learning that uses expert demonstrations in MDPs. 
+Generative Adversarial Imitation Learning (GAIL) \cite{ho2016generative} is a key paradigm for efficient imitation learning that uses expert demonstrations in \ac{mdp}s. 
 The main idea of GAIL is to disambiguate the reward signal from IRL by ensuring that every policy except the expert policy has a lower expected reward under the inverse reward function, given the expert 
 demonstrations. Following, we will use a cost function $c \propto -r$, as it gives a natural optimum at $c=0$.\\
 
@@ -202,7 +202,7 @@ A downside is that it requires a high number of environment interactions to trai
 bounds can be found in appendix \ref{app:GAIL}.
 
 
-\subsection{Generative Adversarial Imitation Learning in POMDPs}
+\subsection{Generative Adversarial Imitation Learning in \ac{pomdp}s}
 \label{GAIL_POMDPS}
 In this section, we will describe an imitation learning approach based on GAIL, that handles \ac{pomdp}s.\\
 The GAIL algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
@@ -233,7 +233,7 @@ of their approach is, that the believe state representation will be expressive f
 the observations are high dimensional and include redundant or unnecessary information that will be hard to learn. This forces the network to allocate capacity that is not directly used to 
 optimise the overall objective. Moreover, as GAIL, this approach suffers from bad sample efficiency with respect to environment interactions and cannot make use of a reward signal from the environment. 
 
-\subsection{Single Observation Imitation Learning in POMDPs}
+\subsection{Single Observation Imitation Learning in \ac{pomdp}s}
 Simon Stepputtis, et al. \cite{stepputtis2020languageconditioned} propose a method for robot manipulation tasks that takes 
 into account natural language instructions. 
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the environment.

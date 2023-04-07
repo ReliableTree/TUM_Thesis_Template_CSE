@@ -2,9 +2,9 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
-In the following chapter, we will first develop the \ac{avc} algorithm defined on single observation POMDPs and then relax 
+In the following chapter, we will first develop the \ac{avc} algorithm defined on \ac{sopomdp}s and then relax 
 the constraint to the \ac{mdp} setting. To indicate an observation after each step, we will refer to the \ac{mdp} setting as continued observation 
-and call the \ac{avc} algorithm for MDPs continuous observation active critic (COAVC).\\
+and call the \ac{avc} algorithm for \ac{mdp}s continuous observation active critic (COAVC).\\
 
 The \ac{avc} architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that \ac{avc} uses the whole sequence of 
 actions, rather then on the current observation and action, to plan the current step.\\ 
@@ -28,7 +28,7 @@ Then we will motivate the whole sequence formulation, derive the updates for the
 actor and provide analysis of optimality and policy improvement of our method. 
 
 \section{Single Observation Partially Observable Markov Decision Process}
-We identify two main challenges in dealing with SOPOMDPs. \\
+We identify two main challenges in dealing with \ac{sopomdp}s. \\
 The first challenge is the curse of dimensionality from the large preimage of the policy, given it has to keep track 
 of the past. \\
 The second challenge is unstable update behaviour of actor critic methods which comes from update errors by the policy gradient. This problem 
@@ -36,7 +36,7 @@ is specifically pronounced in settings with highly non smooth feedback from the 
 and no further observations.
 \subsection{Curse of Dimensionality}
 \label{COD_AC}
-As introduces in \ref{COD}, the evidence for a model scales approximately inversely proportional to the exponent of the dimension on which it acts. In MDPs, the 
+As introduces in \ref{COD}, the evidence for a model scales approximately inversely proportional to the exponent of the dimension on which it acts. In \ac{mdp}s, the 
 actor $\pi$ acts on the observation space and returns an action from the action space. A probabilistic actor defines a probability distribution on the set 
 of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. This also holds for 
 deterministic actors with integer probabilities $\pi(a|s) \in \{0,1\}$.
@@ -79,7 +79,7 @@ the transition probability $\mathcal{T}$, the policy $\pi$ and the number of rec
 where $\mathcal{T}(s_1, s', t)_{\pi}$ indicates that the normalized transition function depends on the timestep $t$ and policy $\pi$.\\
 With this formulation, we find that the preimage of the policy given deterministic actions can be reduced to:
 $$\pi(a|b_t) = \pi(a|o_1, t): \mathcal{R}^m \times \mathcal{R}^{n} \times \mathcal{R} \rightarrow \mathcal{R}.$$
-We call this a strong inductive belief state bias for the SOPOMDP, as it forces the assumption of a deterministic and constant policy $\pi$, so that the prior action sequence is known. 
+We call this a strong inductive belief state bias for the \ac{sopomdp}, as it forces the assumption of a deterministic and constant policy $\pi$, so that the prior action sequence is known. 
 Here we see, 
 why this setup is specifically interesting for planning. Planning ahead fulfil the same constraint, namely that we can plan the actions, but we don't get feedback of the 
 observations we would receive, if we acted out a planned sequence. \\

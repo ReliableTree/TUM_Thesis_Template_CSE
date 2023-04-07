@@ -23,7 +23,7 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 
 In the following sections, we will provide an overview of these learning paradigms. 
 Then, we will introduce the mathematical framework of \ac{mdp}s to model the environment in reinforcement learning. 
-After that, we will discuss model-free and model-based algorithms for MDPs. We will also introduce imitation learning and inverse reinforcement learning. 
+After that, we will discuss model-free and model-based algorithms for \ac{mdp}s. We will also introduce imitation learning and inverse reinforcement learning. 
 Next, we will introduce \ac{pomdp}, followed by an overview of sequential models that can be used 
 to solve \ac{pomdp}s.
 
@@ -268,7 +268,7 @@ which we will use as part of our baselines.
 \subsection{Value Functions}
 
 Value functions are a fundamental concept in \ac{rl} and are used to estimate the expected return of being in a 
-particular state or taking a particular action. In this section we discuss the two main types of value functions in MDPs: state 
+particular state or taking a particular action. In this section we discuss the two main types of value functions in \ac{mdp}s: state 
 value functions and state action value functions.
 
 \subsubsection{State Value Function}
@@ -701,7 +701,7 @@ which is developed in the next section.
 
 \section{Partially Observable Markov Decision Processes}
 \label{POMDP}
-So far, we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
+So far, we have discussed \ac{mdp}s with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
 transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
 is only partially observable. Those dynamics are captured in a \ac{pomdp}.
 
