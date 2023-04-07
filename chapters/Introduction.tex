@@ -5,11 +5,13 @@ Deep \ac{rl} made promising advances in recent years. In particular, DeepMinds M
 approximators and \ac{mcts} to plan actions ahead. 
 Another field that made leaps forward recently is generative AI. As examples, Midjourney \cite{midjourney} 
 can generate highly detailed pictures from natural 
-language description and "ChatGPT" is able to provide meaningful assistance through natural language interface. \\
+language description and ChatGPT \cite{cite:ChatGPT} is able to provide meaningful assistance through natural language interface. \\
+
 We identify two important paradigms from these examples: search and pretraining. \\
+
 Search is currently not widely used in robotics, as \ac{mcts} cannot be used, because the number of branches per node is infinite making enumeration impossible. While there are recent approaches 
-using search on continuous action spaces \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim_2020}, they require a differentiable model of the system dynamics, which is difficult to provide in real world scenarios. 
-Also currently there are no vast datasets for robot trajectories public, so data availability is limited.\\ 
+using search on continuous action spaces \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim_2020}, they require a differentiable model of the system dynamics, which is difficult to provide in real world scenarios.\\ 
+
 In this thesis we develop a new \ac{rl} 
 paradigm called \ac{avc}. It learns relevant dynamics of the world model, conducts search in inference time, and makes efficient use of expert demonstrations. 
 To the authors knowledge, \ac{avc} is the only algorithm that uses inference time search on continuous action space with no given model of the environment.\\
@@ -18,6 +20,7 @@ We also relax this constraint and test \ac{avc} on an \ac{mdp} setting with obse
 
 We find the single observation to be an interesting setting. This setup is interesting, as it is plausible that robots may not have time to perform complex computations 
 on the input signal after each time step, and sparse rewards are typically easy to define in real-world application.\\
+
 Another possible application is natural language models. Resent efforts have been made to tune 
 them according to human preferences from a pretrained initialisation \cite{cite:ChatGPT}. Language models are not reliant on additional observations as the environment state is the current 
 text. The initial state is set by the user's input and the current environment state is fully determined by the the actions, respectively words, of the model. 
@@ -27,6 +30,7 @@ In this sense, it is comparable to our setup.\\
 \ac{avc} is a general-purpose \ac{rl} algorithm algorithm applicable in deterministic \ac{mdp}s and "Partially Observable" \ac{mdp}s. 
 For this reason, we compare it to two state-of-the-art general-purpose \ac{rl} algorithms, TQC and PPO. Additionally we use behavioural cloning as pretraining  
 and also compare our results to GAIL, a state-of-the-art imitation learning algorithm.\\
+
 In this thesis, we present empirical results indicating the efficacy of our algorithm in leveraging expert knowledge to significantly surpass the performance of the selected baselines in our 
 experimental setup. Our findings offer compelling evidence that our algorithm is capable of swift learning and increased stability in both single observation \ac{pomdp}s and \ac{mdp}s when confronted with 
 sparsely distributed rewards, surpassing the performance of alternative algorithms used for comparison.\\
