@@ -2,9 +2,9 @@
 
 \chapter{Conclusion & Future Work}
 \label{chapter:Conc_Fut}
-In this thesis, we have presented the AVC paradigm, which effectively employs search on continuous action spaces and utilizes 
-expert demonstrations to solve sparse reward reinforcement learning tasks. Our results demonstrate that AVC 
-outperforms state-of-the-art general-purpose RL algorithms in a variety of robot manipulation tasks, achieving superior performance 
+In this thesis, we have presented the \ac{avc} paradigm, which effectively employs search on continuous action spaces and utilizes 
+expert demonstrations to solve sparse reward \ac{rl} tasks. Our results demonstrate that \ac{avc} 
+outperforms state-of-the-art general-purpose \ac{rl} algorithms in a variety of robot manipulation tasks, achieving superior performance 
 while maintaining high sample efficiency. We provided evidence that search is a critical component that enables us to make the best use of available 
 environment interactions.
 
@@ -20,11 +20,11 @@ modelling an uncertainty estimate could be another crucial aspect of improving o
 Currently, the critic searches for solutions with a high expected probability without considering uncertainty. 
 Incorporating an uncertainty estimate could assist the critic in finding solutions that maximise expected reward with high confidence. 
 Existing uncertainty-aware approaches \cite{gawlikowski2022survey,liu2022simple} 
-could be integrated into the AVC algorithm.\\ \\
+could be integrated into the \ac{avc} algorithm.\\ \\
 
 \textbf{Curiosity Driven Exploration}\\
 To further enhance exploration, we could incorporate curiosity-driven exploration approaches \cite{pathak2017curiositydriven}. 
 Curiosity provides an intrinsic reward that could be specifically useful in sparse reward settings. 
-Currently, the AVC algorithm selects a provided trajectory if the critic estimates that it solves the environment. By incorporating curiosity, 
+Currently, the \ac{avc} algorithm selects a provided trajectory if the critic estimates that it solves the environment. By incorporating curiosity, 
 we can explore more robust solutions or gain a better understanding of MDP dynamics by modifying trajectories even in environments that the 
 algorithm can already solve. Here, incorporating an uncertainty estimate could be beneficial as well.

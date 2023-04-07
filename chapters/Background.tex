@@ -22,10 +22,10 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 \end{itemize} .
 
 In the following sections, we will provide an overview of these learning paradigms. 
-Then, we will introduce the mathematical framework of Markov Decision Processes (MDPs) to model the environment in reinforcement learning. 
+Then, we will introduce the mathematical framework of \ac{mdp}s to model the environment in reinforcement learning. 
 After that, we will discuss model-free and model-based algorithms for MDPs. We will also introduce imitation learning and inverse reinforcement learning. 
-Next, we will introduce Partially Observable Markov Decision Processes (POMDPs), followed by an overview of sequential models that can be used 
-to solve POMDPs.
+Next, we will introduce \ac{pomdp}, followed by an overview of sequential models that can be used 
+to solve \ac{pomdp}s.
 
 \section{Supervised Learning}
 \label{section:super_learn}
@@ -63,7 +63,7 @@ for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}.
 \section{Reinforcement Learning}
 \label{section:rl}
 
-Reinforcement learning is a learning paradigm where an agent interacts with an environment and learns to take actions that maximise a 
+ \ac{rl} is a learning paradigm where an agent interacts with an environment and learns to take actions that maximise a 
 cumulative reward signal. In this paradigm, the input $x$ is typically the state $s$ of the environment, the output $y$ is the action $a$ taken by the agent, 
 and the the objective function $g$ is a reward signal $r$.
 
@@ -118,10 +118,10 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
 \end{minipage}
 
 \section{Markov Decision Processes}
-Markov Decision Processes (MDPs) are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
-context to develop reinforcement learning algorithms.
+\ac{mdp}s are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
+context to develop \ac{rl} algorithms.
 
-An MDP is defined as a tuple $(S, A, T, R, \gamma)$, where:
+An \ac{mdp}is defined as a tuple $(S, A, T, R, \gamma)$, where:
 \begin{itemize}
     \item $S$ is the set of possible states in the system
     \item $A$ is the set of possible actions that can be taken in each state
@@ -186,11 +186,11 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
-  \caption{A MDP diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
+  \caption{A \ac{mdp}diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
 \end{figure}
 
 \section{Policy Gradient}
-There are numerous ways to arrive at a policy that maximises the reinforcement learning objective as defined in equation 
+There are numerous ways to arrive at a policy that maximises the \ac{rl} objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function.\\ 
 In this thesis we use neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
@@ -249,11 +249,11 @@ It continues until convergence.
 
 \section{MDP Model}
 Now that we have established the foundation of reinforcement learning, we will investigate two learning paradigms, 
-namely model free reinforcement learning in section \ref{sec:mod_free_ref} and model based reinforcement learning in section \ref{sec:mod_based_ref}. \\
+namely model free \ac{rl} in section \ref{sec:mod_free_ref} and model based \ac{rl} in section \ref{sec:mod_based_ref}. \\
 
 Model free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
-estimate of the expected rewards given the MDP dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
-as it is robust to uncertainties of the MDP dynamics and does not need a model of the environment, which is hard to provide in many cases. 
+estimate of the expected rewards given the \ac{mdp}dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
+as it is robust to uncertainties of the \ac{mdp}dynamics and does not need a model of the environment, which is hard to provide in many cases. 
 Model based approaches learn the policy given a model of the MDP. If the model is not known, it is learned 
 from observed interactions. The advantage of model based algorithms is, that the policy can use the model to plan steps ahead. 
 Where it is applicable, planning has proven to be 
@@ -267,7 +267,7 @@ which we will use as part of our baselines.
 
 \subsection{Value Functions}
 
-Value functions are a fundamental concept in reinforcement learning and are used to estimate the expected return of being in a 
+Value functions are a fundamental concept in \ac{rl} and are used to estimate the expected return of being in a 
 particular state or taking a particular action. In this section we discuss the two main types of value functions in MDPs: state 
 value functions and state action value functions.
 
@@ -476,7 +476,7 @@ A proof for the convergence and optimality of this estimator can be found in \ci
 Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
 is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximise the cumulative reward it receives 
 over the course of its interactions with the environment. Also, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
-The balance between exploration and exploitation is crucial for the success of RL algorithms, and different methods aim to find a good compromise between them.
+The balance between exploration and exploitation is crucial for the success of \ac{rl} algorithms, and different methods aim to find a good compromise between them.
 
 SAC extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximises a modified 
 version of the expected cumulative reward that takes into account both the expected reward and the entropy of the policy. The modified objective is given by:
@@ -539,7 +539,7 @@ policies in a number of challenging tasks including robot manipulation tasks wit
 \subsection{TRPO}
 \label{sec:TRPO}
 Trust Region Policy optimisation \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
-Recall we defined the reinforcement learning objective as:
+Recall we defined the \ac{rl} objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
 \end{equation}
@@ -578,7 +578,7 @@ similar or better performance then TRPO.
 
 \section{Model Based Learning}
 \label{sec:mod_based_ref}
-In model based reinforcement learning the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
+In model based \ac{rl} the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
 $a_{1, ..., T}$ to optimise the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
 expectation is build with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
@@ -597,7 +597,7 @@ So far we have stated, that the proper transition function $T(s,a,s')$ must be k
 interested in optimising the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
 of our environment at each timestep, but only in the rewards $r_t$. \\
 This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
-let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the MDP and let 
+let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the \ac{mdp}and let 
 $\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equivalent to $m$, 
 if $k$ applications of the Bellman operator result in the same updated value function: 
 \begin{equation}
@@ -608,7 +608,7 @@ It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\
 defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
 equivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model.\\ 
 From this work we conclude that solving the 
-reinforcement learning problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual MDP with model $m$. 
+\ac{rl} problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual \ac{mdp}with model $m$. 
 
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
@@ -703,9 +703,9 @@ which is developed in the next section.
 \label{POMDP}
 So far, we have discussed MDPs with knowledge of a state $s_t$ that gives us sufficient statistics with respect to the 
 transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
-is only partially observable. Those dynamics are captured in a Partially Observable Markov Decision Processes (POMDP).
+is only partially observable. Those dynamics are captured in a \ac{pomdp}.
 
-A POMDP is defined as a tuple:
+A \ac{pomdp} is defined as a tuple:
 
 \begin{itemize}
 \item $\mathcal{S}$: a finite set of states.
@@ -717,7 +717,7 @@ A POMDP is defined as a tuple:
 \item $\gamma$: the discount factor $\gamma \in [0, 1)$.
 \end{itemize}
 
-To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states of the MDP given the history of 
+To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states of the \ac{mdp}given the history of 
 actions and observations. Formally a belief state $b_t(s)$ at time $t$ is the probability of the system to be in state $s$, 
 given action $a$, observation $o$ and belief state distribution $b_{t}$. The update step is written as:
 \begin{equation*}
@@ -726,7 +726,7 @@ given action $a$, observation $o$ and belief state distribution $b_{t}$. The upd
 \begin{equation*}
     \frac{p(o|s) p(s|a,b_{t})}{p(o|a,b_{t})}.
 \end{equation*}
-Using the definitions from the POMDP, we can write this update as:
+Using the definitions from the \ac{pomdp}, we can write this update as:
 \begin{equation}
     \label{pomdp_bayes}
 b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}
@@ -781,13 +781,13 @@ An example is depicted in figure \ref{fig:POMDP}.  \\
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
-  \caption{A POMDP diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
+  \caption{A \ac{pomdp} diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
   \label{fig:POMDP}
 \end{figure}
 
 \subsection{Curse Of Dimensionality}
 \label{COD}
-A problem in dealing with POMDPs is the large input space to a policy, considering the time horizon. 
+A problem in dealing with \ac{pomdp}s is the large input space to a policy, considering the time horizon. 
 The curse of dimensionality describes how the volume of a distribution increases exponentially with the dimension of the distribution. That means in general, 
 that you need exponentially many observations from a distribution with respect to the number of dimensions, to get sufficient evidence for a model of the distribution. 
 To motivate this, assume a simple 
@@ -822,14 +822,14 @@ which is exponential in the number of parameters $d$.
 In summary, evidence for a model is approximately inverse proportional to the exponent of the number of dimensions of the dataset it is trained on.
 
 \section{Sequence Models}
-Sequence models are a natural choice to model POMDPs. 
+Sequence models are a natural choice to model \ac{pomdp}s. 
 A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
 a sequence model could take as input a sequence of n observations and return one action. \\ 
 Naively, the input sequence of n tokens with dimension d could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
 input to a model. The dimension of the input then scales linear with the sequence length. As motivated in section \ref{COD}, this means exponentially more evidence is 
-required with sequence length n to achieve the same confidence. These approaches are referred to as frame stacking and can solve a POMDPs as shown by Raffin 
+required with sequence length n to achieve the same confidence. These approaches are referred to as frame stacking and can solve a \ac{pomdp}s as shown by Raffin 
 \cite{framestacking}, though 
-their performance decreases with the number of frames needed to accurately represent the POMDP. \\
+their performance decreases with the number of frames needed to accurately represent the \ac{pomdp}. \\
 Frame stacking handles the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
 structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
 sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically 

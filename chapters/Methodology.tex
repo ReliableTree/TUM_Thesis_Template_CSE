@@ -2,11 +2,11 @@
 
 \chapter{Methodology}
 \label{chapter:Methodology}
-In the following chapter, we will first develop the active critic (AVC) algorithm defined on single observation POMDPs and then relax 
+In the following chapter, we will first develop the \ac{avc} algorithm defined on single observation POMDPs and then relax 
 the constraint to the MDP setting. To indicate an observation after each step, we will refer to the MDP setting as continued observation 
-and call the AVC algorithm for MDPs continuous observation active critic (COAVC).\\
+and call the \ac{avc} algorithm for MDPs continuous observation active critic (COAVC).\\
 
-The active critic architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that AVC uses the whole sequence of 
+The \ac{avc} architecture consists of an actor and a critic, similar to actor critic methods. The main difference is, that \ac{avc} uses the whole sequence of 
 actions, rather then on the current observation and action, to plan the current step.\\ 
 
 Formally, let $s_{1}$ be the state at timestep $1$ and let $a_{1:T}$ be an action sequence with $T$ actions. 
@@ -27,7 +27,7 @@ In the following chapter, we will first justify using a transformer encoder arch
 Then we will motivate the whole sequence formulation, derive the updates for the critic and the 
 actor and provide analysis of optimality and policy improvement of our method. 
 
-\section{Single Observation POMDP}
+\section{Single Observation Partially Observable Markov Decision Process}
 We identify two main challenges in dealing with SOPOMDPs. \\
 The first challenge is the curse of dimensionality from the large preimage of the policy, given it has to keep track 
 of the past. \\
@@ -43,16 +43,16 @@ deterministic actors with integer probabilities $\pi(a|s) \in \{0,1\}$.
 Thus the dimension of the preimage of the actor is $n \times m$ with $\pi:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$.\\
 Similarly, the critic $Q$ usually defines a function on $\mathcal{A}$ and $\mathcal{O}$ to the cumulative discounted expected value 
 $Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$\\
-We have shown in \ref{POMDP}, that in a POMDP, the observation space grows linear in time, as the belief state depends on the history: 
+We have shown in \ref{POMDP}, that in a \ac{pomdp}, the observation space grows linear in time, as the belief state depends on the history: 
 $$\pi(a| b_t(o_{1:t}, a_{1:t})):\mathcal{R}^{m \times T} \times \mathcal{R}^{n \times T} \rightarrow \mathcal{R},$$
 $$Q(a, o_{t}| b_{t-1}(o_{1:t-1}, a_{1:t-1})):\mathcal{R}^{m} \times \mathcal{R}^{n} \times \mathcal{R}^{m \times T-1} \times \mathcal{R}^{n \times T-1} \rightarrow \mathcal{R}.$$
 Together with the result from \ref{COD} we conclude, that we have 
-exponentially less evidence with sequence length $T$ for our model in the POMDP setting.\\
+exponentially less evidence with sequence length $T$ for our model in the \ac{pomdp} setting.\\
 To counter this problem, we want to get rid of the time dependency of the belief state. 
-We make the observation, that our case with the single observation at the beginning is a special case of a POMDP. Usually, 
+We make the observation, that our case with the single observation at the beginning is a special case of a \ac{pomdp}. Usually, 
 we need to know all previous observations, as they can give us additional information about the believe state. However, as we don't have subsequent observations 
 after the initial, we only need the actions of the trajectory to update our belief $b_t$. Formally, as introduced in \ref{pomdp_bayes}, the optimal believe state 
-update in POMDPs using bayes theorem is given by:
+update in \ac{pomdp}s using bayes theorem is given by:
 \begin{equation}
     b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}.
 \end{equation}
@@ -93,7 +93,7 @@ our network to generate an action sequence, rather then generating it autoregres
 Another benefit of computing the whole trajectory in one pass is that the independent and identically distributed (i.i.d.) input data 
 assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution during inference time 
 then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
-However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the POMDP, which is independent of 
+However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the \ac{pomdp}, which is independent of 
 the policy, thus the i.i.d. assumption holds.\\
 
 \section{Approximation Error}
@@ -375,7 +375,7 @@ paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
 
 \section{Inference Time Search}
 \label{sec:inf_time_search}
-In the derivation of the AVC algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
+In the derivation of the \ac{avc} algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
 the gradient with respect to the actor, the planner, the observation and the plan. Alet et al. \cite{alet2021noether} propose a method that aims 
 to learn useful conserved quantities to reconstruct a video sequence 
 using conservation laws of the underlying physics. While a different problem setup, they also have a high dimensional derivative with respect to a 
@@ -461,7 +461,7 @@ algorithm is shown in \ref{fig:inference}
 
 
     \end{tikzpicture}
-\caption{Overview of the inference mechanism of Active Critic. The solid lines indicate the forward path, the dashed lines indicate backward gradients, which 
+\caption{Overview of the inference mechanism of \ac{avc}. The solid lines indicate the forward path, the dashed lines indicate backward gradients, which 
 are used to update the actor from timestep $t$ to \color{black!50!green!80} $t+1$ \color{black}.}
 \label{fig:inference}
 
@@ -497,7 +497,7 @@ The other optimisation modes can be adapted straight forward. All models use a t
         \State $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$\\
     }
     return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
-    \caption{Active Critic Inference}
+    \caption{\ac{avc} Inference}
     \label{AC_Inference}
 
 \end{algorithm}
@@ -526,7 +526,7 @@ with the inference time search learning rate $\alpha_{inf}$. Then, the trajector
     \mathcal{D}_{\text{expert}} = \mathcal{D}_{\text{expert}} \cup (o_1, a^N, r_T)\quad |\quad r_T = 1.
 \end{equation*}
 Note that with expert actions and expert dataset, we don't mean action sequences that were computed by 
-a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The AVC learner might add 
+a specific expert, for example a human, but rather we mean generally an action sequence, which solves an MDP given an observation $o$. The \ac{avc} learner might add 
 additional successful trajectories to the expert dataset. \\
 
 \subsection{Update Step Actor}
@@ -595,7 +595,7 @@ with learning rate $\alpha_{\theta}$. The pseudocode is depicted in algorithm \r
 \end{algorithmic}
 \end{algorithm}
 \subsection{Active Critic Learner}
-Putting everything together, we can now define the learning paradigm of the active critic algorithm, depicted in figure \ref{AC_Learner}. The number of update 
+Putting everything together, we can now define the learning paradigm of the \ac{avc} algorithm, depicted in figure \ref{AC_Learner}. The number of update 
 steps in inference time $N$ can be used to weigh exploration against exploitation. A high number of update steps means the critic can find very different 
 trajectories, to the one proposed by the actor. As these trajectores are further from the distribution on which the critic learned, the confidence of the 
 critic score will be lower. Note, this hyperparameter has no effect on the performance of the actor, as we decoupled the critic from the actor.
@@ -626,8 +626,8 @@ critic score will be lower. Note, this hyperparameter has no effect on the perfo
 \label{sec:relax_dense}
 We now want to relax the constraint that we only use one observations per trajectory to the deterministic MDP setting. 
 We refer to the typical MDP setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
-Following, we develop the addition to the active critic algorithm we call continued observation active critic (COAVC). 
-We will first discuss how a straight forward adaption of AVC will have an unwanted failure mode. Then we will develop an additional loss term to counter this problem.\\
+Following, we develop the addition to the \ac{avc} algorithm we call continued observation active critic (COAVC). 
+We will first discuss how a straight forward adaption of \ac{avc} will have an unwanted failure mode. Then we will develop an additional loss term to counter this problem.\\
 
 So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
 length $T$ from it.\\ 
@@ -635,7 +635,7 @@ length $T$ from it.\\
 A straight forward adaptation of this algorithm to continued observations would be to use a different encoding of the observations. We propose to use a special token to indicate an 
 observation from the future that was not yet measured $t_f$. We then build the current observation sequence at time $t$ by filling the $T - t$ unseen observations with $t_f$ and 
 the planner to 
-generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the AVC algorithm, the new loss of the actor becomes: 
+generate the current actions sequence $a^t_{1:T} = \pi(o_{1:t}, t_{f, t+1:T}, p(a))$. Similar to the loss function of the actor from the \ac{avc} algorithm, the new loss of the actor becomes: 
 \begin{equation}
     \label{dense_actor_objective}
     J_{\phi, \zeta} = \mathbb{E}_{(o_{1:t}, a_{1:T}) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\left[\left( \pi_{\phi}(o_{1, ..., t}, t_{f, t+1:T}, p_{\zeta}(a))(t) - a(t)\right)^2\right],
@@ -694,7 +694,7 @@ disambiguate action sequences with additional proxy losses.
 For now, we will ensure convergence by choosing the action sequence ${a^t}^*$ as a starting point for the optimisation to get ${a^{t+1}}^*$, thus if $C^t = C^{t+1}$ we will find 
 ${a^t}^* = {a^{t+1}}^*$, because the gradient will be zero. 
 The update 
-steps are adapted straight forward from AVC using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
+steps are adapted straight forward from \ac{avc} using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
 
 \subsection{Inference Time Optimisation}
 A practical issue we came across is the inference time per step. This is a typical problem of model based algorithms, as they need to optimise the trajectory given 
@@ -705,7 +705,7 @@ per step is dependent on the number of optimisation steps. If the number is low,
 If the number is high, the computation time per trajectory is too long, as the total number of update steps is $n \times T$, with n updates per step and trajectory length 
 T.\\ 
 
-This problem did not occur with the AVC algorithm, as the action sequence is only optimised 
+This problem did not occur with the \ac{avc} algorithm, as the action sequence is only optimised 
 once per trajectory, limiting the additional compute cost.\\
 
 Recall in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 

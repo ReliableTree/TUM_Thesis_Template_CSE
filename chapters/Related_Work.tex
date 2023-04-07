@@ -2,15 +2,15 @@
 
 \chapter{Related Work}
 \label{chapter:RelWork}
-Our work focuses on using search in inference time. Importantly, we consider MDPs and POMDPs where only a single observation is given. 
+Our work focuses on using search in inference time. Importantly, we consider MDPs and \ac{pomdp}s where only a single observation is given. 
 We assume some expert demonstrations and access to a sparse
 reward of whether the task was successfully solved. \\
-While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic MDPs and deterministic POMDPs. That is why we compare our 
-findings to two state-of-the-art general purpose reinforcement learning algorithms, which we will develop in this section in detail, as we find it key to analyze experimental results. 
+While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic MDPs and deterministic \ac{pomdp}s. That is why we compare our 
+findings to two state-of-the-art general purpose \ac{rl} algorithms, which we will develop in this section in detail, as we find it key to analyze experimental results. 
 Another key aspect is imitation learning, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. \\
 
 Furthermore, we will discuss current approaches that addresses parts of our setup. \\
-We will first focus on imitation learning, then cover guided reinforcement learning with sparse rewards, and then
+We will first focus on imitation learning, then cover guided \ac{rl} with sparse rewards, and then
 discuss how inference time search is used in current algorithms. Some of the presented approaches cover multiple requirements, so they cannot unambiguously be sorted into the provided categories.
 
 \section{General Purpose Reinforcement Learning Algorithms}
@@ -204,9 +204,9 @@ bounds can be found in appendix \ref{app:GAIL}.
 
 \subsection{Generative Adversarial Imitation Learning in POMDPs}
 \label{GAIL_POMDPS}
-In this section, we will describe an imitation learning approach based on GAIL, that handles POMDPs.\\
+In this section, we will describe an imitation learning approach based on GAIL, that handles \ac{pomdp}s.\\
 The GAIL algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
-extend the GAIL paradigm to work on POMDPs. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
+extend the GAIL paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
 \begin{equation}
     \min_{\phi,\theta}\max_{\tilde{\omega}} &\mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\log(1-D_{\tilde{\omega}}(b_{\phi},a))]
@@ -221,7 +221,7 @@ The authors include three regularisation losses to improve the expressiveness of
     \mathcal{L}^f(\phi) = \mathbb{E}|| o_{t+k} - g(b_t^\phi, a_{t:t+k-1})||_2^2,
 \end{equation}
 where g is a learned stochastic unimodal gaussian with learned mean and fixed variance. Intuitively, this term seeks to impose, that the belief state $b_t$ is indeed a sufficient statistic for the 
-POMDP, by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $f$ of the regularisation loss means forward. 
+\ac{pomdp}, by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $f$ of the regularisation loss means forward. 
 In a similar way, there is an inverse regularisation $i$, which looks k steps into the past. Additionally, the authors propose an action regularisation $a$ which tries to reproduce the actions that were 
 taken, given the initial belief state and the subsequent observations. With all three regularisation losses, the total loss function for the believe module is:
 \begin{equation}
@@ -257,8 +257,8 @@ the reward for the state is $r(s_t|g) = 0$, which does not provide much informat
 To use the information of which state was actually reached by the trajectory, a new goal is constructed $g' = s_t$. Using this, the new reward is $r(s_t|g') = 1$.
 The agent can then learn from these hindsight goals, which can provide more frequent rewards and enable faster learning. An additional advantage of HER is that it is agnostic with respect to the learning algorithm, as it only provides additional trajectories for the replay buffer.
 
-Overall, HER is a powerful algorithm that addresses the problem of sparse rewards in reinforcement learning by leveraging hindsight. It has been successfully applied to a wide range of tasks, 
-including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard reinforcement learning algorithms.\\
+Overall, HER is a powerful algorithm that addresses the problem of sparse rewards in \ac{rl} by leveraging hindsight. It has been successfully applied to a wide range of tasks, 
+including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard \ac{rl} algorithms.\\
 
 A downside of HER is that it requires the inverse function $g(s)$, meaning from a visited state, the goal must be reconstructable. This is not always given.
 Consider the goal of not driving into a vehicle or a goal expressed in natural language. \\ \\
@@ -269,7 +269,7 @@ One common approach similar to Pathak et al \cite{pathak2017curiositydriven} to 
 measure how surprising or informative a particular 
 state or action is to the agent. \\
 
-By incorporating this intrinsic reward signal into the overall reinforcement learning objective, the agent is encouraged to explore areas of the environment that are 
+By incorporating this intrinsic reward signal into the overall \ac{rl} objective, the agent is encouraged to explore areas of the environment that are 
 unexpected or uncertain, which can lead to discovering new strategies or behaviors that improve its performance. This approach has been shown to be effective in a variety of 
 domains, including robotics, gaming, and natural language processing.\\
 
@@ -277,7 +277,7 @@ This approach is very general and can be added as an addition to classical reinf
 
 \subsection{Guided Reinforcement Learning with Sparse Rewards}
 \label{sec:rel_work_finetuning}
-With guided reinforcement learning we refer to expert knowledge that is provided to the algorithm, for example with expert demonstrations.
+With guided \ac{rl} we refer to expert knowledge that is provided to the algorithm, for example with expert demonstrations.
 Mel Vecerik et al. \cite{vecerik2018leveraging} describe a priority 
 sampling algorithm in combination with deep deterministic policy gradient (DDPG). The probability with which a 
 training sample is chosen from the replay buffer is defined as: 
@@ -307,20 +307,20 @@ probability of choosing a transition and thus counter acts the improvement rate 
 
 Schrittwieser et al. \cite{MUZero} describe a search based algorithm for discrete action spaces called MuZero. It is designed to achieve state-of-the-art performance 
 in a wide range of games without any prior knowledge of the game rules, unlike its predecessor AlphaGo and AlphaZero, which relied on a hand-crafted 
-domain-specific algorithm. MuZero learns to play games by combining deep neural networks with Monte Carlo tree search (MCTS) to plan and evaluate its actions. 
-It does not have access to the game states, but only to observations covering a limited amount of information in a POMDP setting.
+domain-specific algorithm. MuZero learns to play games by combining deep neural networks with \ac{mcts} to plan and evaluate its actions. 
+It does not have access to the game states, but only to observations covering a limited amount of information in a \ac{pomdp} setting.
 To plan ahead, it predicts the expected rewards $r_{t:T}$ for a proposed action sequence $a_{t:T}$ given a history of observations $o_{1:t}$.\\
 For the search, the planner needs access to a model predicting the reward after n steps. To learn this model, the authors use an end to end trained recurrent neural network, which 
 compares it's prediction to the actual rewards from the environment. The prediction and search proves to be crucial for the performance of MuZero.\\ 
-While MuZero achieves state-of-the-art performance on the challenging ATARI 57 benchmark, it requires discrete actions for the MCTS based algorithm.
+While MuZero achieves state-of-the-art performance on the challenging ATARI 57 benchmark, it requires discrete actions for the \ac{mcts} based algorithm.
 
 \subsection{Continuous Action Space}
 \label{sec:mctsca}
 Lee et. al \cite{Lee_Jeon_Kim_Kim_2020} develop a possible way to relax the requirement of a discrete action space of the MuZero algorithm. 
 The main idea is to separate 
-the MCTS into two phases, a coarse phase, where actions from the action space are coarsely sampled and a fine tuning phase, where the actions are tuned, using the continuity of the action space.\\
+the \ac{mcts} into two phases, a coarse phase, where actions from the action space are coarsely sampled and a fine tuning phase, where the actions are tuned, using the continuity of the action space.\\
 To tune the actions, the gradient of the reward with respect to the policy is taken, where $\pi_t(a|t)$ represents the policy for action at time step t. 
 Formally, the gradient can be written as $\Delta \pi_t = \frac{\partial V (s_t, \pi_{t:T})}{\pi_{t}}$. Given a differentiable model of the environment, their algorithm can 
 find solutions to tasks with no prior training. The authors demonstrate their approach on several robot 
 benchmarks, where it can match or surpass the performance of pretrained SAC, given 5 seconds computation time per action.\\
-While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the MCTS.
+While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the \ac{mcts}.

@@ -2243,17 +2243,19 @@
     <bcf:citekey order="59">gawlikowski2022survey</bcf:citekey>
     <bcf:citekey order="59">liu2022simple</bcf:citekey>
     <bcf:citekey order="60">pathak2017curiositydriven</bcf:citekey>
-    <bcf:citekey order="61">ho2016generative</bcf:citekey>
-    <bcf:citekey order="62">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="63">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="64">InfCausalEnt</bcf:citekey>
-    <bcf:citekey order="65">NEURIPS2020_b5c01503</bcf:citekey>
-    <bcf:citekey order="66">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="67">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="61">yu2019meta</bcf:citekey>
+    <bcf:citekey order="62">todorov2012mujoco</bcf:citekey>
+    <bcf:citekey order="63">ho2016generative</bcf:citekey>
+    <bcf:citekey order="64">10.5555/3104322.3104481</bcf:citekey>
+    <bcf:citekey order="65">10.5555/3104322.3104481</bcf:citekey>
+    <bcf:citekey order="66">InfCausalEnt</bcf:citekey>
+    <bcf:citekey order="67">NEURIPS2020_b5c01503</bcf:citekey>
     <bcf:citekey order="68">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="69">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="70">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="71">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="72">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="73">stepputtis2020languageconditioned</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

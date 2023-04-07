@@ -1,11 +1,83 @@
 % !TEX root = ../main.tex
 \chapter{Implementation Details}
-%\section{Detailed Validation Results}
 \label{chapter:DetailedDescriptions}\label{appendix}
-%\inputminted{c++}{../../src/wos_native.cuh}
+-python 3.10
+-pytorch 1.13
+-mujoco 2.1.2.14
+-metaworld 0.1.0
+-all details in requirements of code --github
+
+Weight decay 1e-2
+AdamW optimizer
+all networks are trained with lr 1e-4
+
+actor
+encoder
+
+
+planner
+encoder
+
+-critic:
+encoder 
+
+Sample whole trajectories randomly from replay buffer
+Max size replaybuffer for dense observations: 50000 trajectoreis
+
+SOPOMDP:
+100 opt with lr 1e-6
+MDPs:
+3 opt steps with lr 1e-6, until 1 positive sample is found, than 1e-5. We found otherwise it over optimizes in early stages leading to no 
+exploration. 
+in environments with no provided expert trajectories, we set a random exploration phase according to the baselines of 10 Epsiodes or 1000 steps, where 
+the trajectories for the training dataset are sampled at random, but the trajectoreis for the evaluation of the success rate are sampled according to 
+curretn policy.
+
+
+lr: 1e-4 for all networks
+6000 trajectories per training step
+If we explicitly state pure imitation learning, we use 6000 trajectories from replay buffer but don't add new trajectories to have 
+comparability in terms of compute.
+
+we only optimise trajectories until critic predicts sucess probability 1
+batchsize: 16
+
+Tp prevent early overfitting of critic given limited data, we only train until loss of 1e-5 
+sample 10 training trajectories in parallel
+for validation, we sample 15 in parallel two times to have 30 test samples
+
+We use manual seed for torch and numpy. We compute multiple episodes in one run, so from seed = 0 we can get all three runs with different random behaviour. 
+
 
 \chapter{Meta World}
 \label{chapter:MetaWorld}
+Meta-World \cite{yu2019meta} is a benchmark suite of 50 robotic manipulation tasks designed to evaluate the generalization ability of \ac{rl} 
+algorithms. The tasks are highly challenging and involve complex manipulation of objects in a simulated environment. 
+While Meta-World is often used for meta-reinforcement learning, it can also be used for normal\ac{rl}tasks.
+
+One of the strengths of Meta-World is that the tasks have well-defined success criteria, which makes it possible to naturally define sparse rewards. 
+In this thesis, we us five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push" and "Reach", as displayed in 
+figure \ref{}. \\
+
+The environments have 39 dimensional observation space and 4 dimensional action space. 
+The actino space consists Of
+
+
+The observation space consists Of
+
+
+The instances of the environment sample different layouts of objects and goals, which are represented in the observations. We use the 
+goal observable V2 environments provided with the benchmark.
+
+table
+reach: goal positional
+pickpalce: goal positional
+drawer close: position of drawer
+windowopen: position of window
+push: goal position
+
+Meta-World uses the MuJoCo simulation environment \cite{todorov2012mujoco}. In our setting, we use the python package  
+"mujoco-py" version 2.1.2.14 with "metaworld" version 0.1.0.   
 
 \chapter{Additional Plots}
 \label{chapter:additional_plots}
@@ -212,7 +284,7 @@ evaluation and 100 tasks are used for testing.\\
 The task consists of picking up objects and pouring their content into other objects. A sentense in natural language describes the task and the object. 
 For example "Pick up the red cup". Additionally, an rgb image of the scene is provided. An overview over 
 all possible objects and an example task can be found in figure \ref{lang_imi_expl}. 
-There is only one observation per trajectory, so the setting is the single observation POMDP.  \\
+There is only one observation per trajectory, so the setting is the single observation \ac{pomdp}.  \\
 
 
 Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} also propose a method to solve the benchmark. 
