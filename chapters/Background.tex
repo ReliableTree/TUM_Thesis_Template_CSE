@@ -22,8 +22,8 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 \end{itemize}
 
 In the following sections, we will provide an overview of these learning paradigms. 
-Then, we will introduce the mathematical framework of \ac{mdp}s to model the environment in reinforcement learning. 
-After that, we will discuss model-free and model-based algorithms for \ac{mdp}s. We will also introduce imitation learning and inverse reinforcement learning. 
+Then, we will introduce the mathematical framework of \ac{mdp}s to model the environment in \ac{rl}. 
+After that, we will discuss model-free and model-based algorithms for \ac{mdp}s. We will also introduce \ac{il} and \ac{irl}. 
 Next, we will introduce \ac{pomdp}, followed by an overview of sequential models that can be used 
 to solve \ac{pomdp}s.
 
@@ -248,8 +248,8 @@ It continues until convergence.
 \end{algorithm}
     
 
-\section{MDP Model}
-Now that we have established the foundation of reinforcement learning, we will investigate two learning paradigms, 
+\section{\ac{mdp} Model}
+Now that we have established the foundation of \ac{rl}, we will investigate two learning paradigms, 
 namely model-free \ac{rl} in section \ref{sec:mod_free_ref} and model-based \ac{rl} in section \ref{sec:mod_based_ref}. \\
 
 Model-free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
@@ -475,7 +475,7 @@ A proof for the convergence and optimality of this estimator can be found in \ci
 \subsection{Soft Actor Critic}
 \label{SAC}
 Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
-is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
+is a fundamental trade-off in \ac{rl}. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. Also, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of \ac{rl} algorithms, and different methods aim to find a good compromise between them.
 
@@ -611,12 +611,12 @@ From this work we conclude that solving the
 \ac{rl} problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual \ac{mdp} with model $m$. 
 
 \section{Imitation Learning}
-Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
+Imitation learning (\ac{il}) is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
 rather than by trial and error \cite{IL}. In this approach, the data distribution seen during test time is dependent on the learned policy, 
 breaking the \ac{iid} assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
-Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
+Formally \ac{il} can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
 
 \begin{equation}
     \pi^* = \underset{\pi}{\text{argmax}}\left[\mathbb{E} [\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]\right]
@@ -625,19 +625,19 @@ Formally imitation learning can be defined as the task of learning a policy $\pi
 where $s_t$ is the state at time step $t$, $a_t$ is the action taken by the agent at time step $t$, $r(s_t, a_t)$ is the reward received for taking action $a_t$ in state $s_t$, and $\gamma \in [0,1]$ is the discount factor.
 
 Returning to our general learning paradigm \ref{general_learning_paradigm}, $g^*$ has access to expert Data $D_{\text{expert}}$. 
-The challenge of imitation learning 
+The challenge of \ac{il} 
 opposed to the general supervised learning paradigm is, that the data distribution during test time depends on the learned policy $\pi_{\text{imitation}}$:
 \begin{align}
     \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \ propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]
 \end{align}
 in general.
 \\ \\
-The goal of imitation learning is to learn a policy that performs as well as the expert demonstrations in a new, unseen environment. 
+The goal of \ac{il} is to learn a policy that performs as well as the expert demonstrations in a new, unseen environment. 
 This approach has been applied successfully in a variety of domains, including robotics \cite{stepputtis2020languageconditioned}, video games \cite{MUZero}, 
 and natural language processing \cite{brown2020language}.
 
 \subsection{Behavioral Cloning}
-Behavioral cloning is a popular technique used in imitation learning. 
+Behavioral cloning is a popular technique used in \ac{il}. 
 In behavioral cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
 actions predicted by the learned policy. Formally let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
 predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
@@ -678,12 +678,12 @@ Differentiating the KL divergence with respect to $\theta$ gives:
 , as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
 
 \section{Inverse Reinforcement Learning}
-Inverse reinforcement learning (IRL) describes a class of algorithms that are provided with an incomplete $\text{MDP}_{\bar{\text{R}}}$, 
+\ac{irl} describes a class of algorithms that are provided with an incomplete $\text{MDP}_{\bar{\text{R}}}$, 
 where the reward function is not given. Instead an expert policy provides optimal behavior. The goal of IRL is to recover the reward function from the 
-expert behavior to train a policy that imitates the expert policy. This is similar to direct imitation learning as discussed in the last section, 
+expert behavior to train a policy that imitates the expert policy. This is similar to direct \ac{il} as discussed in the last section, 
 with the difference that the learned reward 
 function can be used to train a policy on additional interactions with the environment, 
-while direct imitation learning only acts on the provided expert trajectories. 
+while direct \ac{il} only acts on the provided expert trajectories. 
 Formally let $r'$ be a reward function and $\pi_{r'}^*$ defined as:
 \begin{equation}
     \pi_{r'}^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
@@ -695,7 +695,7 @@ actions under the policy $\pi_{r'}^*$ are optimal:
 \end{equation}
 This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: \\
 Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
-There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning, 
+There are different approaches to disambiguate the reward function and the resulting policy. One approach is \ac{gail}, 
 which is developed in the next section.
 
 
@@ -979,4 +979,4 @@ One advantage of the Transformer architecture is that it does not suffer from th
 This is because the self-attention mechanism allows the model to directly access any input token, without the need for recurrent connections. Self attention type 
 architectures have been shown to outperform recurrent networks on a number of sequence based tasks. For example they are used in the GPT-3 architecture, which has 
 shown impressive results in natural language prediction \cite{brown2020language}. While they were developed for natural language tasks, they have 
-shown promising results in a multitude of areas, including image generation, image classification, imitation learning and reinforcement learning.
+shown promising results in a multitude of areas, including image generation, image classification, \ac{il} and \ac{rl}.

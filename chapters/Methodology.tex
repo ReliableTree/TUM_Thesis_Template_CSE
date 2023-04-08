@@ -96,7 +96,7 @@ our network to generate an action sequence, rather then generating it autoregres
 
 Another benefit of computing the whole trajectory in one pass is that the \ac{iid} input data 
 assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution during inference time 
-then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
+then during train time, which generally does not hold for \ac{il}, as the distribution of data seen during inference depends on the policy. 
 However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the \ac{pomdp}, which is independent of 
 the policy, thus the \ac{iid} assumption holds.\\
 
@@ -247,8 +247,8 @@ but $\epsilon_{\nabla_{\theta}} \neq 0$, as $C$ is still a function approximator
 
 Intuitively, while we have the actual value $C_{s_1, a_{1:T}}(t), (s_1, a_{1:T}) \in \mathcal{D}^n$ of a given action sequence in our database $\mathcal{D}^n$, 
 we don't know the value of an arbitrary action sequence starting from $s_1$: $C_{s_1, \tilde{a}_{1:T}}(t), (s_1 \in \mathcal{D}^n, \tilde{a}_{1:T} \notin \mathcal{D}^n)$. \\
-To mitigate this error, we want to decouple the actor update from the critic by rephrasing the actor update as an imitation learning problem. \\
-Let's say we have a dataset $\mathcal{D}_E$ of expert demonstrations. Like in imitation learning, we define the objective $J_{\phi}$ as:
+To mitigate this error, we want to decouple the actor update from the critic by rephrasing the actor update as an \ac{il} problem. \\
+Let's say we have a dataset $\mathcal{D}_E$ of expert demonstrations. Like in \ac{il}, we define the objective $J_{\phi}$ as:
 \begin{equation}
     \label{eq:ac_obj_1}
     J_{\phi} = \mathbb{E}_{(o, a_{t}) \in \mathcal{D}_E, t \in \{1, ..., T\}}\sum_n \left(\pi_{\phi}(o)_{t, n} - a_{t, n}\right)^2,
@@ -264,7 +264,7 @@ Following, we will provide a lower bound for the policy improvement, which uses 
 Assume we have a dataset $\mathcal{D}_{\text{E}}$ sampled from the expert policy $\pi_{\text{E}}$ with optimal value 
 $$J(\pi_{\text{E}}) =\mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right],$$
 and a dataset $\tilde{\mathcal{D}}_{\text{E}}$ sampled from $\pi_{\text{E}}$ with $\mathcal{D}_{\text{E}} \subset \tilde{\mathcal{D}}_{\text{E}}$. 
-We want to show, that a policy $\tilde{\pi}$ that is trained with imitation learning on $\tilde{\mathcal{D}}_{\text{E}}$ has 
+We want to show, that a policy $\tilde{\pi}$ that is trained with \ac{il} on $\tilde{\mathcal{D}}_{\text{E}}$ has 
 a higher expected reward then a policy $\pi$ trained on $\mathcal{D}_{\text{E}}$: $J_{\tilde{\pi}} \geq J_{\pi}$.
 We define 
 $$L_{\pi_{\text{E}}}(\pi) = J(\pi_{\text{E}}) + \sum_s \rho_{\pi_{\text{E}}}(s) \sum_a \pi(a|s) A_{\pi}(s,a),$$
@@ -716,6 +716,6 @@ once per trajectory, limiting the additional compute cost.\\
 Recall, in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
 actions, instead of optimizing the actions directly. We found a good solution is to keep the states of the actor and planner during inference of a trajectory, 
 instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimization, as we only want to 
-train it using imitation learning from expert trajectories. With this adaptation, we can use a low number of optimization steps per time step and still change the trajectory meaningfully, 
+train it using \ac{il} from expert trajectories. With this adaptation, we can use a low number of optimization steps per time step and still change the trajectory meaningfully, 
 as the update steps on the actor and planner accumulate during inference time.
      

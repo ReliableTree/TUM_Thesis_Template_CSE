@@ -8,10 +8,10 @@ reward of whether the task was successfully solved. \\
 
 While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic \ac{mdp}s and deterministic \ac{pomdp}s. That is why we compare our 
 findings to two state-of-the-art general purpose \ac{rl} algorithms, which we will develop in this section in detail, as we find it key to analyze experimental results. 
-Another key aspect is imitation learning, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. \\
+Another key aspect is \ac{il}, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. \\
 
 Furthermore, we will discuss current approaches that addresses parts of our setup. \\
-We will first focus on imitation learning, then cover guided \ac{rl} with sparse rewards, and then
+We will first focus on \ac{il}, then cover guided \ac{rl} with sparse rewards, and then
 discuss how inference time search is used in current algorithms. Some of the presented approaches cover multiple requirements, so they cannot unambiguously be sorted into the provided categories.
 
 \section{General Purpose Reinforcement Learning Algorithms}
@@ -79,7 +79,7 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
     \label{ppo_algo}
 
 \end{algorithm}
-Overall, \ac{ppo} is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.\\
+Overall, \ac{ppo} is a robust and effective algorithm for deep \ac{rl}, and has been successfully applied to a wide range of environments and tasks.\\
 
 A GRU can be used in the recurrent implementation of \ac{ppo} called Recurrent Proximal Policy optimization (RPPO) as analyzed by Pleines, et al. 
 \cite{RPPO}. Here the policy $\pi$ is defined on the history of observations and actions using a recurrent hidden state $h_t : o_{1:t} \times a_{1:t}$ with $\pi : o_{1:t} \times a_{1:t} \rightarrow \mathcal{R}$.
@@ -176,7 +176,7 @@ for off-policy learning with a focus on exploration, in contrast to PPO, which w
 
 \section{Imitation Learning}
 \subsection{Generative Adversarial Imitation Learning}
-\ac{gail} \cite{ho2016generative} is a key paradigm for efficient imitation learning that uses expert demonstrations in \ac{mdp}s. 
+\ac{gail} \cite{ho2016generative} is a key paradigm for efficient \ac{il} that uses expert demonstrations in \ac{mdp}s. 
 The main idea of \ac{gail} is to disambiguate the reward signal from IRL by ensuring that every policy except the expert policy has a lower expected reward under the inverse reward function, given the expert 
 demonstrations. Following, we will use a cost function $c \propto -r$, as it gives a natural optimum at $c=0$.\\
 
@@ -200,7 +200,7 @@ where $\theta$ and $\omega$ are the parameters of the generator and discriminato
 $\lambda$ controls the trade-off between the similarity to the expert trajectories and the entropy of the policy and $D_{\text{KL}}(\cdot || \cdot)$ denotes the Kullback-Leibler divergence. \\
 Intuitively discriminator tries to distinguish between the expert and generated trajectories, while the generator tries to produce trajectories that are indistinguishable from those of the expert.\\
 
-Overall, \ac{gail} is a state-of-the-art imitation learning algorithm which is able to learn complex behavior with limited expert demonstrations. It shows outstanding 
+Overall, \ac{gail} is a state-of-the-art \ac{il} algorithm which is able to learn complex behavior with limited expert demonstrations. It shows outstanding 
 asymptotical performance with respect to the amount of expert demonstrations, which is why we will use it as a baseline in our experiments.\\ 
 A downside is that it requires a high number of environment interactions to train the discriminator and actor, as stated by the authors. A more detailed derivation of the algorithm and theoretical 
 bounds can be found in appendix \ref{app:GAIL}.
@@ -208,7 +208,7 @@ bounds can be found in appendix \ref{app:GAIL}.
 
 \subsection{Generative Adversarial Imitation Learning in \ac{pomdp}s}
 \label{GAIL_POMDPS}
-In this section, we will describe an imitation learning approach based on GAIL, that handles \ac{pomdp}s.\\
+In this section, we will describe an \ac{il} approach based on GAIL, that handles \ac{pomdp}s.\\
 The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
 extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
@@ -245,7 +245,7 @@ into account natural language instructions.
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the environment.
 The proposed method involves using a neural network to map natural language instructions to 
 corresponding robot actions, using a GRU to unroll the trajectory. The authors also introduce a novel dataset of language-conditioned robot manipulation tasks, which we will use to evaluate 
-and compare the performance of our method in pure imitation learning settings.\\ 
+and compare the performance of our method in pure \ac{il} settings.\\ 
 The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
 tasks when language instructions are given. A more detailed overview of the method, dataset and benchmark can be found in appendix \ref{LCILRM}.\\
 
@@ -279,7 +279,7 @@ By incorporating this intrinsic reward signal into the overall \ac{rl} objective
 unexpected or uncertain, which can lead to discovering new strategies or behaviors that improve its performance. This approach has been shown to be effective in a variety of 
 domains, including robotics, gaming, and natural language processing.\\
 
-This approach is very general and can be added as an addition to classical reinforcement learning.
+This approach is very general and can be added as an addition to classical \ac{rl}.
 
 \subsection{Guided Reinforcement Learning with Sparse Rewards}
 \label{sec:rel_work_finetuning}

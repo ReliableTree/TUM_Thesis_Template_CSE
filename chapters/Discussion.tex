@@ -5,7 +5,7 @@
 In this chapter we will summarize our findings and discuss advantages as well es remaining limitations of our approach and evaluation.
 \section{Applicability and Advantages}
 \subsection{Imitation Learning}
-Our results from section \ref{sec:exp_imi_lr} demonstrate that our imitation learning approach outperforms recurrent algorithms in continuous action space, 
+Our results from section \ref{sec:exp_imi_lr} demonstrate that our \ac{il} approach outperforms recurrent algorithms in continuous action space, 
 given a single observation per trajectory. We propose this is due to generating the whole sequence in one step, 
 rather than using an autoregressive approach. This method does not break the \ac{iid} assumption, making predictions more robust and effective 
 for planning in continuous space. \\
@@ -18,11 +18,11 @@ This approach allows for informed search and leads to faster convergence and mor
 search paradigm on the convergence rate of the algorithm as evidence for the importance and effectiveness of our use of inference time search.
 
 \subsection{Reinforcement Learning}
-We explored the effectiveness of \ac{rl} in improving the performance of our approach as compared to pure imitation learning. 
+We explored the effectiveness of \ac{rl} in improving the performance of our approach as compared to pure \ac{il}. 
 Our results in section \ref{sec:fine_tuning} demonstrate that our approach can effectively leverage both expert demonstrations and \ac{rl} data to achieve 
 superior performance compared to our baselines.\\
 
-To further assess the impact of reinforcement learning, we conducted experiments on the Drawer Close environment without expert demonstrations. 
+To further assess the impact of \ac{rl}, we conducted experiments on the Drawer Close environment without expert demonstrations. 
 In this environment, a solution can be achieved through random trajectories to some degree. 
 Our analysis revealed that our algorithm outperformed the baselines significantly in this pure reinforcement setting, 
 indicating that our approach is more stable with sparse rewards than traditional actor critic methods.\\
@@ -30,8 +30,8 @@ indicating that our approach is more stable with sparse rewards than traditional
 
 
 
-\subsection{MDP Setting}
-In Section \ref{sec_exp_con_obs}, we evaluated the performance of the \ac{coavc} approach in the standard MDP setting, 
+\subsection{\ac{mdp} Setting}
+In Section \ref{sec_exp_con_obs}, we evaluated the performance of the \ac{coavc} approach in the standard \ac{mdp} setting, 
 where observations are available after each step.\\
 
 Our experiments demonstrated that our method significantly outperforms the baselines, making efficient use of expert demonstrations and reinforcement learning.\\
@@ -40,7 +40,7 @@ To evaluate the performance of pure \ac{rl} in \ac{mdp}s, we conducted experimen
 environments without expert demonstrations. Our results show that all baselines and COAVC can find solutions, but COAVC is more stable and achieves 
 faster convergence. These findings provide further evidence of the general applicability and better performance of our approach over the baselines. 
 
-\subsection{Single Observation and MDP Comparison}
+\subsection{Single Observation and \ac{mdp} Comparison}
 We compared COAVC to \ac{avc} in section \ref{sec:com_coavc_avc} and observed that while COAVC performs better, 
 \ac{avc} already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
 expert data. Moreover, the inference of \ac{avc} is \ac{iid}, while that of COAVC is not, as observations at inference time are dependent on actions. 
@@ -59,7 +59,7 @@ tailored for it. In section Guided Reinforcement Learning with Sparse Rewards \r
 a candidate. While we argued why we expect our algorithm to perform better in cases with provided expert demonstrations than the featured algorithm, we have to 
 leave testing it for future work.\\
 
-Another aspect that we would like to test in more depths is the sparse reward setting. In section \ref{sec:HER}, we have introduced two concepts that are used for sparse reinforcement learning, namely 
+Another aspect that we would like to test in more depths is the sparse reward setting. In section \ref{sec:HER}, we have introduced two concepts that are used for sparse \ac{rl}, namely 
 HER and curiosity driven exploration. While HER is not generally applicable, we would like to both test our approach against a baseline using curiosity, as well as incorporate 
 curiosity into our algorithm as an additional reward signal. 
 
@@ -79,7 +79,7 @@ COAVC performs well in this environment was not possible due to time constraints
 In COAVC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
 However, choosing the action sequence with the highest expected reward is not equivalent to choosing the action with the highest posterior 
 expectation over both the environment dynamics and action sequences. In indeterministic environments, the optimal action sequence may depend on later observations. To 
-search for the best current action in an indeterministic MDP requires the estimate of multiple possible observations and action sequences, respectively. \\
+search for the best current action in an indeterministic \ac{mdp} requires the estimate of multiple possible observations and action sequences, respectively. \\
 
 In the current version, planning with multiple possible action sequences that can depend on later observations is not possible. 
-Although COAVC can update the action sequence given new observations, it can not plan for multiple possible future observations.
+Although COAVC can update the action sequence given new observations, it cannot plan for multiple possible future observations.

@@ -36,7 +36,7 @@ curretn policy.
 
 lr: 1e-4 for all networks
 6000 trajectories per training step
-If we explicitly state pure imitation learning, we use 6000 trajectories from replay buffer but don't add new trajectories to have 
+If we explicitly state pure \ac{il}, we use 6000 trajectories from replay buffer but don't add new trajectories to have 
 comparability in terms of compute.
 
 we only optimize trajectories until critic predicts sucess probability 1
@@ -53,7 +53,7 @@ We use manual seed for torch and numpy. We compute multiple episodes in one run,
 \label{chapter:MetaWorld}
 Meta-World \cite{yu2019meta} is a benchmark suite of 50 robotic manipulation tasks designed to evaluate the generalization ability of \ac{rl} 
 algorithms. The tasks are highly challenging and involve complex manipulation of objects in a simulated environment. 
-While Meta-World is often used for meta-reinforcement learning, it can also be used for normal\ac{rl}tasks.
+While Meta-World is often used for meta-\ac{rl}, it can also be used for normal\ac{rl}tasks.
 
 One of the strengths of Meta-World is that the tasks have well-defined success criteria, which makes it possible to naturally define sparse rewards. 
 In this thesis, we us five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push" and "Reach", as displayed in 
@@ -146,13 +146,13 @@ Meta-World uses the MuJoCo simulation environment \cite{todorov2012mujoco}. In o
 
 \chapter{Generative Adversarial Imitation Learning}
 \label{app:GAIL}
-For imitation learning, Generative Adversarial Imitation Learning (GAIL) 
+For \ac{il}, Generative Adversarial Imitation Learning (GAIL) 
 \cite{ho2016generative} presents a key paradigm to make efficient use of expert demonstrations given access to the \ac{mdp}. 
 The main idea of \ac{gail} is to disambiguate the reward signal 
 by ensuring every policy except the expert policy has a lower expected reward under our inverse reward function, given the expert 
 demonstrations.\\ 
 First, 
-maximum causal entropy IRL \cite{10.5555/3104322.3104481} is a method to regularize policies found from inverse reinforcement learning. The idea is to choose the reward function, for 
+maximum causal entropy IRL \cite{10.5555/3104322.3104481} is a method to regularize policies found from \ac{irl}. The idea is to choose the reward function, for 
 which the optimal policy has the highest entropy with respect to the action distribution. This allows us to choose a policy that is "no more committed to any 
 particular path" \cite[p.2]{10.5555/3104322.3104481}, then necessary. Formally the objective is written as:
 \begin{equation*}
@@ -171,7 +171,7 @@ and the discounted causal entropy as defined by Bloem, et al. \cite{InfCausalEnt
 \end{equation*}
 Here $\pi_{r'}^*$ denotes the expert policy, which indicates the expert policy is assumed to maximize a true 
 reward function ${r'}$. From now, we will refer to the expert policy as $\pi_{\text{E}}$, as it is more in line with the common choice found in 
-literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for reinforcement learning. In the paper, 
+literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for \ac{rl}. In the paper, 
 the authors minimize a cost function $c$, instead of maximizing a reward function $r$. The choice does not make a profound 
 mathematical difference, but it gives a more natural way to interpret the inverse objective. $c=0$ can be naturally defined as the optimal cost value, while a reward function has 
 no natural upper bound. For this practical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimization in 
@@ -247,7 +247,7 @@ and the discrimnator update rule as:
 Note, because cost $c$ instead of reward $r$ is used in equation \ref{GAIL_update_policy} gradient descent is used, as the cost is minimized and in equation \ref{eq_GAIL_disc} 
 gradient ascent is used, as we want to maximize the discriminative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo}.\\ \\
 \begin{algorithm}
-    \caption{Generative adversarial imitation learning}
+    \caption{Generative adversarial Imitation Learning}
     \label{GAIL_Algo}
     \begin{algorithmic}
     \Require Expert trajectories $\tau_E \sim \pi_E$, initial policy and discriminator parameters $\theta_0$, $w_0$\\
@@ -278,7 +278,7 @@ asymptotical performance with respect to the amount of expert demonstrations but
 Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} propose a benchmark for natural language conditioned robot manipulation tasks. \\
 The benchmark consists of a 7 dof simulated robot arm with a 
 tabletop setup using CoppeliaSim, which allows for accurate dynamics simulations at an update rate of 20 Hz. 
-An imitation learning dataset consisting of 44 100 tasks is provieded, where 4000 tasks are used for 
+An \ac{il} dataset consisting of 44 100 tasks is provieded, where 4000 tasks are used for 
 evaluation and 100 tasks are used for testing.\\
 
 The task consists of picking up objects and pouring their content into other objects. A sentense in natural language describes the task and the object. 
