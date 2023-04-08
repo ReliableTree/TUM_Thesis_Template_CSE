@@ -50,6 +50,14 @@
 \usepackage{subcaption}
 \usepackage{adjustbox}
 \usepackage{acronym}
+\usepackage{hyperref}[2011/02/05]
+
+\makeatletter
+\AtBeginDocument{%
+  \renewcommand*{\AC@hyperlink}[2]{#2}%
+}
+\makeatother
+
 % KOMA scrbook options:
 %  index=totoc: include an entry for the index in the table of contents.
 %  headsepline: use horizontal line under heading.
@@ -72,7 +80,7 @@
 
 \makeglossaries
 
-\begin{document}
+\begin{document} 
 
  \frontmatter
 

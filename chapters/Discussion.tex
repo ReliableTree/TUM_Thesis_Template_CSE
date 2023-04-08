@@ -10,9 +10,9 @@ given a single observation per trajectory. We propose this is due to generating 
 rather than using an autoregressive approach. This method does not break the i.i.d. assumption, making predictions more robust and effective 
 for planning in continuous space. \\
 
-\subsection{Optimisation Mode}
-In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimisation modes employed in the \ac{avc} algorithm. 
-Our experiments revealed that the optimisation mode plays a critical role in determining the \ac{rl} performance. 
+\subsection{Optimization Mode}
+In Section \ref{ref:com_opt_modes}, we conducted an analysis of various optimization modes employed in the \ac{avc} algorithm. 
+Our experiments revealed that the optimization mode plays a critical role in determining the \ac{rl} performance. 
 Specifically, we propose leveraging the actor to encode a useful space of candidate solutions that the critic can search on. 
 This approach allows for informed search and leads to faster convergence and more efficient exploration of candidate solutions. We take the strong effect of the inference time 
 search paradigm on the convergence rate of the algorithm as evidence for the importance and effectiveness of our use of inference time search.

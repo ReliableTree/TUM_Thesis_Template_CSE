@@ -2,13 +2,13 @@
 
 \chapter{Background}
 \label{chapter:Background}
-In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ to maximise the expectation of an objective function 
-${g: X \times Y \to \mathbb{R}}$ using a signal function $g^*$, which is available during train time:
+In this thesis machine learning will be defined as the guided search for candidate functions $f^*: X \to Y$ defined on a data distribution $\mathcal{D}$ to maximize the expectation of an objective function 
+${g: X \times Y \to \mathbb{R}}$ using a signal function $g^*$, which is available during train time on the train data distribution $\mathcal{D}_{\text{train}}$:
 \begin{equation}
     \label{general_learning_paradigm}
     \begin{aligned}
-        f^* &= \arg\max_{f} \mathbb{E}_{x \sim D}[g(x,f(x))] \\
-        f^* &\approx f' = \arg\max_{f} \mathbb{E}_{x \sim D_{train}}[g^*(x,f(x))]
+        f^* &= \arg\max_{f} \mathbb{E}_{x \sim \mathcal{D}}[g(x,f(x))] \\
+        f^* &\approx f' = \arg\max_{f} \mathbb{E}_{x \sim \mathcal{D}_{\text{train}}}[g^*(x,f(x))]
     \end{aligned}
 \end{equation}
 
@@ -18,8 +18,8 @@ Following the book "Pattern Recognition and Machine Learning" \cite{bishop} ther
 \begin{itemize}
 	\item Supervised Learning
 	\item Unsupervised Learning
-	\item Reinforcement Learning
-\end{itemize} .
+	\item Reinforcement Learning.
+\end{itemize}
 
 In the following sections, we will provide an overview of these learning paradigms. 
 Then, we will introduce the mathematical framework of \ac{mdp}s to model the environment in reinforcement learning. 
@@ -33,14 +33,14 @@ Supervised learning is a learning paradigm where the input-output pairs $(x,y) \
 $f^*$ that maps inputs $x \in X$ to outputs $y \in Y$. The objective function is typically a loss function that measures the difference between 
 the predicted output $f(x)$ and the true output $y$.
 
-Formally the signal or loss function $L = g^*$ is defined on a training set $D_{train} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
+Formally the signal or loss function $L = g^*$ is defined on a training set $\mathcal{D}_{\text{train}} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
 labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimising $f$ for $L$ 
-over $D_{train}$ should be aligned with optimising $f$ for $g$ over $D$:
+over $\mathcal{D}_{\text{train}}$ should be aligned with optimising $f$ for $g$ over $D$:
 
 \begin{equation}
 \begin{aligned}
 f^* &= \arg\min_{f} \mathbb{E}_{(x,y) \sim D}[g(f(x), y)] \\
-f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim D_{train}}[L(f(x),y)] = \arg\min{f} \frac{1}{n}\sum_{i=1}^n L(f(x_i),y_i)
+f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim \mathcal{D}_{\text{train}}}[L(f(x),y)] = \arg\min{f} \frac{1}{n}\sum_{i=1}^n L(f(x_i),y_i)
 \end{aligned}
 \end{equation}
 
@@ -63,11 +63,11 @@ for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}.
 \section{Reinforcement Learning}
 \label{section:rl}
 
- \ac{rl} is a learning paradigm where an agent interacts with an environment and learns to take actions that maximise a 
+ \ac{rl} is a learning paradigm where an agent interacts with an environment and learns to take actions that maximize a 
 cumulative reward signal. In this paradigm, the input $x$ is typically the state $s$ of the environment, the output $y$ is the action $a$ taken by the agent, 
 and the the objective function $g$ is a reward signal $r$.
 
-The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximise the expected cumulative reward:
+The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximize the expected cumulative reward:
 
 \begin{equation*}
     \label{rl_objective}
@@ -106,8 +106,8 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \end{itemize}
     \item \textbf{Time horizon:}
     \begin{itemize}
-    \item Infinite horizon: the algorithm aims to maximise the expected sum of rewards over an infinite time horizon.
-    \item Finite horizon: the algorithm aims to maximise the expected sum of rewards over a fixed time horizon.
+    \item Infinite horizon: the algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
+    \item Finite horizon: the algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
     \end{itemize}
     \item \textbf{inference type:}
     \begin{itemize}
@@ -132,7 +132,8 @@ An \ac{mdp}is defined as a tuple $(S, A, T, R, \gamma)$, where:
 
 The transition function $T$ is defined as:
 
-$$T(s, a, s') = \mathbb{P}(s_{t+1}=s' \mid s_t=s, a_t=a)$$
+$$T(s, a, s') = \mathbb{P}(s_{t+1}=s' \mid s_t=s, a_t=a),$$
+where $s, s' \in S$ and $a \in A$.
 
 This function specifies the probability of moving from state $s$ to state $s'$ after taking action $a$. The reward function $R$ is defined as:
 
@@ -190,19 +191,19 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
 \end{figure}
 
 \section{Policy Gradient}
-There are numerous ways to arrive at a policy that maximises the \ac{rl} objective as defined in equation 
+There are numerous ways to arrive at a policy that maximizes the \ac{rl} objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function.\\ 
-In this thesis we use neural networks for this task, as they have shown most promising results. The expectation over the cumulative 
+In this thesis we use neural networks for this task, as they show most promising results. The expectation over the cumulative 
 reward $J = E[\sum_{t} \gamma^t r_t]$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
 
 \begin{equation}
 J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]
 \end{equation}
 where  $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$. 
-$T$ can either be finite or infinite. If $T$ is infinite, $\gamma$ must be smaller then 1.
+$T$ can either be finite or infinite. If $T$ is infinite, $\gamma$ must be smaller than 1.
 
-Our goal is to maximise $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
+Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
 \begin{equation}
     \label{nabla_reinforce}
     \begin{aligned}
@@ -249,17 +250,17 @@ It continues until convergence.
 
 \section{MDP Model}
 Now that we have established the foundation of reinforcement learning, we will investigate two learning paradigms, 
-namely model free \ac{rl} in section \ref{sec:mod_free_ref} and model based \ac{rl} in section \ref{sec:mod_based_ref}. \\
+namely model-free \ac{rl} in section \ref{sec:mod_free_ref} and model-based \ac{rl} in section \ref{sec:mod_based_ref}. \\
 
-Model free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
+Model-free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
 estimate of the expected rewards given the \ac{mdp} dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
 as it is robust to uncertainties of the \ac{mdp} dynamics and does not need a model of the environment, which is hard to provide in many cases. 
-Model based approaches learn the policy given a model of the MDP. If the model is not known, it is learned 
-from observed interactions. The advantage of model based algorithms is, that the policy can use the model to plan steps ahead. 
+Model-based approaches learn the policy given a model of the MDP. If the model is not known, it is learned 
+from observed interactions. The advantage of model-based algorithms is, that the policy can use the model to plan steps ahead. 
 Where it is applicable, planning has proven to be 
 a crucial advantage. One example is the MuZero algorithm from Julian Schrittwieser et. al \cite{MUZero}.
 
-\section{Model Free Learning}
+\section{Model-Free Learning}
 \label{sec:mod_free_ref}
 In the following section we develop the framework of value functions, on which off policy algorithms rely. 
 We will then introduce PPO, a state-of-the-art on policy algorithm and TQC, a state-of-the-art off policy algorithm, 
@@ -353,7 +354,7 @@ Bellman update operator defined as:
 \begin{equation}
     (T V)(s) = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right).
 \end{equation}
-From this equation it follows, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
+It follows from this equation, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
 \begin{equation}
     \label{TD_update_BM}
     \delta_t = (T V)(s_t) - V(s_t),
@@ -364,8 +365,8 @@ so
 \end{equation*}
 We want to proof that $V$ converges to $V_{\pi}$ under the action of the update operator $T$. We will do this in two steps:
 \begin{enumerate}
-    \item Show that $T$ is a contraction mapping
-    \item Show that the unique fixed point of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
+    \item show that $T$ is a contraction mapping,
+    \item show that the unique fixed point of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
 \end{enumerate}
 \\ \\
 
@@ -474,11 +475,11 @@ A proof for the convergence and optimality of this estimator can be found in \ci
 \subsection{Soft Actor Critic}
 \label{SAC}
 Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
-is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximise the cumulative reward it receives 
+is a fundamental trade-off in reinforcement learning. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. Also, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of \ac{rl} algorithms, and different methods aim to find a good compromise between them.
 
-SAC extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximises a modified 
+SAC extends the AC method by introducing a new objective that encourages the policy to be more stochastic. Specifically, the SAC algorithm maximizes a modified 
 version of the expected cumulative reward that takes into account both the expected reward and the entropy of the policy. The modified objective is given by:
 
 \begin{equation}
@@ -494,8 +495,7 @@ In the original implementation, SAC uses two $Q$ value estimates and a state val
     V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}],
 \end{equation}
 with the minimum value of the two $Q$ critics $Q_\text{min}$ to compensate for the overestimation bias of critics in actor critic 
-algorithms. We will 
-go into more detail on this bias in section \ref{sec:TQC}.
+algorithms. A formal derivation of this bias is done by Thrun and Schwartz \cite{thrun1993issues}. 
 The $Q$ values are trained with TD learning:
 
 \begin{equation}
@@ -521,7 +521,7 @@ a common choice in deep learning applications.\\
 
 This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper \cite{haarnoja2018soft}. \\
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
-To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparametrization trick is used:
+To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparameterization trick is used:
 
 \begin{equation}
     \label{SAC_update_rule}
@@ -533,12 +533,12 @@ To approximate the derivative of \ref{sac_pol_obj} given limited sample size, th
 
 
 
-To summarize, SAC introduces a parameter $\alpha$ with which the trade off between exploration and exploitation can be tuned. It outperforms non stochastic 
+To summarize, SAC introduces a parameter $\alpha$ with which the trade-off between exploration and exploitation can be tuned. It outperforms non-stochastic 
 policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces.
 
 \subsection{TRPO}
 \label{sec:TRPO}
-Trust Region Policy optimisation \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
+Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
 Recall we defined the \ac{rl} objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
@@ -572,16 +572,16 @@ improvement holds:
     \label{eq:pol_impr_TRPO}
     \text{and} \quad  D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}) = \max_s D_{\operatorname{KL}} (\pi(\cdot|s),\tilde{\pi}(\cdot|s)).
 \end{equation}
-Following this insight, the authors propose an algorithm that aims to maximise expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
+Following this insight, the authors propose an algorithm that aims to maximize expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
 We will not explain their algorithm here, as the PPO algorithm builds upon this insight, but is computationally cheaper and has been empirically shown to have 
-similar or better performance then TRPO.
+similar or better performance than TRPO.
 
-\section{Model Based Learning}
+\section{Model-Based Learning}
 \label{sec:mod_based_ref}
-In model based \ac{rl} the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
+In model-based \ac{rl} the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
-$a_{1, ..., T}$ to optimise the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
-expectation is build with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
+$a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
+expectation is built with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
 $J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu, et al. \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
 model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
 and let $V_{\pi}^{M_\theta}$ be the value function, given $\pi$ is the optimal policy for the learned model $M_{\theta}$. It is shown, that 
@@ -593,7 +593,7 @@ the action space is discrete, to make the task of learning the model easier.
 
 \subsection{Proper Value Equivalence}
 \label{sec:prop_val_eq}
-So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model based learning. However this is not strictly the case. Recall we are 
+So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model-based learning. However this is not strictly the case. Recall we are 
 interested in optimising the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
 of our environment at each timestep, but only in the rewards $r_t$. \\
 This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
@@ -606,7 +606,7 @@ if $k$ applications of the Bellman operator result in the same updated value fun
 \end{equation}
 It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall the value function is 
 defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
-equivalent to $m$, but does not predict the observations or states is sometimes referred to as a weakly grounded model.\\ 
+equivalent to $m$, but does not predict the observations or states is sometimes referred to as a "weakly grounded model".\\ 
 From this work we conclude that solving the 
 \ac{rl} problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual \ac{mdp} with model $m$. 
 
@@ -616,7 +616,7 @@ rather than by trial and error \cite{IL}. In this approach, the data distributio
 breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
-Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximises the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
+Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
 
 \begin{equation}
     \pi^* = \underset{\pi}{\text{argmax}}\left[\mathbb{E} [\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]\right]
@@ -636,9 +636,9 @@ The goal of imitation learning is to learn a policy that performs as well as the
 This approach has been applied successfully in a variety of domains, including robotics \cite{stepputtis2020languageconditioned}, video games \cite{MUZero}, 
 and natural language processing \cite{brown2020language}.
 
-\subsection{Behavioural Cloning}
-Behavioural cloning is a popular technique used in imitation learning. 
-In behavioural cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
+\subsection{Behavioral Cloning}
+Behavioral cloning is a popular technique used in imitation learning. 
+In behavioral cloning, the policy is learned by minimizing the difference between the actions taken by the expert and the 
 actions predicted by the learned policy. Formally let $a_{\text{expert}}$ be the action taken by the expert and $a_{\text{imitation}}$ be the action 
 predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
 
@@ -650,8 +650,8 @@ where $d(\cdot, \cdot)$ is a distance metric, and $\theta$ are the parameters of
 squared error, or the cross-entropy loss.
 
 
-\subsection{Behavioural Cloning for Stochastic Policies}
-Behavioural cloning for stochastic policies is a variant of behavioural cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximise the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
+\subsection{Behavioral Cloning for Stochastic Policies}
+Behavioral cloning for stochastic policies is a variant of behavioral cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
 A common choice to achieve this is to minimize the KL divergence between the expert policy and the trained policy.
 
 Formally let 
@@ -679,8 +679,8 @@ Differentiating the KL divergence with respect to $\theta$ gives:
 
 \section{Inverse Reinforcement Learning}
 Inverse reinforcement learning (IRL) describes a class of algorithms that are provided with an incomplete $\text{MDP}_{\bar{\text{R}}}$, 
-where the reward function is not given. Instead an expert policy provides optimal behaviour. The goal of IRL is to recover the reward function from the 
-expert behaviour to train a policy that imitates the expert policy. This is close to direct imitation learning as discussed in the last section, 
+where the reward function is not given. Instead an expert policy provides optimal behavior. The goal of IRL is to recover the reward function from the 
+expert behavior to train a policy that imitates the expert policy. This is similar to direct imitation learning as discussed in the last section, 
 with the difference that the learned reward 
 function can be used to train a policy on additional interactions with the environment, 
 while direct imitation learning only acts on the provided expert trajectories. 
@@ -694,7 +694,7 @@ actions under the policy $\pi_{r'}^*$ are optimal:
     r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
 This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: \\
-Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximises the expected discounted reward.\\
+Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
 There are different approaches to disambiguate the reward function and the resulting policy. One approach is Generative Adversarial Imitation Learning, 
 which is developed in the next section.
 
@@ -717,7 +717,7 @@ A \ac{pomdp} is defined as a tuple:
 \item $\gamma$: the discount factor $\gamma \in [0, 1)$.
 \end{itemize}
 
-To handle the partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states of the \ac{mdp} given the history of 
+To handle partial observability, the agent maintains a belief state, which is a probability distribution over the underlying states of the \ac{mdp} given the history of 
 actions and observations. Formally a belief state $b_t(s)$ at time $t$ is the probability of the system to be in state $s$, 
 given action $a$, observation $o$ and belief state distribution $b_{t}$. The update step is written as:
 \begin{equation*}
@@ -796,7 +796,7 @@ discrete probability distribution for a two-class classifier on n dimensions wit
     p(C=i|x_1, ..., x_n)  = \theta_{i,j} | i \in \{0, 1\}, j \in \{0, ..., 2^n\}.
 \end{equation}
 There are $2^n$ possible values for $x_1, ..., x_n$ and two values for the class label. This gives a total of $2*(2^n-1)$ cases, where the $-1$ comes from using 
-the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empirical distribution 
+the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empirifcal distribution 
 with $\sigma_{\theta_{i,j}} \propto \frac{1}{N}$ and thus the standard deviation scales with $\frac{1}{\sqrt{N}}$, where N is the number of samples 
 for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon$, you get
 \begin{equation}
@@ -825,9 +825,9 @@ In summary, evidence for a model is approximately inverse proportional to the ex
 Sequence models are a natural choice to model \ac{pomdp}s. 
 A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
 a sequence model could take as input a sequence of n observations and return one action. \\ 
-Naively, the input sequence of n tokens with dimension d could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
+Naively, the input sequence of n tokens with dimension $d$ could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
 input to a model. The dimension of the input then scales linear with the sequence length. As motivated in section \ref{COD}, this means exponentially more evidence is 
-required with sequence length n to achieve the same confidence. These approaches are referred to as frame stacking and can solve a \ac{pomdp}s as shown by Raffin 
+required with sequence length n to achieve the same confidence. These approaches are referred to as "frame stacking" and can solve a \ac{pomdp}s as shown by Raffin 
 \cite{framestacking}, though 
 their performance decreases with the number of frames needed to accurately represent the \ac{pomdp}. \\
 Frame stacking handles the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 

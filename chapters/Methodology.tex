@@ -31,7 +31,7 @@ actor and provide analysis of optimality and policy improvement of our method.
 We identify two main challenges in dealing with \ac{sopomdp}s. \\
 The first challenge is the curse of dimensionality from the large preimage of the policy, given it has to keep track 
 of the past. \\
-The second challenge is unstable update behaviour of actor critic methods which comes from update errors by the policy gradient. This problem 
+The second challenge is unstable update behavior of actor critic methods which comes from update errors by the policy gradient. This problem 
 is specifically pronounced in settings with highly non smooth feedback from the environment, like in our case, given sparse rewards 
 and no further observations.
 \subsection{Curse of Dimensionality}
@@ -264,10 +264,10 @@ We want to show, that a policy $\tilde{\pi}$ that is trained with imitation lear
 a higher expected reward then a policy $\pi$ trained on $\mathcal{D}_{\text{E}}$: $J_{\tilde{\pi}} \geq J_{\pi}$.
 We define 
 $$L_{\pi_{\text{E}}}(\pi) = J(\pi_{\text{E}}) + \sum_s \rho_{\pi_{\text{E}}}(s) \sum_a \pi(a|s) A_{\pi}(s,a),$$
-where $\pi$ is the policy we optimise with respect to equation \ref{eq:ac_obj_1} and $\rho_{\pi_{\text{E}}}(s)$ is known from 
+where $\pi$ is the policy we optimize with respect to equation \ref{eq:ac_obj_1} and $\rho_{\pi_{\text{E}}}(s)$ is known from 
 the data distribution $\mathcal{D}_{\text{E}}$. We know get 
 $$J({\pi}) \geq L_{\pi_{\text{E}}}({\pi}) - C D^{\max}_{\operatorname{KL}} (\pi,\pi_{\text{E}}).$$
-Now if we optimise $\pi$ until convergence on the expert dataset, we get 
+Now if we optimize $\pi$ until convergence on the expert dataset, we get 
 $$D^{\max}_{\operatorname{KL}}(\pi(s,a),\pi_{\text{E}}(s,a)) = 0 |(s,a) \in \mathcal{D}_{\text{E}}$$
 and 
 $$D^{\max}_{\operatorname{KL}}(\pi(s,a),\pi_{\text{E}}(s,a)) \geq 0 |(s,a) \notin \mathcal{D}_{\text{E}}.$$
@@ -296,7 +296,7 @@ be added to the set of trajectories for the critic $\mathcal{D}_c$ and to the se
 
 With this setup, our algorithm is truly on policy, while being able to use all data collected from expert demonstrations and during train time. 
 
-The actor is model free, while the critic is weakly grounded model based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
+The actor is model free, while the critic is weakly grounded model-based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
 but our architecture enables search on continuous action space, which is not possible in MuZero. 
 
 \section{Average Actions Problem}
@@ -475,7 +475,7 @@ We will first describe the inference of AVC, then the update step of the actor a
 
 \subsection{Inference}
 The inference of the actor critic algorithm using the gradient directly on the actions is depicted in algorithm \ref{AC_Inference}. 
-The other optimisation modes can be adapted straight forward. All models use a transformer encoder architecture. \\
+The other optimization modes can be adapted straight forward. All models use a transformer encoder architecture. \\
 
 
 \begin{algorithm}[H]
@@ -514,7 +514,7 @@ of the actor $\pi$:
 \begin{equation}
     a^0 = a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T}).
 \end{equation}
-The initial action sequence $a^0$ is then optimised given the critic. For example, if we optimise the actions directly, we get:
+The initial action sequence $a^0$ is then optimized given the critic. For example, if we optimize the actions directly, we get:
 \begin{equation*}
     a^{i+1} = a^i + \alpha_{inf}\nabla_{a} (C(o_1, a^i)(T) - 1)^2,
 \end{equation*}
@@ -691,26 +691,26 @@ and observations until timestep $t$. \\
 
 Moreover, it is not guaranteed and in fact unlikely that there is a unique optimal action sequence $a$. This means, even if $C^t = C^{t+1}$, ${a^t}^* \neq {a^{t+1}}^*$ in general. We can 
 disambiguate action sequences with additional proxy losses. 
-For now, we will ensure convergence by choosing the action sequence ${a^t}^*$ as a starting point for the optimisation to get ${a^{t+1}}^*$, thus if $C^t = C^{t+1}$ we will find 
+For now, we will ensure convergence by choosing the action sequence ${a^t}^*$ as a starting point for the optimization to get ${a^{t+1}}^*$, thus if $C^t = C^{t+1}$ we will find 
 ${a^t}^* = {a^{t+1}}^*$, because the gradient will be zero. 
 The update 
 steps are adapted straight forward from \ac{avc} using the new loss functions $J_{\theta} = J_{pred, C} + J_{\theta, MDP}$. 
 
-\subsection{Inference Time Optimisation}
-A practical issue we came across is the inference time per step. This is a typical problem of model based algorithms, as they need to optimise the trajectory given 
+\subsection{Inference Time Optimization}
+A practical issue we came across is the inference time per step. This is a typical problem of model-based algorithms, as they need to optimize the trajectory given 
 the current observations.\\ 
 
-In our case, for each step the actor and planner are optimised given the critic predictions, thus the inference time 
-per step is dependent on the number of optimisation steps. If the number is low, learning is slow, as the proposed actions from the actor are barely changed. 
+In our case, for each step the actor and planner are optimized given the critic predictions, thus the inference time 
+per step is dependent on the number of optimization steps. If the number is low, learning is slow, as the proposed actions from the actor are barely changed. 
 If the number is high, the computation time per trajectory is too long, as the total number of update steps is $n \times T$, with n updates per step and trajectory length 
 T.\\ 
 
-This problem did not occur with the \ac{avc} algorithm, as the action sequence is only optimised 
+This problem did not occur with the \ac{avc} algorithm, as the action sequence is only optimized 
 once per trajectory, limiting the additional compute cost.\\
 
 Recall in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
 actions, instead of optimising the actions directly. We found a good solution is to keep the states of the actor and planner during inference of a trajectory, 
-instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimisation, as we only want to 
-train it using imitation learning from expert trajectories. With this adaptation, we can use a low number of optimisation steps per time step and still change the trajectory meaningfully, 
+instead of resetting it after each step. After each inference, the actor is reset to the state before the inference optimization, as we only want to 
+train it using imitation learning from expert trajectories. With this adaptation, we can use a low number of optimization steps per time step and still change the trajectory meaningfully, 
 as the update steps on the actor and planner accumulate during inference time.
      
