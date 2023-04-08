@@ -17,8 +17,8 @@ discuss how inference time search is used in current algorithms. Some of the pre
 \section{General Purpose Reinforcement Learning Algorithms}
 \subsection{PPO}
 \label{section:PPO}
-Schulman, et al. \cite{PPO} introduce "Proximal Policy optimization" (PPO), which 
-builds upon the ideas of Trust Region Policy optimization (TRPO) \cite{TRPO}. In TRPO, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
+Schulman, et al. \cite{PPO} introduce "Proximal Policy Optimization" \ac{ppo}, which 
+builds upon the ideas of \ac{trpo} \cite{TRPO}. In \ac{trpo}, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
 \begin{flalign}
         \text{optimize } L^{TRPO}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}} \left[\frac{\pi_{\theta}(a|s)}{\pi_{\theta_{old}}(a|s)} A(s,a)\right] \\
@@ -39,13 +39,13 @@ with the corresponding loss:
     \label{LPG}
     L^{\mathrm{PG}}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[-\mathrm{log}(\pi_{\theta}(a|s))A(s,a)].
 \end{equation}
-Most common implementations of PPO use a stochastic policy, like in SAC, with the corresponding loss:
+Most common implementations of \ac{ppo} use a stochastic policy, like in SAC, with the corresponding loss:
 \begin{equation}
     \label{PPO_Loss_Reg}
     L^{\mathrm{PG}}(\theta) = \mathbb{E}_{(a, s, t) \propto \pi_{\theta}}[-\mathrm{log}(\pi_{\theta}(a|s))A(s,a)+\alpha \mathrm{log}(\pi_{\theta}(a|s))].
 \end{equation}
 
-In TRPO, ensuring the KL constraint requires a second order approximation to it. PPO is an on-policy algorithm that uses only first order approximations, while 
+In \ac{trpo}, ensuring the KL constraint requires a second order approximation to it. \ac{ppo} is an on-policy algorithm that uses only first order approximations, while 
 also making sure that the policy update does not change the policy too much. Instead of the hard KL constraint, it clips the gradient of the policy update within 
 an $\epsilon$ region around the old policy.\\
 
@@ -79,11 +79,11 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
     \label{ppo_algo}
 
 \end{algorithm}
-Overall, PPO is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.\\
+Overall, \ac{ppo} is a robust and effective algorithm for deep reinforcement learning, and has been successfully applied to a wide range of environments and tasks.\\
 
-A GRU can be used in the recurrent implementation of PPO called Recurrent Proximal Policy optimization (RPPO) as analysed by Pleines, et al. 
+A GRU can be used in the recurrent implementation of \ac{ppo} called Recurrent Proximal Policy optimization (RPPO) as analyzed by Pleines, et al. 
 \cite{RPPO}. Here the policy $\pi$ is defined on the history of observations and actions using a recurrent hidden state $h_t : o_{1:t} \times a_{1:t}$ with $\pi : o_{1:t} \times a_{1:t} \rightarrow \mathcal{R}$.
-The adapted loss function from PPO is defined as:
+The adapted loss function from \ac{ppo} is defined as:
 \begin{equation}
     LC_t(\theta) = \widehat{\mathbb{E}}_t\big[\min\big(q_t(\theta)\widehat{A}_t, \text{clip}\big(q_t(\theta), 1 - \epsilon, 1 + \epsilon\big)\widehat{A}_t\big)\big] \tag{1}
 \end{equation}
@@ -106,7 +106,7 @@ Thrun and Schwartz \cite{thrun1993issues} it is found that:
     \end{align}
 \end{equation}
 where $U(a)$ is action dependent random noise with zero mean. \\
-The main idea of TQC is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
+The main idea of \ac{tqc} is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
 It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.\\
 Formally the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
 $Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.\\
@@ -146,7 +146,7 @@ From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right].
 \end{equation}
-In the TQC paper, they use N critics $\psi_n$. To keep the notation clean, we derived the main ideas using only one. An 
+In the \ac{tqc} paper, they use N critics $\psi_n$. To keep the notation clean, we derived the main ideas using only one. An 
 overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 
 \begin{algorithm}

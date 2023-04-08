@@ -113,8 +113,8 @@ show that it can be used to find optimal actions, then we develop the objective 
 
 \subsection{Critic}
 \label{sec:AC_Critic}
-To train the critic in actor critic methods, we can either use on-policy data as in PPO \ref{section:PPO}, which is not sample efficient, as only the data collected 
-in the current episode is used for training, or we can use off-policy data as in TQC \ref{section:TQC}, where the critic has an overestimation bias. This 
+To train the critic in actor critic methods, we can either use on-policy data as in \ac{ppo} \ref{section:PPO}, which is not sample efficient, as only the data collected 
+in the current episode is used for training, or we can use off-policy data as in \ac{tqc} \ref{section:TQC}, where the critic has an overestimation bias. This 
 leads to sub optimal data usage and the reliance on an additional hyperparameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
 collected without introducing a bias on the critic. \\
 Recall, that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation bias comes from action noise $U(a)$ in the update step of the $Q$ value:
@@ -260,7 +260,7 @@ The idea is, we don't push the actor towards a predicted goal,
 but only towards measured goals. This formulation allows us to use good lower bound on the expected policy improvement.\\
 
 \subsubsection{Policy Improvement}
-Following, we will provide a lower bound for the policy improvement, which uses results from section TRPO \ref{sec:TRPO}. 
+Following, we will provide a lower bound for the policy improvement, which uses results from section \ac{trpo} \ref{sec:TRPO}. 
 Assume we have a dataset $\mathcal{D}_{\text{E}}$ sampled from the expert policy $\pi_{\text{E}}$ with optimal value 
 $$J(\pi_{\text{E}}) =\mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right],$$
 and a dataset $\tilde{\mathcal{D}}_{\text{E}}$ sampled from $\pi_{\text{E}}$ with $\mathcal{D}_{\text{E}} \subset \tilde{\mathcal{D}}_{\text{E}}$. 

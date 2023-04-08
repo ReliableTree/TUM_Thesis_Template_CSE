@@ -263,7 +263,7 @@ a crucial advantage. One example is the MuZero algorithm from Julian Schrittwies
 \section{Model-Free Learning}
 \label{sec:mod_free_ref}
 In the following section we develop the framework of value functions, on which off-policy algorithms rely. 
-We will then introduce PPO, a state-of-the-art on-policy algorithm and TQC, a state-of-the-art off-policy algorithm, 
+We will then introduce \ac{ppo}, a state-of-the-art on-policy algorithm and \ac{tqc}, a state-of-the-art off-policy algorithm, 
 which we will use as part of our baselines.
 
 \subsection{Value Functions}
@@ -573,8 +573,8 @@ improvement holds:
     \text{and} \quad  D^{\max}_{\operatorname{KL}} (\pi,\tilde{\pi}) = \max_s D_{\operatorname{KL}} (\pi(\cdot|s),\tilde{\pi}(\cdot|s)).
 \end{equation}
 Following this insight, the authors propose an algorithm that aims to maximize expected policy improvement under a $\operatorname{KL}$ divergence constraint. 
-We will not explain their algorithm here, as the PPO algorithm builds upon this insight, but is computationally cheaper and has been empirically shown to have 
-similar or better performance than TRPO.
+We will not explain their algorithm here, as the \ac{ppo} algorithm builds upon this insight, but is computationally cheaper and has been empirically shown to have 
+similar or better performance than \ac{trpo}.
 
 \section{Model-Based Learning}
 \label{sec:mod_based_ref}

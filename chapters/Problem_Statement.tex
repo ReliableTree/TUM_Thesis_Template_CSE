@@ -39,14 +39,14 @@ An approaches to leverage expert demonstrations by sampling them with higher pri
 An additional problem with mixing expert demonstrations and reinforcement data in actor critic algorithms is, that they induce two different distributions, one from the expert and one from 
 the learner. This leads to overestimation by the critic, further hindering the learning process. \\
 
-Apart from the expert demonstrations, critics in actor critic methods generally overestimate the expected reward. TQC \cite{TQC_Paper} aims to solve this issue by learning the 
+Apart from the expert demonstrations, critics in actor critic methods generally overestimate the expected reward. \ac{tqc} \cite{TQC_Paper} aims to solve this issue by learning the 
 probability distribution of the expected reward and ignore the highest tail of it. While it shows good performance in \ac{rl} environments 
 it is also reliant on additional hyperparameters 
 specifying the coarseness of the learned probability distribution and the cutoff point. To solve this problem , we aim to develop a critic that is inherently unbiased using transitions from expert demonstrations 
 and reinforcement learning.\\
 
 A third difficulty with actor critic methods is that the update step of the policy must be carefully tuned. Apart from the general overestimation of the critic, it has a variance in the estimate, 
-as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, PPO ensures limited change of the policy 
+as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, \ac{ppo} ensures limited change of the policy 
 between update steps, making it more robust. The trade-off is less exploration compared to TQC. To have good exploration 
 and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
 proposed trajectory of the actor, without changing the actor itself. \\
