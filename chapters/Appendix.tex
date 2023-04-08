@@ -172,9 +172,9 @@ and the discounted causal entropy as defined by Bloem, et al. \cite{InfCausalEnt
 Here $\pi_{r'}^*$ denotes the expert policy, which indicates the expert policy is assumed to maximize a true 
 reward function ${r'}$. From now, we will refer to the expert policy as $\pi_{\text{E}}$, as it is more in line with the common choice found in 
 literature. Furthermore, we used the reward in equation  \ref{proto_inf_ler}, as it is in line with our notation for reinforcement learning. In the paper, 
-the authors minimize a cost function $c$, instead of maximzing a reward function $r$. The choice does not make a profound 
+the authors minimize a cost function $c$, instead of maximizing a reward function $r$. The choice does not make a profound 
 mathematical difference, but it gives a more natural way to interpret the inverse objective. $c=0$ can be naturally defined as the optimal cost value, while a reward function has 
-no natural upper bound. For this practical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimisation in 
+no natural upper bound. For this practical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimization in 
 \ref{proto_inf_ler} becomes a maximization and vice versa:
 \begin{equation}
     \label{proto_inf_ler_c}
@@ -296,9 +296,9 @@ In more detail, a policy $\pi(v,I)$ is learned to imitate expert behavior in a s
 $R \in R^{T \times N}$ over $T$ time steps and with $N$ control variables, an rgb image $I \in \mathcal{R}^{569 \times 320 \times 3}$ of the agent's surroundings, 
 and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language. The proposed method takes the image $I$ and task description $v$ 
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
-which is subsequently used in the control model to generate robot actions at each timestep in a closed-loop 
+which is subsequently used in the control model to generate robot actions at each time step in a closed-loop 
 fashion using a GRU to keep track of the former history. In addition to the hidden state of the GRU, 
-the task embedding $e$ is used in every timestep, as we know, that the task does not change. A schematic overview can be seen in figure \ref{language_imitation}. \\
+the task embedding $e$ is used in every time step, as we know, that the task does not change. A schematic overview can be seen in figure \ref{language_imitation}. \\
 
 \begin{figure}[htbp]
     \centering

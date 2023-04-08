@@ -135,7 +135,7 @@ In this section, we will explore the performance of the \ac{avc} algorithm given
 We motivated the practical relevance in the introduction. An additional advantage for testing the effectiveness of the search paradigm is that planning is most efficient in
 single observation settings.
 We discussed this in section \ref{sec:AC_Critic}, where we state that while predicting the \ac{mdp} has a quadratic error bound, we don't get any updated information
-during the trajectory, and thus no better estimate is possible then the prediction at timestep $1$. \\
+during the trajectory, and thus no better estimate is possible then the prediction at time step $1$. \\
 
 We chose environments from the Meta-World benchmark as described in appendix \ref{chapter:MetaWorld}. \\
 
@@ -165,7 +165,7 @@ In plots with no provided expert trajectory, it displays the behavior following 
 \subsection{Inference Time Search}
 \label{ref:com_opt_modes}
 In section \ref{sec:inf_time_search} we discussed that we can use different modes of optimization during inference time to optimize the action sequence. In this section, 
-we showcase the difference between optimising the action sequence directly and optimising the actor and planner weights. We tested the two different 
+we showcase the difference between optimizing the action sequence directly and optimizing the actor and planner weights. We tested the two different 
 modes in the reach environment given a single observation per trajectory. For the direct 
 action optimization runs we used 20000 sampled episodes to see, if \ac{rl} took place at all, as for the first 2000 episodes no improvement above 
 imitation learning performance is seen. For this reason, we only repeated the experiment twice, as it took a long time to compute. The results are depicted in figure 
@@ -177,7 +177,7 @@ where we apply the gradient directly to the actions "action optimization mode" a
 the gradient to the actor and planner networks and recalculate the trajectories given the changed networks "actor planner 
 optimization mode".\\
 
-We hypothesise that 
+We hypothesize that 
 the actor planner optimization mode's much faster convergence rate is due to the actor and planner networks ability to 
 encode an informed representation of the useful trajectory space. This informed representation guides the gradient search 
 given by the critic, leading to more efficient exploration. Subfigure \ref{fig:direct_actions} illustrates the trajectory 
@@ -266,7 +266,7 @@ All plots for all experiments can be found in Appendix \ref{chapter:additional_p
 
 We expected RPPO to be the least performant from our discussion of the curse of dimensionality in section \ref{COD_AC}. As no current input 
 is provided from the environment, RPPO has to keep track of all previous actions. PPO and TQC use positional encoding to indicate the current 
-timestep which makes the problem easier.\\ 
+time step which makes the problem easier.\\ 
 
 The algorithms guided by GAIL did not improve meaningfully. We assume the limited amount of environment 
 interaction was not proficient to learn a good discriminator to provide useful rewards for the reinforcement learners.\\ 
@@ -480,11 +480,11 @@ The observation that DOAVC achieved convergence at a faster rate than AVC, despi
 all three runs, provides additional support for the proposition that DOAVC makes effective use of the continued observations. \\
 
 In the Window Open environment, DOAVC initially converged slower but 
-reached near perfect performance quicker then AC. We suppose this is due to the different optimization modes used for the two algorithms. Recall that \ac{avc} optimizes the whole 
+reached near perfect performance quicker then AC. We suppose this is due to the different optimization modes used for the two algorithms. Recall, that \ac{avc} optimizes the whole 
 trajectory at the beginning, while DOAVC makes small improvements per time step, due to self imposed inference time constraints. We expect this has the effect that in inference time, the critic of 
 \ac{avc} can make larger changes to the trajectory proposed by the actor. In other words, DOAVC makes smaller moves towards the critic target than AC. Also out of time constraints, we could 
 not conduct a hyperparameter search for DOAVC. It is possible that DOAVC would converge quicker, given more optimization steps per inference step or a higher inference optimization 
-learning rate $\alpha_{inf}$.\\ 
+learning rate $\alpha_{\mathrm{inf}}$.\\ 
 
 AVCs performance is close to DOAVC. We propose this is due to the fact, that \ac{avc} uses the information about the environment 
 from the expert demonstrations effectively to search for new candidate solutions. As discussed in section \ref{ref:com_opt_modes}, \ac{avc} searches on a prestructured subspace given the "knowledge" of the 

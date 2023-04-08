@@ -26,7 +26,7 @@ with respect to a KL divergence constraint:
 \end{flalign}
 The core idea is to place a constraint on the distance between the new policy and the old policy. By doing so, 
 too large update steps to the policy should be prevented, resulting in a more stable learning behavior. 
-Recall the advantage estimator was defined as:
+Recall, the advantage estimator was defined as:
 \begin{equation}
     A(s,a) = Q(s,a) - V(s).
 \end{equation}
@@ -68,7 +68,7 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
     \SetAlgoLined
     \begin{algorithmic}
     \For{$\text{iteration}=1,2,\dots$}{ \\
-        \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ timesteps\\
+        \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ time steps\\
         \State Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
         \State optimize surrogate $L^{\mathrm{CLIP}}$ with respect to $\theta$. \\
         \State $\theta_\text{old} \gets \theta$
@@ -172,7 +172,7 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 \end{algorithm}
 TQC achieves state-of-the-art performance in a wide variety of challenging tasks, like robotic manipulation in the OpenAI Gym environment \cite{1606.01540}, which makes it a fitting baseline 
 for our experiments. It is specifically suited 
-for off policy learning with a focus on exploration, in contrast to PPO, which was designed for on policy update steps.
+for off-policy learning with a focus on exploration, in contrast to PPO, which was designed for on-policy update steps.
 
 \section{Imitation Learning}
 \subsection{Generative Adversarial Imitation Learning}

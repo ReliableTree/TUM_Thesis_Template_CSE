@@ -34,8 +34,8 @@ $f^*$ that maps inputs $x \in X$ to outputs $y \in Y$. The objective function is
 the predicted output $f(x)$ and the true output $y$.
 
 Formally the signal or loss function $L = g^*$ is defined on a training set $\mathcal{D}_{\text{train}} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
-labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimising $f$ for $L$ 
-over $\mathcal{D}_{\text{train}}$ should be aligned with optimising $f$ for $g$ over $D$:
+labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimizing $f$ for $L$ 
+over $\mathcal{D}_{\text{train}}$ should be aligned with optimizing $f$ for $g$ over $D$:
 
 \begin{equation}
 \begin{aligned}
@@ -121,7 +121,7 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
 \ac{mdp}s are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
 context to develop \ac{rl} algorithms.
 
-An \ac{mdp}is defined as a tuple $(S, A, T, R, \gamma)$, where:
+An \ac{mdp}is defined as a tuple $\langle S, A, T, R, \gamma \rangle$, where:
 \begin{itemize}
     \item $S$ is the set of possible states in the system
     \item $A$ is the set of possible actions that can be taken in each state
@@ -262,8 +262,8 @@ a crucial advantage. One example is the MuZero algorithm from Julian Schrittwies
 
 \section{Model-Free Learning}
 \label{sec:mod_free_ref}
-In the following section we develop the framework of value functions, on which off policy algorithms rely. 
-We will then introduce PPO, a state-of-the-art on policy algorithm and TQC, a state-of-the-art off policy algorithm, 
+In the following section we develop the framework of value functions, on which off-policy algorithms rely. 
+We will then introduce PPO, a state-of-the-art on-policy algorithm and TQC, a state-of-the-art off-policy algorithm, 
 which we will use as part of our baselines.
 
 \subsection{Value Functions}
@@ -539,7 +539,7 @@ policies in a number of challenging tasks including robot manipulation tasks wit
 \subsection{TRPO}
 \label{sec:TRPO}
 Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
-Recall we defined the \ac{rl} objective as:
+Recall, we defined the \ac{rl} objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
 \end{equation}
@@ -593,9 +593,9 @@ the action space is discrete, to make the task of learning the model easier.
 
 \subsection{Proper Value Equivalence}
 \label{sec:prop_val_eq}
-So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model-based learning. However this is not strictly the case. Recall we are 
-interested in optimising the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
-of our environment at each timestep, but only in the rewards $r_t$. \\
+So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model-based learning. However this is not strictly the case. Recall, we are 
+interested in optimizing the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
+of our environment at each time step, but only in the rewards $r_t$. \\
 This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
 let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the \ac{mdp} and let 
 $\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equivalent to $m$, 
@@ -604,7 +604,7 @@ if $k$ applications of the Bellman operator result in the same updated value fun
     \label{eq_kthVE}
     \left(\mathcal{T}^{m}_{\pi}(V)\right)^k = \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k.
 \end{equation}
-It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall the value function is 
+It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall, the value function is 
 defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
 equivalent to $m$, but does not predict the observations or states is sometimes referred to as a "weakly grounded model".\\ 
 From this work we conclude that solving the 
@@ -850,7 +850,7 @@ For a neural network, suppose the activation of a hidden state at time t+1 depen
 \begin{equation}
     h_{t+1} = \sigma(\omega h_t),
 \end{equation}
-where we ignored an input term and a bias term for ease of annotation. Now the update rule after t timesteps is:
+where we ignored an input term and a bias term for ease of annotation. Now the update rule after t time steps is:
 \begin{align*}
         \frac{\partial h_t}{\partial h_1} \approx \Pi_{t'=1}^t \ \omega \sigma'(\omega h_{t'}) \\
         = \omega^{t} \Pi_{t'=1}^t \sigma'(\omega h_{t'}).
