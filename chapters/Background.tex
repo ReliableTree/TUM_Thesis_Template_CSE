@@ -613,7 +613,7 @@ From this work we conclude that solving the
 \section{Imitation Learning}
 Imitation learning is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
 rather than by trial and error \cite{IL}. In this approach, the data distribution seen during test time is dependent on the learned policy, 
-breaking the i.i.d. (independent and identically distributed) assumption typically made in supervised learning. This means that the performance of the 
+breaking the \ac{iid} assumption typically made in supervised learning. This means that the performance of the 
 learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
 
 Formally imitation learning can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:

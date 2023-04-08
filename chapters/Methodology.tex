@@ -94,11 +94,11 @@ information between time steps can be exchanged, earlier actions are not part of
 We will discuss the architecture in more details in the coming sections. For now, we only want to motivate the single pass through 
 our network to generate an action sequence, rather then generating it autoregressively like recurrent methods would.\\ 
 
-Another benefit of computing the whole trajectory in one pass is that the independent and identically distributed (i.i.d.) input data 
+Another benefit of computing the whole trajectory in one pass is that the \ac{iid} input data 
 assumption underlying supervised learning methods is not broken. The assumption states, that we don't expect a different data distribution during inference time 
 then during train time, which generally does not hold for imitation learning, as the distribution of data seen during inference depends on the policy. 
 However, by computing the whole trajectory at once, the input data is distributed according to the initial state of the \ac{pomdp}, which is independent of 
-the policy, thus the i.i.d. assumption holds.\\
+the policy, thus the \ac{iid} assumption holds.\\
 
 \section{Approximation Error}
 \label{inference_time_planning}

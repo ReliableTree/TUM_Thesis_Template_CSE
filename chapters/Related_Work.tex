@@ -176,8 +176,8 @@ for off-policy learning with a focus on exploration, in contrast to PPO, which w
 
 \section{Imitation Learning}
 \subsection{Generative Adversarial Imitation Learning}
-Generative Adversarial Imitation Learning (GAIL) \cite{ho2016generative} is a key paradigm for efficient imitation learning that uses expert demonstrations in \ac{mdp}s. 
-The main idea of GAIL is to disambiguate the reward signal from IRL by ensuring that every policy except the expert policy has a lower expected reward under the inverse reward function, given the expert 
+\ac{gail} \cite{ho2016generative} is a key paradigm for efficient imitation learning that uses expert demonstrations in \ac{mdp}s. 
+The main idea of \ac{gail} is to disambiguate the reward signal from IRL by ensuring that every policy except the expert policy has a lower expected reward under the inverse reward function, given the expert 
 demonstrations. Following, we will use a cost function $c \propto -r$, as it gives a natural optimum at $c=0$.\\
 
 The entropy regularized IRL objective is written as:
@@ -192,7 +192,7 @@ entropy, $c_{\text{inv}}$ denotes the inverse cost function, $\mathcal{C}$ denot
 To find the cost function that fulfil the disambiguation requirement and optimizes equation \ref{proto_inf_ler_c}, a discriminator $D$ is learned, that tries to predict, if a transition is 
 sampled from the expert policy or the learned policy.  
 
-Formally the GAIL objective is defined as:
+Formally the \ac{gail} objective is defined as:
 \begin{equation}
     J(\rho_{\pi_{\theta}}, D_{\omega}) =  - \lambda \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right],
 \end{equation}
@@ -200,7 +200,7 @@ where $\theta$ and $\omega$ are the parameters of the generator and discriminato
 $\lambda$ controls the trade-off between the similarity to the expert trajectories and the entropy of the policy and $D_{\text{KL}}(\cdot || \cdot)$ denotes the Kullback-Leibler divergence. \\
 Intuitively discriminator tries to distinguish between the expert and generated trajectories, while the generator tries to produce trajectories that are indistinguishable from those of the expert.\\
 
-Overall, GAIL is a state-of-the-art imitation learning algorithm which is able to learn complex behavior with limited expert demonstrations. It shows outstanding 
+Overall, \ac{gail} is a state-of-the-art imitation learning algorithm which is able to learn complex behavior with limited expert demonstrations. It shows outstanding 
 asymptotical performance with respect to the amount of expert demonstrations, which is why we will use it as a baseline in our experiments.\\ 
 A downside is that it requires a high number of environment interactions to train the discriminator and actor, as stated by the authors. A more detailed derivation of the algorithm and theoretical 
 bounds can be found in appendix \ref{app:GAIL}.
@@ -209,8 +209,8 @@ bounds can be found in appendix \ref{app:GAIL}.
 \subsection{Generative Adversarial Imitation Learning in \ac{pomdp}s}
 \label{GAIL_POMDPS}
 In this section, we will describe an imitation learning approach based on GAIL, that handles \ac{pomdp}s.\\
-The GAIL algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
-extend the GAIL paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
+The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
+extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
 \begin{equation}
     \min_{\phi,\theta}\max_{\tilde{\omega}} &\mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\mathrm{log}(1-D_{\tilde{\omega}}(b_{\phi},a))]
@@ -234,7 +234,7 @@ taken, given the initial belief state and the subsequent observations. With all 
     L(\phi) = L^\text{IM} + \lambda_1 L^\text{f} + \lambda_2 L^\text{i} + \lambda_3 L^\text{a},
 \end{equation}
 where $\lambda_i$ are the weights for the respective regularizers. \\
-The approach is superior to GAIL with frame stacking and can also improve upon GAIL with recurrent networks for the discriminator and the actor, though the margins are small in some cases. The advantage 
+The approach is superior to \ac{gail} with frame stacking and can also improve upon \ac{gail} with recurrent networks for the discriminator and the actor, though the margins are small in some cases. The advantage 
 of their approach is, that the believe state representation will be expressive following their regularizers. However, they use an $L_2$ distance error between the predictions and the observations. In most environments, 
 the observations are high dimensional and include redundant or unnecessary information that will be hard to learn. This forces the network to allocate capacity that is not directly used to 
 optimize the overall objective. Moreover, as GAIL, this approach suffers from bad sample efficiency with respect to environment interactions and cannot make use of a reward signal from the environment. 

@@ -7,7 +7,7 @@ In this chapter we will summarize our findings and discuss advantages as well es
 \subsection{Imitation Learning}
 Our results from section \ref{sec:exp_imi_lr} demonstrate that our imitation learning approach outperforms recurrent algorithms in continuous action space, 
 given a single observation per trajectory. We propose this is due to generating the whole sequence in one step, 
-rather than using an autoregressive approach. This method does not break the i.i.d. assumption, making predictions more robust and effective 
+rather than using an autoregressive approach. This method does not break the \ac{iid} assumption, making predictions more robust and effective 
 for planning in continuous space. \\
 
 \subsection{Optimization Mode}
@@ -43,7 +43,7 @@ faster convergence. These findings provide further evidence of the general appli
 \subsection{Single Observation and MDP Comparison}
 We compared COAVC to \ac{avc} in section \ref{sec:com_coavc_avc} and observed that while COAVC performs better, 
 \ac{avc} already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
-expert data. Moreover, the inference of \ac{avc} is i.i.d., while that of COAVC is not, as observations at inference time are dependent on actions. 
+expert data. Moreover, the inference of \ac{avc} is \ac{iid}, while that of COAVC is not, as observations at inference time are dependent on actions. 
 
 In conclusion, our experiments demonstrate that the \ac{avc} paradigm is highly stable and performs well in settings with sparse rewards. 
 It effectively leverages expert demonstrations for both exploitation and informed search. While COAVC provides improved performance over 

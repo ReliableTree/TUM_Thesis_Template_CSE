@@ -32,7 +32,7 @@ where the expectation is taken over trajectories of length $T$ induced by the po
 
 Our algorithm aims to be sample efficient with respect to both expert trajectories and environment interactions. \\
 
-Currently, GAIL, a state of the art imitation learning algorithm, has good asymptotical performance with respect to the number of expert trajectories, but is not sample efficient 
+Currently, \ac{gail}, a state of the art imitation learning algorithm, has good asymptotical performance with respect to the number of expert trajectories, but is not sample efficient 
 with respect to environment interactions during train time. Moreover, it does not make use of reward signals from the environment but only relies on the expert demonstrations.\\ 
 
 An approaches to leverage expert demonstrations by sampling them with higher priority \cite{vecerik2018leveraging} has limited convergence rate towards expert behavior and is dependent on additional hyperparameters. 
@@ -47,7 +47,7 @@ and reinforcement learning.\\
 
 A third difficulty with actor critic methods is that the update step of the policy must be carefully tuned. Apart from the general overestimation of the critic, it has a variance in the estimate, 
 as it is a learned function approximator. The more the policy is changed in an update step, the less accurate the prediction of the critic. To solve this problem, \ac{ppo} ensures limited change of the policy 
-between update steps, making it more robust. The trade-off is less exploration compared to TQC. To have good exploration 
+between update steps, making it more robust. The trade-off is less exploration compared to \ac{tqc}. To have good exploration 
 and ensure stable improvement without the need of extensive hyperparameter tuning, we aim to use inference time search to find and apply candidate solutions, which can vary widely from the 
 proposed trajectory of the actor, without changing the actor itself. \\
 
