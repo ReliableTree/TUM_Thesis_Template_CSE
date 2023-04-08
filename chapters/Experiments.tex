@@ -24,7 +24,7 @@ expert demonstration to guide initial exploration. Here, we use behavioral cloni
 We will investigate the effect of these choices on the performance of the baseline algorithms.\\
 
 In the deterministic SOPOMDP setting, we will use the strong inductive bias described in the "Curse Of Dimensionality" 
-section \ref{COD_AC} for \ac{tqc} and\ac{ppo}to encode the current belief state of the environment. \\
+section \ref{COD_AC} for \ac{tqc} and \ac{ppo} to encode the current belief state of the environment. \\
 Specifically, we encode the current history by appending a positional encoding to the initial observation. The upside is that we give 
 the baseline algorithms a way to make use of the determinacy of the environment by reducing the preimage of the algorithms compared to 
 frame stacking. The downside is, that the algorithms have no informations about previously taken actions. This is why we use the 
@@ -54,7 +54,7 @@ proposed by the authors uses a recurrent policy. As we have motivated in section
 models because we use the knowledge that we are not getting additional information from the environment during the unroll of the trajectory. 
 To test this, we have used the dataset of 40,000 expert demonstrations provided with the benchmark to train our model using only imitation learning.\\
 
-The results are depicted in table
+The results are depicted in table \ref{tab:lcil}.
 
 \begin{table}
     \centering
@@ -68,6 +68,7 @@ The results are depicted in table
     \end{tabular}
     \caption{Success rates of the 100 pick, pour and combined tasks. The left column depicts the results from the \ac{avc} algorithm (ours) in 
     imitation mode. Right is the result of the LCIL architecture.}
+    \label{tab:lcil}
 \end{table}
 
 On the 100 test environments that were provided, we decreased the overall error rate by 75$ \% $. 
@@ -274,8 +275,8 @@ interaction was not proficient to learn a good discriminator to provide useful r
 For hyperparameter tuning we found that the performance of the baselines was most 
 reliant on the learning rate. Too high values lead to catastrophic forgetting. The values we chose were the highest possible values before 
 catastrophic forgetting took place. However, the performance from behavioral cloning, indicated by the first data point per plot, was mostly 
-the best achievable performance.\ac{ppo}tends to do better than \ac{tqc} in the single observation setup in general. We expect this is due to the 
-fact that  \ac{tqc} 's strength as an off-policy algorithm lies in exploration. In our chosen setup, exploration is specifically hard, given no 
+the best achievable performance. \ac{ppo} tends to do better than \ac{tqc} in the single observation setup in general. We expect this is due to the 
+fact that \ac{tqc}'s strength as an off-policy algorithm lies in exploration. In our chosen setup, exploration is specifically hard, given no 
 information from the environment during the trajectories.\\
 
 We find that \ac{avc} is the only algorithm that can meaningfully improve its performance given the limited amount of environment interactions. 
@@ -350,7 +351,7 @@ Notable, \ac{avc} performs significantly better then the baselines at the first 
 random behavior from randomly initialization of the policies. In further tests, we found that the initial success rate is either close to one or close to zero for all policies depending 
 on the initialization. This is likely 
 due to the fact, that the initial observations for the Drawer Close environment are close in $L_2$ distance, thus a random policy will act similar in all environments. We find if that behavior 
-solves one environment, it solves all with high probability. In the three runs of the experiment, \ac{avc} was randomly initialized to have a high success rate in two runs, while\ac{ppo}and\ac{tqc}had no 
+solves one environment, it solves all with high probability. In the three runs of the experiment, \ac{avc} was randomly initialized to have a high success rate in two runs, while \ac{ppo} and \ac{tqc} had no 
 initial success. We did not have time to repeat the experiment until the initial performance of the algorithms converge. However, in train mode, 
 all algorithms sample trajectories randomly in the initial training phase. 
 We set the initial random phase to 1000 steps or 10 trajectories, so all algorithms had access to some successful trajectories with high probability. While the initialization was an advantage 
@@ -374,7 +375,7 @@ Overall, we take these finding as evidence for the effectiveness of the \ac{rl} 
 \label{sec_exp_con_obs}
 In this section we test the relaxation of the \ac{avc} algorithm to \ac{mdp} environments, developed in section \ref{sec:relax_dense}, with the environment state given as an observation after each step. \\
 We use sparse rewards 
-and compare \ac{coavc} to\ac{ppo}and \ac{tqc} on the Reach, Window Open and Drawer Close environments. Apart from 
+and compare \ac{coavc} to \ac{ppo} and \ac{tqc} on the Reach, Window Open and Drawer Close environments. Apart from 
 providing an observation per time step,
 we use the same setup as described in previous sections. The results are shown in figure \ref{fig:dense_ref} for three runs per experiment.\\ 
 

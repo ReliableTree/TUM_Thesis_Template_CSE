@@ -15,9 +15,9 @@ We will first focus on imitation learning, then cover guided \ac{rl} with sparse
 discuss how inference time search is used in current algorithms. Some of the presented approaches cover multiple requirements, so they cannot unambiguously be sorted into the provided categories.
 
 \section{General Purpose Reinforcement Learning Algorithms}
-\subsection{PPO}
+\subsection{Proximal Policy Optimization}
 \label{section:PPO}
-Schulman, et al. \cite{PPO} introduce "Proximal Policy Optimization" \ac{ppo}, which 
+Schulman, et al. \cite{PPO} introduce "Proximal Policy Optimization" (\ac{ppo}), which 
 builds upon the ideas of \ac{trpo} \cite{TRPO}. In \ac{trpo}, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
 \begin{flalign}
@@ -93,9 +93,9 @@ The adapted loss function from \ac{ppo} is defined as:
 We will use RPPO as part of our baselines.
 
 
-\subsection{TQC}
+\subsection{Truncated Mixture of Continuous Distributional Quantile Critics}
 \label{section:TQC}
-Arsenii Kuznetsov, et al. proposed "Truncated Mixture of Continuous Distributional Quantile Critics" (TQC) \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
+Arsenii Kuznetsov, et al. proposed "Truncated Mixture of Continuous Distributional Quantile Critics" \ac{tqc} \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
 Empirically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
 two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the overestimation bias by 
 Thrun and Schwartz \cite{thrun1993issues} it is found that:
