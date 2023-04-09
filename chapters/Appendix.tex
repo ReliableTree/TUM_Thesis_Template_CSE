@@ -1,52 +1,114 @@
 % !TEX root = ../main.tex
 \chapter{Implementation Details}
 \label{chapter:DetailedDescriptions}\label{appendix}
--python 3.10
--pytorch 1.13
--mujoco 2.1.2.14
--metaworld 0.1.0
--all details in requirements of code --github
+We use python 3.10 on ubuntu 20.04. An overview of the used software and respective versions is shown in table \ref{tab:software_versions}. 
 
-Weight decay 1e-2
-AdamW optimizer
-all networks are trained with lr 1e-4
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    {} & Software Version \\
+    \hline\hline
+    Ubuntu & 20.04 \\
+    \hline
+    Python & 3.10 \\
+    \hline
+    PyTorch & 1.13\\
+    \hline
+    Numpy & 1.23.3 \\
+    \hline
+    MuJoCo & 2.1.2.14\\
+    \hline
+    Meta-World & 0.1.0\\
+    \hline
+    \end{tabular}
+    \caption{Used software versions.}
+    \label{tab:software_versions}
+\end{table}\\
 
-actor
-encoder
+We use the planner, actor, and critic network implemented in PyTorch with an AdamW optimizer with learning rate 1e-4 and weight decay 1e-2. The 
+critic has a linear head, which projects the $1 \times l$ results from the critic transformer to $1$ output for the whole sequence, where $l$ is the 
+sequence length. \\
+
+The hyperparameters of the models are depicted in table \ref{tab:model_parameters}. The dimensions in brackets hint how the total dimensions are 
+computed. For example, the actor in Meta-World has 39 input dimensions from the observation space and a 1-dimensional input from the planner.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    Hyperparameter & Value \\
+    \hline\hline
+    Model Dimension & 200 \\
+    \hline
+    Hidden Dimension & 200 \\
+    \hline
+    Attention Heads & 8\\
+    \hline
+    Layers & 5 \\
+    \hline
+    Sequence Length & 100\\
+    \hline
+    Actor Input Dimension& Meta-World: 40 (39 + 1), Language Conditioned: 45 (44 + 1)\\
+    \hline
+    Planner Input Dimension&Meta-World: 4, Language Conditioned: 7\\
+    \hline
+    Critic Input Dimension& Meta-World: 43 (39 + 4), Language Conditioned: 51 (44 + 7)\\
+    \hline
+    Actor Output Dimension& Meta-World: 4, Language Conditioned: 7\\
+    \hline
+    Planner Output Dimension & 1\\
+    \hline
+    Critic Output Dimension& 1\\
+    \hline
+    \end{tabular}
+    \caption{Model Parameters.}
+    \label{tab:model_parameters}
+\end{table}\\
 
 
-planner
-encoder
+For training, we sample whole trajectories randomly from the replay buffer with batch size 16. The maximum size of the replay buffer is 50000 trajectories. 
+We use at least 6000 trajectories or the whole replay buffer between two validation episodes in \ac{sopomdp}s and at least 1000 trajectories or the whole 
+replay buffer in \ac{mdp}s. We add 10 training episodes at once after each validation. To prevent early overfitting of the critic given limited data, 
+we only train the critic until the train loss is 1e-5.
+\\
 
--critic:
-encoder 
-
-Sample whole trajectories randomly from replay buffer
-Max size replaybuffer for dense observations: 50000 trajectoreis
-
-SOPOMDP:
-100 opt with lr 1e-6
-\ac{mdp}s:
-3 opt steps with lr 1e-6, until 1 positive sample is found, than 1e-5. We found otherwise it over optimizes in early stages leading to no 
-exploration. 
-in environments with no provided expert trajectories, we set a random exploration phase according to the baselines of 10 Epsiodes or 1000 steps, where 
-the trajectories for the training dataset are sampled at random, but the trajectoreis for the evaluation of the success rate are sampled according to 
-curretn policy.
+In inference time, we use different optimizer settings for \ac{sopomdp}s and \ac{mdp}s, which are depicted in table \ref{tab:inference_parameters}. 
+In environments with no provided expert trajectories, we used an inference time learning rate of 1e-6 until we found three successful trajectories. 
+After that, we used a learning rate of 1e-5, which resulted in quicker convergence. 
 
 
-lr: 1e-4 for all networks
-6000 trajectories per training step
-If we explicitly state pure \ac{il}, we use 6000 trajectories from replay buffer but don't add new trajectories to have 
-comparability in terms of compute.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|}
+    \hline
+    {} & \textbf{\ac{sopomdp}} \\
+    \hline\hline
+    Optimizer & AdamW \\
+    \hline
+    Learning Rate & 1e-6 \\
+    \hline
+    Optimization Steps & 100 per trajectory\\
+    \hline\hline
+    {} & \textbf{\ac{mdp}}  \\
+    \hline\hline
+    Optimizer & AdamW \\
+    \hline
+    Learning Rate Exploration / Finetuning & 1e-6 \\
+    \hline
+    Learning Rate Exploitation & 1e-5 \\
+    \hline
+    Optimization Steps & 3 per step\\
+    \hline
+    Explore Until & 3 trajectories found\\
+    \hline
+    \end{tabular}
+    \caption{Used software versions.}
+    \label{tab:inference_parameters}
+\end{table}\\
 
-we only optimize trajectories until critic predicts sucess probability 1
-batchsize: 16
-
-Tp prevent early overfitting of critic given limited data, we only train until loss of 1e-5 
-sample 10 training trajectories in parallel
-for validation, we sample 15 in parallel two times to have 30 test samples
-
-We use manual seed for torch and numpy. We compute multiple episodes in one run, so from seed = 0 we can get all three runs with different random behavior. 
+We sample 10 trajectories in parallel for training inference and 15 trajectories in parallel twice per data point for evaluation. During inference time 
+optimization, we only optimize trajectories, for which the critic value is smaller then 1. We clip the actions to stay within the boundaries of the environments.\\
 
 
 \chapter{Meta World}
