@@ -239,7 +239,7 @@ mathematical difference, but it gives a more natural way to interpret the invers
 no natural upper bound. For this practical reason, we will make use of $c$ instead of $r$ for the rest of this section. As $c \propto -r$, the minimization in 
 \ref{proto_inf_ler} becomes a maximization and vice versa:
 \begin{equation}
-    \label{proto_inf_ler_c}
+    \label{proto_inf_ler_c_app}
     \pi_{\text{inv}}^* = \underset{c_{\text{inv}} \in \mathcal{C}}{\text{max}} \left( \min_{\pi \in \Pi} \left(- \text{H}(\pi) + \mathbb{E}_{\pi}[c_{\text{inv}}(s, a)] \right) - \mathbb{E}_{\pi_{\text{E}}}[c_{\text{inv}}(s,a)] \right).
 \end{equation}
 The key insight is, that this optimization problem can be uniquely identified with an occupancy measure distance between the expert policy and the 
@@ -253,7 +253,7 @@ With this, the discounted expected reward can be written as:
 \begin{equation}
     \mathbb{E}_\pi[c(s,a)] = \sum_{s,a} \rho_\pi(s,a) c(s,a)
 \end{equation}
-and equation \ref{proto_inf_ler_c} can be written as:
+and equation \ref{proto_inf_ler_c_app} can be written as:
 \begin{equation}
     \label{occ_meas_obj}
     \pi_{\text{inv}}^* = \max_{c_{\text{inv}} \in \mathcal{C}} \left( \min_{\rho_\pi \propto \pi \in \Pi} \left(- \bar{\text{H}}(\rho_\pi) + \sum_{s,a} \rho_\pi(s,a) c(s,a) \right) - \sum_{s,a} \rho_{\text{E}}(s,a) c(s,a) \right).
@@ -280,7 +280,7 @@ such that $d_{\psi}$ becomes small, when $\pi_{\text{E}}$ and $\rho_{\pi}$ becom
     = \min_{\rho_\pi \propto \pi \in \Pi}- \bar{\text{H}}(\rho_\pi) + \max_{c_{\text{inv}} + \in \mathcal{C}} -\psi(c) \sum_{s,a} \left( \rho_\pi(s,a) - \rho_{\text{E}}(s,a)\right) c(s,a)
 \end{equation*}
 \begin{equation}
-    \label{proto_inf_ler_c_reg}
+    \label{proto_inf_ler_c_reg_app}
     = \min_{\rho_\pi \propto \pi \in \Pi}- \bar{\text{H}}(\rho_\pi) + \psi^*(\rho_\pi(s,a) - \rho_{\text{E}}(s,a)),
 \end{equation}
 where $\psi^*$ is the complex conjugate of $\psi$. With this, we can identify $d_{\psi} = \psi^*$.\\
@@ -290,7 +290,7 @@ which complex conjugate $\psi^*_{\text{GA}}$ is:
 \begin{equation}
     \psi^*_{\text{GA}} = \max_{D\in(0,1)^{\mathcal{S} \times \mathcal{A}}} \mathbb{E}_{\pi}\left[ \text{log}(D(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D(s,a))\right],
 \end{equation}
-with discriminator $D$. In this formulation, the objective \ref{proto_inf_ler_c_reg} minimzes the Jensen Shannon divergence ($D_{JS}$) between $\rho_\pi$ and $\rho_{\text{E}}$. If we treat the entropy constraint as a regularization with 
+with discriminator $D$. In this formulation, the objective \ref{proto_inf_ler_c_reg_app} minimzes the Jensen Shannon divergence ($D_{JS}$) between $\rho_\pi$ and $\rho_{\text{E}}$. If we treat the entropy constraint as a regularization with 
 parameter $\lambda$, the \ac{gail} objective can be written as:
 \begin{equation}
     J(\rho_{\pi_{\theta}}, D_{\omega}) = - \lambda  \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right],
