@@ -149,10 +149,10 @@ $$\pi^*(s_1) = a_1$$
 $$s_2 = T_{\text{det}}(s_1, a_1)$$
 $$a_2 = \pi(s_2) ..., $$
 where we abused notation and wrote $s_{t+1} = T_{\text{det}}(s_t, a_t)$ for the deterministic transition function, where 
-\begin{cases}
+$\begin{cases}
     T_{\text{det}}(s', a_t, s_t) = 1\quad | s' = s_{t+1}\\
     T_{\text{det}}(s', a_t, s_t) = 0, \quad \text{else}.
-\end{cases}\\
+\end{cases}$\\
 
 We can now uniquely identify $a^*_{1:T} \propto \pi^*(s)$ as 
 $$a^*_{1:T}(s) = \{a_1 = \pi^*(s) , a_2 = \pi^*(s_2|s_1,a_1), ... \},$$
@@ -334,7 +334,7 @@ no two same observations are part of the initial expert trajectories. In inferen
 paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
 
 \begin{figure}
-    \centered
+    \centering
     \begin{tikzpicture}
         \node[draw, fill=blue!20, rounded corners] (obs_inpt) at (0,0) {$\begin{matrix}[o_1\end{matrix} ]$};
         \node[draw, fill=blue!20, rounded corners] (obs_rep) at (2,0) {$\left[\begin{matrix}o_1\\ \vdots\\ \times T \\ \vdots \\ o_1\end{matrix}\right]_t$};
@@ -349,8 +349,8 @@ paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
         \node[draw, fill=blue!20, rounded corners] (plans) at (6.5,5) {$\begin{matrix}[p_1, ..., p_T\end{matrix} ]^T$};
 
         \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (6.5,3) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        \node[draw, fill=blue!20, rounded corners, right = of actor, x_shift = 1] (prop_actions) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
-        \node[draw, thick, rectangle , right = of prop_actions, x_shift = 1] (loss) {$|a_t - a^E_t|_{_2}^{^2}$};
+        \node[draw, fill=blue!20, rounded corners, right = of actor] (prop_actions) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
+        \node[draw, thick, rectangle , right = of prop_actions] (loss) {$|a_t - a^E_t|_{_2}^{^2}$};
 
         \draw[->, black!50, line width=1pt] (obs_inpt) to (obs_rep);
         \draw[->, black!50, line width=1pt] (obs_rep) to (embplus_1);
@@ -408,17 +408,17 @@ shown in section \ref{func_app_error}. Recall, the update to our actor is done b
 algorithm is shown in \ref{fig:inference}
 
 \begin{figure}
-    \centered
+    \centering
     \begin{tikzpicture}
         \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,0) {$\text{Planner}_{t\rightarrow \color{black!50!green!80} t+1}$};
         \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (critic) at (6,2) {Critic};
         \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (0,2) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
         
         \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
-            \begin{cases}
+            $\begin{cases}
                 \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>1}\\
                 [0]_{t=0}
-            \end{cases}
+            \end{cases}$
             };
         \node[draw, fill=blue!20, rounded corners] (actions) at (3,2) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
         \node[draw, fill=blue!20, rounded corners] (exp_values) at (8.5,2) {$\left[\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}\right]_t$};
@@ -484,22 +484,22 @@ The other optimization modes can be adapted straight forward. All models use a t
 
 
 \begin{algorithm}[H]
-    \Require Given $\mathcal{D}_{\text{critic}}$, $\mathcal{D}_{\text{expert}}$,  
+    Require $\mathcal{D}_{\text{critic}}$, $\mathcal{D}_{\text{expert}}$,  
     $C_{\theta}$, $\pi_{\phi}$, $\alpha_{\mathrm{inf}}$, $N$\\
-    \State $p_a \gets 0^{T \times d_p}$ \hfill\COMMENT{Initialize plan to zero vector} \\
-    \State sample $o_1$ from MDP\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{Add positional encoding $p_i$ to repeated observation} \\
-    \State $a^0 \gets \pi(\tilde{o}_{1, ..., T}, p_a)$\hfill\COMMENT{Get initial actions $a^0$ according to policy $\pi$} \\
+    $p_a \gets 0^{T \times d_p}$ hfill \hfill Initialize plan to zero vector \\
+    sample $o_1$ from MDP\\
+    $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill Add positional encoding $p_i$ to repeated observation \\
+    $a^0 \gets \pi(\tilde{o}_{1, ..., T}, p_a)$\hfill Get initial actions $a^0$ according to policy $\pi$ \\
     \For {$i=1$ to $N$}{
-        \State Update action $a^i$ using gradient descent:\\
-        \State $a^{i} \gets a^{i-1} + \alpha_{\mathrm{inf}} \nabla_{a^{i-1}} (c(\tilde{o}, a^{i-1}) - 1)^2$
+        Update action $a^i$ using gradient descent:\\
+        $a^{i} \gets a^{i-1} + \alpha_{\mathrm{inf}} \nabla_{a^{i-1}} (c(\tilde{o}, a^{i-1}) - 1)^2$
     }
-    \State Execute actions sequence $a^N$\\
-    \State Get reward $r_T$ based on final state\\
-    \State Add experience to replay buffers:\\
-    \State $\mathcal{D}_{\text{critic}} \gets \mathcal{D}_{\text{critic}} \cup (o_1, a^N_{1, ..., T}, r)$\\
-    \If {$r = 1$}{\\
-        \State $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$\\
+    Execute actions sequence $a^N$\\
+    Get reward $r_T$ based on final state\\
+    Add experience to replay buffers:\\
+    $\mathcal{D}_{\text{critic}} \gets \mathcal{D}_{\text{critic}} \cup (o_1, a^N_{1, ..., T}, r)$\\
+    \If {$r = 1$}{
+        $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$
     }
     return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
     \caption{\ac{avc} Inference}
@@ -536,43 +536,41 @@ additional successful trajectories to the expert dataset. \\
 
 \subsection{Update Step Actor}
 Now we want to derive the update step of the whole sequence actor as motivated in the section "Actor" \ref{sec:AC_actor}.
-To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_a_{\zeta} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
+To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_{a_{\zeta}} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
 We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$ as described in equation \ref{eq:seq_emb}. We can now compute the actions as:
 \begin{equation*}
-    a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T},p_a_{\zeta}).
+    a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T},p_{a_{\zeta}}).
 \end{equation*}
 From this we get the objective function of the actor:
 \begin{equation}
     \label{actor_objective}
-    J_{\phi, \zeta} = \mathbb{E}_{(o, a(t)) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\sum_n \left( \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a_{\zeta})_{t, n} - a_{n}(t)\right)^2,
+    J_{\phi, \zeta} = \mathbb{E}_{(o, a(t)) \in \mathcal{D}_E,\ t \in \{1, ..., T\}}\sum_n \left( \pi_{\phi}(\tilde{o}_{1, ..., T}, p_{a_{\zeta}})_{t, n} - a_{n}(t)\right)^2,
 \end{equation}
 with $n$ indicating the dimension of the action space. The respective gradient steps are:
 \begin{equation*}
     \phi_{i+1} = \phi_i - \alpha_{\phi} \nabla_{\phi}J_{\phi, \zeta}
 \end{equation*}
 \begin{equation*}
-    \zeta_{i+1} = \zeta_ - \alpha_{\zeta_} \nabla_{\zeta_}J_{\phi, \zeta}.
+    \zeta_{i+1} = \zeta_i - \alpha_{\zeta} \nabla_{\zeta}J_{\phi, \zeta}.
 \end{equation*}
 The pseudocode is depicted in algorithm \ref{Actor_Update_Alg}.
 \begin{algorithm}
     \caption{Actor Update}
     \label{Actor_Update_Alg}
-    \begin{algorithmic}
-    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, actor $\pi_{\phi}$, planner $P_{\zeta}$, 
+    Given expert demonstrations $\mathcal{D}_{\text{expert}}$, actor $\pi_{\phi}$, planner $P_{\zeta}$, 
     learning rate $\alpha_{\phi}$, learning rate $\alpha_{\zeta}$\\
-    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1)$ from $\mathcal{D}_{\text{expert}}$\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
-    \State $p_a \gets $
-    \begin{cases}
+     Sample $(a^{\text{E}}_{1, ..., T}, o_1)$ from $\mathcal{D}_{\text{expert}}$\\
+    $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill{repeat observations and append positional encoding} \\
+    $p_a \gets $
+    $\begin{cases}
         p_{\zeta}(a^{\text{E}}_{1, ..., T})\ |\ a^{\text{E}} \notin \text{original expert demonstrations}\\
         0^{T \times d_p}, \text{else}
-    \end{cases} \hfill\COMMENT{generate plan $p_a$} \\
-    \State $a^\pi_{1,...,T} \gets \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a)$ \hfill\COMMENT{generate actions according to $\pi_{\phi}$} \\
-    \State $J_{\pi} = \mathcal{L}_2(a^\pi_{1,...,T}, a^{\text{E}}_{1, ..., T})$ \hfill\COMMENT{compute $L_2$ loss from actions} \\
-    \State $\phi \gets \phi_{old} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
-    $\zeta \gets \zeta{old} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill\COMMENT{update $\phi$ and $\zeta$ according to gradients} \\
-    \State return $\phi$, $\zeta$
-\end{algorithmic}
+    \end{cases}$ \hfill {generate plan $p_a$} \\
+    $a^\pi_{1,...,T} \gets \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a)$ \hfill{generate actions according to $\pi_{\phi}$} \\
+    $J_{\pi} = \mathcal{L}_2(a^\pi_{1,...,T}, a^{\text{E}}_{1, ..., T})$ \hfill{compute $L_2$ loss from actions} \\
+    $\phi \gets \phi_{old} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
+    $\zeta \gets \zeta{old} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill {update $\phi$ and $\zeta$ according to gradients} \\
+    return $\phi$, $\zeta$
 \end{algorithm}
 
 \subsection{Update Step Critic}
@@ -588,16 +586,14 @@ with learning rate $\alpha_{\theta}$. The pseudocode is depicted in algorithm \r
 \begin{algorithm}
     \caption{Critic Update}
     \label{Critic_Update_Alg}
-    \begin{algorithmic}
-    \Require Given replay buffer $\mathcal{D}_{\text{critic}}$, critic $C_{\theta}$ and learning rate $\alpha_{\theta}$\\
-    \State Sample $(a^{\text{E}}_{1, ..., T}, o_1, r)$ from $\mathcal{D}_{\text{critic}}$\\
-    \State $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill\COMMENT{repeat observations and append positional encoding} \\
-    \State $c \gets C_{\theta}(\tilde{o}_{1, ..., T}, a^{\text{E}}_{1, ..., T})$\hfill\COMMENT{compute expected reward $c$} \\
+    Given replay buffer $\mathcal{D}_{\text{critic}}$, critic $C_{\theta}$ and learning rate $\alpha_{\theta}$\\
+    Sample $(a^{\text{E}}_{1, ..., T}, o_1, r)$ from $\mathcal{D}_{\text{critic}}$\\
+    $\tilde{o}_{1, ..., T} \gets [o_1]^T \oplus [p_i]_{i=1}^T$ \hfill{repeat observations and append positional encoding} \\
+    $c \gets C_{\theta}(\tilde{o}_{1, ..., T}, a^{\text{E}}_{1, ..., T})$\hfill{compute expected reward $c$} \\
     
-    \State $J_{C} = \mathcal{L}_2(c, r)$ \hfill\COMMENT{compute $L_2$ loss from reward $r$} \\
-    \State $\theta \gets \theta{old} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
-    \State return $\theta$
-\end{algorithmic}
+    $J_{C} = \mathcal{L}_2(c, r)$ \hfill{compute $L_2$ loss from reward $r$} \\
+    $\theta \gets \theta{old} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
+    return $\theta$
 \end{algorithm}
 \subsection{Active Critic Learner}
 Putting everything together, we can now define the learning paradigm of the \ac{avc} algorithm, depicted in figure \ref{AC_Learner}. The number of update 
@@ -607,24 +603,22 @@ critic score will be lower. Note, this hyperparameter has no effect on the perfo
 \begin{algorithm}
     \caption{Active critic learner}
     \label{AC_Learner}
-    \begin{algorithmic}
-    \Require Given expert demonstrations $\mathcal{D}_{\text{expert}}$, sequence length $T$, learning rates $\alpha_{\mathrm{inf}}$, $\alpha_{\theta}$, 
+    Given expert demonstrations $\mathcal{D}_{\text{expert}}$, sequence length $T$, learning rates $\alpha_{\mathrm{inf}}$, $\alpha_{\theta}$, 
     $\alpha_{\phi}$ and $\alpha_{\zeta}$, inference steps $N$ and update steps $N_{\text{update}}$\\
-    \State Initialize  $\mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{expert}}$, 
+     Initialize  $\mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{expert}}$, 
     actor $\pi_{\phi}$, planner $P_{\zeta}$, critic $C_{\theta}$\\
     \While {\text{not converged}}
     {
         \For {$s=1$ to $N_{\text{samples}}$}
         {
-           $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$ = Inference Step \hfill\COMMENT{see algorithm \ref{AC_Inference}}\\
+           $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$ = Inference Step \hfill{see algorithm \ref{AC_Inference}}\\
         }
         \For {$i=1$ to $N_{\text{update}}$}
         {
-            $\phi_{new}$, $\zeta_{new}$ = Actor Update \hfill\COMMENT{see algorithm \ref{Actor_Update_Alg}}\\
-            $\theta_{new}$ = Critic Update \hfill\COMMENT{see algorithm \ref{Critic_Update_Alg}}\\
+            $\phi_{new}$, $\zeta_{new}$ = Actor Update \hfill{see algorithm \ref{Actor_Update_Alg}}\\
+            $\theta_{new}$ = Critic Update \hfill{see algorithm \ref{Critic_Update_Alg}}\\
         }
     }
-    \end{algorithmic}
 \end{algorithm}
 
 \section{Continued Observations}
@@ -685,9 +679,9 @@ is left for future work.\\
 Intuitively, we demand that the critic expects the same rewards at time step $t$ and $t+1$, given action sequence $a^t$. When this loss is minimized, always taking the actions sequence ${a^t}^*$ maximising the estimated sum of 
 rewards $C_{{a^t}^*}^t(i)$, 
 the expected values $C^t$ will converge to the actual rewards received $r$. This is because minimizing loss \ref{proxy_loss_dense} ensures, that the expected 
-values at time step $t+1$ must be equal or higher than the expected values at time step $t$, as the action sequence $a^{t+1}^* = {a^t}^*$ can be chosen with 
-$C_{{a^t}^*}^t(i) = C_{a^{t+1}^*}^{t+1}(i)$. Now if $C_{{a^t}^*}^t(i) = C_{{a^t}^*}^{t+1}(i)$, the action sequence does not change in $t$: ${a^t}^* = {a^{t+1}}^*$, thus the action 
-sequence ${a^t}^*$ is actually used for all actions of the trajectory and $C^t$ becomes an unbiased estimate, as ${a^t}^*$ is part of the train dataset. \\
+values at time step $t+1$ must be equal or higher than the expected values at time step $t$, as the action sequence ${a^{t+1}}^* = {a^t}^*$ can be chosen with 
+$C_{{{a^t}^*}}^t(i) = C_{{a^{t+1}}^*}^{t+1}(i)$. Now if $C_{{a^t}^*}^t(i) = C_{{a^t}^*}^{t+1}(i)$, the action sequence does not change in $t$: ${a^t}^* = {a^{t+1}}^*$, thus the action 
+sequence ${a^t}^*$ is actually used for all actions of the trajectory and $C^t$ becomes an unbiased estimate, as ${a^t}^*$ is part of the train data set. \\
 
 Now there are a few important observations. First, we did not show, that it is possible to learn an estimate such that $C_a^t = C_a^{t+1}$ for all action sequences $a$. 
 In fact, this assumption relies on a deterministic 

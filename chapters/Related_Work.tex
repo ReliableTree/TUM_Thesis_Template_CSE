@@ -66,15 +66,12 @@ The algorithm aims to minimize $L^{\mathrm{CLIP}}(\theta)$ by doing gradient upd
 The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \begin{algorithm}[h]
     \SetAlgoLined
-    \begin{algorithmic}
-    \For{$\text{iteration}=1,2,\dots$}{ \\
-        \State Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ time steps\\
-        \State Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
-        \State optimize surrogate $L^{\mathrm{CLIP}}$ with respect to $\theta$. \\
-        \State $\theta_\text{old} \gets \theta$
+    \For{$\text{iteration}=1,2,\dots$}{
+        Run policy $\pi_{\theta_\text{old}}$ in environment for $T$ time steps\\
+        Compute advantage estimates $\hat{A}_1, \dots, \hat{A}_T$\\
+        Optimize surrogate $L^{\mathrm{CLIP}}$ with respect to $\theta$. \\
+        $\theta_\text{old} \gets \theta$
         }
-        
-    \end{algorithmic}
     \caption{PPO, actor critic style}
     \label{ppo_algo}
 
@@ -101,10 +98,9 @@ two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the over
 Thrun and Schwartz \cite{thrun1993issues} it is found that:
 \begin{equation}
     \label{eq:overestimation}
-    \begin{align}
-        \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left{Q(s,a) + U(a)\right}\right],
-    \end{align}
+    \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left( Q(s,a)  U(a)\right)\right],
 \end{equation}
+
 where $U(a)$ is action dependent random noise with zero mean. \\
 The main idea of \ac{tqc} is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
 It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.\\
@@ -116,13 +112,12 @@ The $k$th $M$-quantile of a distribution with random variable $X$ is defined as 
 \end{equation}
 with $M$ total quantiles. \\
 Quantile regression is used to learn the values of the $M$ quantiles:
-\begin{equation}
+\begin{align}
     \label{rho}
-    \begin{align}
     L^{\tau_m}_{QR}(\theta^m) := \mathbb{E}_{\tilde{Z}\sim Z}\left[\rho_{\tau_m}(\tilde{Z}-\theta^m)\right],\\
     \quad \text{where} \quad \rho_{\tau_m}(u) = u({\tau_m} - I(u < 0)), \quad \forall u \in \mathbb{R}.
-    \end{align}
-\end{equation}
+\end{align}
+    
 with ${\tau_m = \frac{2m-1}{2M}}, m \in [1, ...., M]$.\\
 Let $\theta^m(s,a)$ be the approximation of the $m$-th quantile of $Q(s,a)$. The probability distribution $Z(s,a)$ can be approximated using $\theta^m$:
 \begin{equation}
@@ -152,23 +147,21 @@ overview over the algorithm with N critics can be found in \ref{algo:TQC}.
 \begin{algorithm}
     \caption{TQC Algorithm [\ref{algo:TQC}]}
     \label{algo:TQC}
-    \begin{algorithmic}
-        \State Initialize policy $\pi_{\phi}$, critics $Z_{\psi_n}$, $Z_{\psi_n}$ for $n \in [1..N]$\\
-        \State Set replay $D = \emptyset$, $\beta = 0.005$\\
+        Initialize policy $\pi_{\phi}$, critics $Z_{\psi_n}$, $Z_{\psi_n}$ for $n \in [1..N]$\\
+        Set replay $D = \emptyset$, $\beta = 0.005$\\
         \For{each iteration}{
             \For{each environment step, until done}{
-                \State Collect transition $(s_t, a_t, r_t, s_{t+1})$ with policy $\pi_{\phi}$ \\
-                \State $D \leftarrow D \cup {(s_t, a_t, r_t, s_{t+1})}$\\
-            \EndFor}
+                Collect transition $(s_t, a_t, r_t, s_{t+1})$ with policy $\pi_{\phi}$ \\
+                $D \leftarrow D \cup {(s_t, a_t, r_t, s_{t+1})}$\\
+            }
             \For{each gradient step}{
-                \State Sample a batch from the replay $D$\\
-                \State $\phi \leftarrow \phi - \lambda{\pi} \hat{\nabla}{\phi}J{\pi}(\phi)$\\
-                \State $\psi_n \leftarrow \psi_n - \lambda_Z \hat{\nabla}{\psi_n}J_Z(\psi_n), \text{for } n \in [1..N]$\\
-                \State $ \overline{\psi_n} \leftarrow \beta \psi_n + (1 - \beta)\overline{\psi_n}, \text{for } n \in [1..N]$
-            \EndFor\\}
-        \EndFor\\}
-        \State \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
-    \end{algorithmic}
+                Sample a batch from the replay $D$\\
+                $\phi \leftarrow \phi - \lambda{\pi} \hat{\nabla}{\phi}J{\pi}(\phi)$\\
+                $\psi_n \leftarrow \psi_n - \lambda_Z \hat{\nabla}{\psi_n}J_Z(\psi_n), \text{for } n \in [1..N]$\\
+                $\overline{\psi_n} \leftarrow \beta \psi_n + (1 - \beta)\overline{\psi_n}, \text{for } n \in [1..N]$
+            }
+        }
+        \textbf{return} policy $\pi_{\phi}$, critics $Z_{\psi_n}$
 \end{algorithm}
 TQC achieves state-of-the-art performance in a wide variety of challenging tasks, like robotic manipulation in the OpenAI Gym environment \cite{1606.01540}, which makes it a fitting baseline 
 for our experiments. It is specifically suited 
@@ -206,14 +199,14 @@ A downside is that it requires a high number of environment interactions to trai
 bounds can be found in appendix \ref{app:GAIL}.
 
 
-\subsection{Generative Adversarial Imitation Learning in \ac{pomdp}s}
+\subsection{Generative Adversarial Imitation Learning in POMDPs}
 \label{GAIL_POMDPS}
 In this section, we will describe an \ac{il} approach based on GAIL, that handles \ac{pomdp}s.\\
 The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
-extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leqt}, a_{\leqt}) = b_{t, \phi}$ that aims to approximate a 
+extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leq t}, a_{\leq t}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
 \begin{equation}
-    \min_{\phi,\theta}\max_{\tilde{\omega}} &\mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\mathrm{log}(1-D_{\tilde{\omega}}(b_{\phi},a))]
+    \min_{\phi,\theta}\max_{\tilde{\omega}} \mathbb{E}_{(b,a)\sim\mathcal{M}_{\text{E}}}[\log D_{\tilde{\omega}}(b_{\phi},a)] + \mathbb{E}_{(b,a)\sim\pi,\mathcal{T}}[\mathrm{log}(1-D_{\tilde{\omega}}(b_{\phi},a))]
 \end{equation}
 with the corresponding imitation loss 
 \begin{equation*}
@@ -239,7 +232,7 @@ of their approach is, that the believe state representation will be expressive f
 the observations are high dimensional and include redundant or unnecessary information that will be hard to learn. This forces the network to allocate capacity that is not directly used to 
 optimize the overall objective. Moreover, as GAIL, this approach suffers from bad sample efficiency with respect to environment interactions and cannot make use of a reward signal from the environment. 
 
-\subsection{Single Observation Imitation Learning in \ac{pomdp}s}
+\subsection{Single Observation Imitation Learning in POMDPs}
 Simon Stepputtis, et al. \cite{stepputtis2020languageconditioned} propose a method for robot manipulation tasks that takes 
 into account natural language instructions. 
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the environment.

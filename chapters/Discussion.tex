@@ -30,7 +30,7 @@ indicating that our approach is more stable with sparse rewards than traditional
 
 
 
-\subsection{\ac{mdp} Setting}
+\subsection{MDP Setting}
 In Section \ref{sec_exp_con_obs}, we evaluated the performance of the \ac{coavc} approach in the standard \ac{mdp} setting, 
 where observations are available after each step.\\
 
@@ -40,7 +40,7 @@ To evaluate the performance of pure \ac{rl} in \ac{mdp}s, we conducted experimen
 environments without expert demonstrations. Our results show that all baselines and COAVC can find solutions, but COAVC is more stable and achieves 
 faster convergence. These findings provide further evidence of the general applicability and better performance of our approach over the baselines. 
 
-\subsection{Single Observation and \ac{mdp} Comparison}
+\subsection{Single Observation and MDP Comparison}
 We compared COAVC to \ac{avc} in section \ref{sec:com_coavc_avc} and observed that while COAVC performs better, 
 \ac{avc} already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
 expert data. Moreover, the inference of \ac{avc} is \ac{iid}, while that of COAVC is not, as observations at inference time are dependent on actions. 

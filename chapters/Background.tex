@@ -52,12 +52,17 @@ given input sequence $x_1,\ldots,x_T$ \cite[chapter~4]{bishop} \cite[chapter~5, 
 
 \section{Unsupervised Learning}
 \label{section:unsup_learn}
-Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to discover underlying patterns or structure in the data.
-The objective function in unsupervised learning is typically not based on a predefined notion of correctness, but rather on measures of statistical
+Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to 
+
+discover underlying patterns or structure in the data.
+The objective function in unsupervised learning is typically not based on a predefined notion of correctness, but
+rather on measures of statistical
 independence or data compression.\\
 
-Unsupervised learning can be used for a variety of tasks, including clustering, density estimation, dimensionality reduction, and anomaly detection.
-It is also often used as a pre-processing step in supervised learning, where the goal is to learn a more informative representation of the input data 
+Unsupervised learning can be used for a variety of tasks, including clustering, density estimation, dimensionality 
+reduction, and anomaly detection.
+It is also often used as a pre-processing step in supervised learning, where the goal is to learn a more informative 
+representation of the input data 
 for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}. 
 
 \section{Reinforcement Learning}
@@ -71,7 +76,7 @@ The agent learns a policy $\pi: S \to A$ that maps states to actions, in order t
 
 \begin{equation*}
     \label{rl_objective}
-    \pi^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]   
+    \pi^* = \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]   
 \end{equation*}
 \begin{equation}
     \approx \pi' = \arg\max_{\pi} \frac{1}{N} \sum_{i=1}^N \left[ \sum_{t=0}^{T_i} \gamma^t r_{i,t} \right]
@@ -156,7 +161,6 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
 \begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.1]
-        font=\fontsize{10};
         % Define nodes
         \node (s1) [circle, draw, fill = green!30] {$s_1$};
         \node (t1_2) [rectangle, draw, right of=s1, xshift=1.5cm] {$T(s_2|s_1, a_1)$};
@@ -211,7 +215,7 @@ Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the pol
         = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]
     \end{aligned}
 \end{equation}
-With $G_t = \sum_{t'=t}^T \gamma^t' r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
+With $G_t = \sum_{t'=t}^T \gamma^{t'} r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
 $G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$ and following trajectory $\tau_{i>t}$ after that.
 
 In practice we don't have access to the real expectation. Instead we sample n trajectories and approximate the expectation.
@@ -248,9 +252,10 @@ It continues until convergence.
 \end{algorithm}
     
 
-\section{\ac{mdp} Model}
+\section{MDP Model}
 Now that we have established the foundation of \ac{rl}, we will investigate two learning paradigms, 
-namely model-free \ac{rl} in section \ref{sec:mod_free_ref} and model-based \ac{rl} in section \ref{sec:mod_based_ref}. \\
+namely model-free \ac{rl} in section \ref{sec:mod_free_ref} and model-based 
+\ac{rl} in section \ref{sec:mod_based_ref}. \\
 
 Model-free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
 estimate of the expected rewards given the \ac{mdp} dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
@@ -368,7 +373,6 @@ We want to proof that $V$ converges to $V_{\pi}$ under the action of the update 
     \item show that $T$ is a contraction mapping,
     \item show that the unique fixed point of $T$ given policy $\pi$ is the true value function $V_{\pi}$.
 \end{enumerate}
-\\ \\
 
 \textbf{Step 1:} Contraction property\\
 \textbf{Definition:}\\
@@ -376,7 +380,7 @@ Let $(X, d)$ be a complete metric space. A map $\mathcal{B}:X \rightarrow X$ is 
 \begin{equation}
     d(\mathcal{B}(x), \mathcal{B}(y)) \leq \gamma d(x,y) \quad \forall x,y \in X.
 \end{equation}
-\\ \\
+\\ 
 
 \textbf{Banach Fixed Point Theorem:}\\
 Let (X,d) be a complete metric space and $\mathcal{B}:X \rightarrow X$ a contractor. 
@@ -391,13 +395,13 @@ First we will show that $T$ is a contraction mapping with respect to the infinit
     \max_{s \in S}\left|E_{\tau \propto \pi}\left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right) -E_{\tau \propto \pi}\left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) W(s')\right)\right| 
 \end{equation*}
 \begin{equation*}
-    &= \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) |V(s') - W(s')| 
+    = \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) |V(s') - W(s')| 
 \end{equation*}
 \begin{equation*}
-    &\leq \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) \max_{s'' \in S}|V(s'') - W(s'')| 
+    \leq \max_{s \in S}\gamma \sum_{s' \in S} p(s' \mid s,a) \max_{s'' \in S}|V(s'') - W(s'')| 
 \end{equation*}
 \begin{equation*}
-    &= \gamma |V - W|_\infty
+    = \gamma |V - W|_\infty
 \end{equation*}
 
 where the last equality comes from the fact that probability distributions are normalized: $\sum_{s' \in S} p(s' \mid s,a) = 1$ and 
@@ -432,18 +436,21 @@ Revisiting \ref{nabla_reinforce}:
     \end{aligned}
 \end{equation}
 where 
-\begin{equation}
-    \begin{align}
-        \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
-        = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
-        = q_{\pi}(s_{t},a_{t}).
-    \end{align}
-\end{equation}
+
+\begin{align}
+    \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
+    = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
+    = q_{\pi}(s_{t},a_{t}).
+\end{align}
+
 
 Plugging in the definition of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
-\begin{equation}
-q_{\pi}(s_t, a_t) = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
-\end{equation}
+\begin{equation*}
+q_{\pi}(s_t, a_t) 
+\end{equation*}
+\begin{equation*}
+    = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
+\end{equation*}
 for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.\\
 
 One way to approximate the $Q$ value using a neural network with parameters $\theta$ is to use the temporal difference term as defined in \ref{TD_update_BM} for the $Q$ value:
@@ -523,13 +530,12 @@ This approach also leads to provably optimal policies, as shown in the appendix 
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
 To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparameterization trick is used:
 
-\begin{equation}
-    \label{SAC_update_rule}
-    \begin{align}
-        \nabla_{\phi}J_\pi(\phi_{i}) \approx \mathbb{E}_{\mathcal{D}} [\nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
-        + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)].
-    \end{align}
-\end{equation}
+   
+\begin{align}
+ \label{SAC_update_rule}
+    \nabla_{\phi}J_\pi(\phi_{i}) \approx \mathbb{E}_{\mathcal{D}} [\nabla_{\phi} log (\pi(\phi_{i})(a_t, s_t))\\
+    + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)].
+\end{align}
 
 
 
@@ -543,7 +549,7 @@ Recall, we defined the \ac{rl} objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
 \end{equation}
-We can compute $J(\tile{\pi})$ for a different policy $\tilde{\pi}$ using $J(\pi)$ like:
+We can compute $J(\tilde{\pi})$ for a different policy $\tilde{\pi}$ using $J(\pi)$ like:
 \begin{equation}
     J(\tilde{\pi}) = J(\pi) + \mathbb{E}_{s_0, a_0, ... \propto \tilde{\pi}}\left[ \sum_{t=0}^{\infty}  \gamma^t A_{\pi}(s_t, a_t)\right],
 \end{equation}
@@ -657,12 +663,11 @@ A common choice to achieve this is to minimize the KL divergence between the exp
 Formally let 
 
 \begin{center}
-    \pi_{\text{expert}}(a|s) = 
+    $\pi_{\text{expert}}(a|s) = 
         \begin{cases}
             1 \ |\ (a|s)\in \mathcal{D}_{\text{expert}}\\
             0, \text{else}
-        \end{cases}
-
+        \end{cases}$
 \end{center}
 
 be the probability of the expert selecting action $a$ in state $s$, and let $\pi_{\theta}(a|s)$ be the probability of the learned policy. Then the KL divergence can be approximated by
@@ -686,7 +691,7 @@ function can be used to train a policy on additional interactions with the envir
 while direct \ac{il} only acts on the provided expert trajectories. 
 Formally let $r'$ be a reward function and $\pi_{r'}^*$ defined as:
 \begin{equation}
-    \pi_{r'}^* &= \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
+    \pi_{r'}^* = \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
 \end{equation}
 be the optimal policy under the reward function $r'$. This equation can be inverted, such that we find the reward function $r_{inv}$ for which the 
 actions under the policy $\pi_{r'}^*$ are optimal:
@@ -741,7 +746,6 @@ An example is depicted in figure \ref{fig:POMDP}.  \\
 \begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.1]
-        font=\fontsize{10};
         % Define nodes
         \node (s1) [circle, draw, fill = green!30] {$s_1$};
         \node (t1_2) [rectangle, draw, right of=s1, xshift=1.5cm] {$T(s_2|s_1, a_1)$};
@@ -864,7 +868,6 @@ They have empirically been shown to have comparable performance to LSTMs by Cahu
 \begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.1]
-        font=\fontsize{10};
         % Define nodes
         \node (o0) [] {};
         \node (o1) [circle, draw, fill = green!30, right of = o0, xshift=2.5cm] {$o_1$};

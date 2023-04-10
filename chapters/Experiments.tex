@@ -195,7 +195,6 @@ Following the insights presented in this section, we will use the actor planner 
       \includegraphics[width=\textwidth]{images/Plan_vs_Actions/Reach.png}
       \caption{Reach environment, One expert demonstration. Comparison of the action optimization mode (blue) and actor planner optimization mode (orange).
       Each experiment was repeated twice. The shaded region indicates the standard variation between runs. }
-      \label{fig:plot1}
     \end{subfigure}
     \medskip
     \begin{subfigure}[t]{0.45\textwidth}
@@ -236,23 +235,19 @@ decouples the actor from the critic, as discussed in section \ref{inference_time
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/4_400/Window Open.png}
     \caption{Window Open environment, 4 expert demonstrations.}
-    \label{fig:plot3}
   \end{subfigure}
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/4_400/Reach.png}
     \caption{Reach environment, 4 expert demonstrations.}
-    \label{fig:plot1}
   \end{subfigure}
   \medskip
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/15_400/Push.png}
     \caption{Push environment, 15 expert demonstrations.}
-    \label{fig:plot2}
   \end{subfigure}
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/15_400/Pick and Place.png}
     \caption{Pick and Place environment, 15 expert demonstrations.}
-    \label{fig:plot4}
   \end{subfigure}
   \caption{
     All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
@@ -435,7 +430,7 @@ we also conducted the Window Open experiment in \ac{mdp} setting with \ac{gail} 
 baseline with pretrained \ac{tqc} performs best. This is probably due to the fact that \ac{gail} makes no use of the sparse reward. Additionally 
 the authors mentioned in the paper, that \ac{gail} is not more efficient in terms of environment interactions then \ac{trpo} with rewards. A large number of 
 environment interactions are needed, before the discriminator of \ac{gail} provides useful rewards for the learner. We suppose that is a reason, why \ac{gail} does not perform 
-well in our setting, where a relatively small amount of environment interactions are used. \\
+well in our setting, where a relatively small amount of environment interactions are used.\\ 
 
 We also included results for the Drawer Close environment with no expert demonstrations. All algorithms perform better than in the single observation environment, 
 but \ac{coavc} is the only algorithm with stable performance. It found a solution with near perfect success rate in all three runs quickly. \\
