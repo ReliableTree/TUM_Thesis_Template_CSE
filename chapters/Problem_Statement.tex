@@ -8,7 +8,7 @@ deterministic \ac{mdp}s with sparse rewards and fixed horizon deterministic \ac{
 Formally we define a continuous fixed horizon \ac{sopomdp} as a tuple
 $$( S,A,T,O,R,G, h ),$$
 where $S$ is the state space, $A$ is the action space, $T$ is the transition 
-function, $O$ is the observation space, $R$ is the reward function, $G$ is the set of states for which the reward is $1$, and $h$ is the time horizon.\\ 
+function, $O$ is the observation space, $R$ is the reward function, $G$ is the set of states for which the reward is $1$, and $h$ is the time horizon, as introduces in section \ref{POMDP}.\\ 
 At each time step $t=1,...,T$, the agent has access to the observation $o_t = s_1$ and selects an action $a_t$.  
 It then receives a 
 reward $r_t\in \{0,1\}$, where 
@@ -17,8 +17,8 @@ $\begin{cases}
     r_T = 1 \quad  |g \in \{ s_t \}\\
     r_T = 0 \quad \text{else.}
 \end{cases}$ \\
-Intuitively, the reward is $1$ only if a goal state was reached along the trajectory. We also relax the single 
-observation constraint, where the agent receives the state of the environment after each step: $o_t = s_t$, as defined for \ac{mdp}s. The rest of the setting is equal.\\
+The reward is $1$ only if a goal state was reached along the trajectory. We also relax the single 
+observation constraint, where the agent receives the state of the environment after each step: $o_t = s_t$, as defined for \ac{mdp}s.\\
 
 The goal of our algorithm is to learn a policy $\pi(a_t|o_{1:t}, a_{0,...,t-1})$ that maximizes the expected cumulative reward over a trajectory of length $T$ given 
 some expert trajectories $D_{\text{expert}}$. 

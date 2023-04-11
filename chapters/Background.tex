@@ -732,10 +732,7 @@ To handle partial observability, the agent maintains a belief state, which is a 
 actions and observations. Formally a belief state $b_t(s)$ at time $t$ is the probability of the system to be in state $s$, 
 given action $a$, observation $o$ and belief state distribution $b_{t}$. The update step is written as:
 \begin{equation*}
-    b_{t+1}(s) = p(s|a,o,b_{t}) = 
-\end{equation*}
-\begin{equation*}
-    \frac{p(o|s) p(s|a,b_{t})}{p(o|a,b_{t})}.
+    b_{t+1}(s) = p(s|a,o,b_{t}) = \frac{p(o|s) p(s|a,b_{t})}{p(o|a,b_{t})}.
 \end{equation*}
 Using the definitions from the \ac{pomdp}, we can write this update as:
 \begin{equation}
