@@ -2246,22 +2246,24 @@
     <bcf:citekey order="62">alet2021noether</bcf:citekey>
     <bcf:citekey order="63">stable-baselines3</bcf:citekey>
     <bcf:citekey order="64">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="65">gawlikowski2022survey</bcf:citekey>
-    <bcf:citekey order="65">liu2022simple</bcf:citekey>
-    <bcf:citekey order="66">pathak2017curiositydriven</bcf:citekey>
-    <bcf:citekey order="67">yu2019meta</bcf:citekey>
-    <bcf:citekey order="68">todorov2012mujoco</bcf:citekey>
-    <bcf:citekey order="69">ho2016generative</bcf:citekey>
-    <bcf:citekey order="70">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="71">10.5555/3104322.3104481</bcf:citekey>
-    <bcf:citekey order="72">InfCausalEnt</bcf:citekey>
-    <bcf:citekey order="73">NEURIPS2020_b5c01503</bcf:citekey>
-    <bcf:citekey order="74">stepputtis2020languageconditioned</bcf:citekey>
-    <bcf:citekey order="75">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="65">TRPO</bcf:citekey>
+    <bcf:citekey order="66">PPO</bcf:citekey>
+    <bcf:citekey order="67">gawlikowski2022survey</bcf:citekey>
+    <bcf:citekey order="67">liu2022simple</bcf:citekey>
+    <bcf:citekey order="68">pathak2017curiositydriven</bcf:citekey>
+    <bcf:citekey order="69">yu2019meta</bcf:citekey>
+    <bcf:citekey order="70">todorov2012mujoco</bcf:citekey>
+    <bcf:citekey order="71">ho2016generative</bcf:citekey>
+    <bcf:citekey order="72">10.5555/3104322.3104481</bcf:citekey>
+    <bcf:citekey order="73">10.5555/3104322.3104481</bcf:citekey>
+    <bcf:citekey order="74">InfCausalEnt</bcf:citekey>
+    <bcf:citekey order="75">NEURIPS2020_b5c01503</bcf:citekey>
     <bcf:citekey order="76">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="77">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="78">stepputtis2020languageconditioned</bcf:citekey>
     <bcf:citekey order="79">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="80">stepputtis2020languageconditioned</bcf:citekey>
+    <bcf:citekey order="81">stepputtis2020languageconditioned</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">

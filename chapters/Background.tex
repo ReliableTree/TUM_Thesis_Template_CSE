@@ -260,8 +260,8 @@ It continues until convergence.
 
 \section{MDP Model}
 Now that we have established the foundation of \ac{rl}, we will investigate two learning paradigms, 
-namely model-free \ac{rl} in section \ref{sec:mod_free_ref} and model-based 
-\ac{rl} in section \ref{sec:mod_based_ref}. \\
+namely model-free \ac{rl} in Section \ref{sec:mod_free_ref} and model-based 
+\ac{rl} in Section \ref{sec:mod_based_ref}. \\
 
 Model-free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
 estimate of the expected rewards given the \ac{mdp} dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
@@ -365,7 +365,7 @@ Bellman update operator defined as:
 \begin{equation}
     (T V)(s) = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right).
 \end{equation}
-It follows from this equation, that the expectation of the TD error defined in equation \ref{TD_update} can be expressed from the Bellman operator $T$ as 
+It follows from this equation, that the expectation of the TD error defined in Equation \ref{TD_update} can be expressed from the Bellman operator $T$ as 
 \begin{equation}
     \label{TD_update_BM}
     \delta_t = (T V)(s_t) - V(s_t),
@@ -417,7 +417,7 @@ Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
 
 \textbf{Step 2:} Unique fixed point\\
 By the Banach fixed point theorem, as discussed by Agarwal \etAl \cite{agarwal2018banach}, $T$ has a fixed point $TV^* = V^*$. 
-We see, that this fixed point satisfies the Bellman equation \ref{bootstrap_v} with 
+We see, that this fixed point satisfies the Bellman Equation \ref{bootstrap_v} with 
 $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right).$$
 As the fixed point is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it is shown that for small enough 
 update rates $\alpha$, TD learning converges to the true value function. A similar proof can be found for TD learning of the $Q$ value function.
@@ -431,7 +431,7 @@ rather then after the whole trajectory. This approximation is referred to as a "
 
 \subsubsection{Critic}
 In this section, we will derive an expression to approximate $G_t$ by using an iterative update step with guaranteed convergence.
-Revisiting equation \ref{nabla_reinforce} we define: 
+Revisiting Equation \ref{nabla_reinforce} we define: 
 \begin{equation}
     \label{ac policy update}
     \begin{aligned}
@@ -515,7 +515,7 @@ The $Q$ values are trained with TD learning:
     \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(q_{\theta_i}(s_t,a_t) - y_t)^2]
 \end{equation}
 
-where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. This is the same update rule as derived in equation \ref{Q-ValueTD}, 
+where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. This is the same update rule as derived in Equation \ref{Q-ValueTD}, 
 considering the identity \ref{q_from_v}.
 
 The policy is updated to minimize the Kullback-Leibler (KL) divergence to the normalized $Q$-Values:
@@ -743,7 +743,7 @@ b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T
 where $a_t$ is the action taken at time $t$, $o_{t+1}$ is the observation received at time $t+1$, and $s'$ is the resulting state after taking action $a_t$ in state $s$.
 
 While the transition probability $\mathcal{T}$ only depends on the last state $s_t$ and the last action $a_t$, 
-in equation \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}$.
+in Equation \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}$.
 This means an optimal policy has to know the history of the \ac{mdp}: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, thus the observation space grows linear in time. 
 An example is depicted in Figure \ref{fig:POMDP}.  \\
 \begin{figure}
@@ -833,7 +833,7 @@ Sequence models are a natural choice to model \ac{pomdp}s.
 A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
 a sequence model could take as input a sequence of n observations and return one action. \\ 
 Naively, the input sequence of n tokens with dimension $d$ could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
-input to a model. The dimension of the input then scales linear with the sequence length. As motivated in section \ref{COD}, this means exponentially more evidence is 
+input to a model. The dimension of the input then scales linear with the sequence length. As motivated in Section \ref{COD}, this means exponentially more evidence is 
 required with sequence length n to achieve the same confidence. These approaches are referred to as "frame stacking" and can solve a \ac{pomdp}s as shown by Raffin 
 \cite{framestacking}, though 
 their performance decreases with the number of frames needed to accurately represent the \ac{pomdp}. \\
@@ -965,7 +965,7 @@ The vectors $Q$, $K$ and $V$ are computed using a position wise feed forward net
 \begin{equation}
     QKV = \text{ReLU}(x \ W_1 + b1)W_2 + b_2,
 \end{equation}
-where the same weights $W_n$ and biases $b_n$ are used for every input $x$ of the sequence. This is expected to be an advantage following the BIC argument from section \ref{COD}. 
+where the same weights $W_n$ and biases $b_n$ are used for every input $x$ of the sequence. This is expected to be an advantage following the BIC argument from Section \ref{COD}. 
 These vectors are used to compute the attention weights between each pair of input tokens.
 The resulting weighted sum of value vectors is used as the output of the self-attention layer.
 The attention weights are computed as follows:

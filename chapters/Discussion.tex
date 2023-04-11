@@ -5,7 +5,7 @@
 In this chapter we will summarize our findings and discuss advantages as well es remaining limitations of our approach and evaluation.
 \section{Applicability and Advantages}
 \subsection{Imitation Learning}
-Our results from section \ref{sec:exp_imi_lr} demonstrate that our \ac{il} approach outperforms recurrent algorithms in continuous action space, 
+Our results from Section \ref{sec:exp_imi_lr} demonstrate that our \ac{il} approach outperforms recurrent algorithms in continuous action space, 
 given a single observation per trajectory. We propose this is due to generating the whole sequence in one step, 
 rather than using an autoregressive approach. This method does not break the \ac{iid} assumption, making predictions more robust and effective 
 for planning in continuous space. \\
@@ -19,7 +19,7 @@ search paradigm on the convergence rate of the algorithm as evidence for the imp
 
 \subsection{Reinforcement Learning}
 We explored the effectiveness of \ac{rl} in improving the performance of our approach as compared to pure \ac{il}. 
-Our results in section \ref{sec:fine_tuning} demonstrate that our approach can effectively leverage both expert demonstrations and \ac{rl} data to achieve 
+Our results in Section \ref{sec:fine_tuning} demonstrate that our approach can effectively leverage both expert demonstrations and \ac{rl} data to achieve 
 superior performance compared to our baselines.\\
 
 To further assess the impact of \ac{rl}, we conducted experiments on the Drawer Close environment without expert demonstrations. 
@@ -41,7 +41,7 @@ environments without expert demonstrations. Our results show that all baselines 
 faster convergence. These findings provide further evidence of the general applicability and better performance of our approach over the baselines. 
 
 \subsection{Single Observation and MDP Comparison}
-We compared COAVC to \ac{avc} in section \ref{sec:com_coavc_avc} and observed that while COAVC performs better, 
+We compared COAVC to \ac{avc} in Section \ref{sec:com_coavc_avc} and observed that while COAVC performs better, 
 \ac{avc} already achieves high accuracy in solving environments. We attribute this to the structured exploration enabled by knowledge from 
 expert data. Moreover, the inference of \ac{avc} is \ac{iid}, while that of COAVC is not, as observations at inference time are dependent on actions. 
 
@@ -59,7 +59,7 @@ tailored for it. In section Guided Reinforcement Learning with Sparse Rewards \r
 a candidate. While we argued why we expect our algorithm to perform better in cases with provided expert demonstrations than the featured algorithm, we have to 
 leave testing it for future work.\\
 
-Another aspect that we would like to test in more depths is the sparse reward setting. In section \ref{sec:HER}, we have introduced two concepts that are used for sparse \ac{rl}, namely 
+Another aspect that we would like to test in more depths is the sparse reward setting. In Section \ref{sec:HER}, we have introduced two concepts that are used for sparse \ac{rl}, namely 
 HER and curiosity driven exploration. While \ac{her} is not generally applicable, we would like to both test our approach against a baseline using curiosity, as well as incorporate 
 curiosity into our algorithm as an additional reward signal. 
 

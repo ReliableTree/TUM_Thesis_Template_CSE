@@ -275,25 +275,25 @@ With this, the discounted expected reward can be written as:
 \begin{equation}
     \mathbb{E}_\pi[c(s,a)] = \sum_{s,a} \rho_\pi(s,a) c(s,a)
 \end{equation}
-and equation \ref{proto_inf_ler_c_app} can be written as:
+and Equation \ref{proto_inf_ler_c_app} can be written as:
 \begin{equation}
     \label{occ_meas_obj_app}
     \pi_{\text{inv}}^* = \max_{c_{\text{inv}} \in \mathcal{C}} \left( \min_{\rho_\pi \propto \pi \in \Pi} \left(- \bar{\text{H}}(\rho_\pi) + \sum_{s,a} \rho_\pi(s,a) c(s,a) \right) - \sum_{s,a} \rho_{\text{E}}(s,a) c(s,a) \right).
 \end{equation}
 
-It is then shown that a policy is uniquely identified with its occupancy measure $\rho_{\pi} \propto \pi$. With this in mind, we rewrite equation \ref{proto_inf_ler_c_app} as a constrained satisfaction problem:
+It is then shown that a policy is uniquely identified with its occupancy measure $\rho_{\pi} \propto \pi$. With this in mind, we rewrite Equation \ref{proto_inf_ler_c_app} as a constrained satisfaction problem:
 \begin{equation}
     \label{const_sat_gail_app}
     \pi_{\text{inv}}^* = \min_{\pi \propto \rho_{\pi}} - \bar{\text{H}}(\rho_{\pi})\quad \text{subject to }\quad \rho_{\pi}(s,a) = \rho_{\text{E}}(s,a) \quad \forall s \in \mathcal{S}, \forall a \in \mathcal{A},
 \end{equation}
-where $\bar{\text{H}}$ is the the discounted causal entropy $\text{H}$ defined on occupancy measures of policies, rather then action distributions. In this sense, equation \ref{proto_inf_ler_c_app} is the dual problem of equation \ref{const_sat_gail_app}. 
+where $\bar{\text{H}}$ is the the discounted causal entropy $\text{H}$ defined on occupancy measures of policies, rather then action distributions. In this sense, Equation \ref{proto_inf_ler_c_app} is the dual problem of Equation \ref{const_sat_gail_app}. 
 This optimization is intractable, as we get as many constraints, as we have action state pairs in our \ac{mdp}. Moreover, in practice we only have a small sample size, which would mean setting 
 the occupancy measure for all unvisited state action pairs to zero. This is obviously not the intended optimum. Instead, the objective \ref{const_sat_gail_app} is relaxed:
 \begin{equation}
     \label{dist_opt_app}
     \pi_{\text{inv}}^* = \min_{\pi} d_{\psi}(\rho_{\pi_{\text{E}}}, \rho_{\pi}) - \text{H}(\pi)
 \end{equation}
-such that $d_{\psi}$ becomes small, when $\pi_{\text{E}}$ and $\rho_{\pi}$ become similar. To do this, we can introduce an additional regularizor $\psi$ to equation \ref{occ_meas_obj_app}:
+such that $d_{\psi}$ becomes small, when $\pi_{\text{E}}$ and $\rho_{\pi}$ become similar. To do this, we can introduce an additional regularizor $\psi$ to Equation \ref{occ_meas_obj_app}:
 
 \begin{equation*}
     \pi_{\text{inv}}^* = \max_{c_{\text{inv}} \in \mathcal{C}} \left(-\psi(c) \ \min_{\rho_\pi \propto \pi \in \Pi} \left(- \bar{\text{H}}(\rho_\pi) + \sum_{s,a} \rho_\pi(s,a) c(s,a) \right) - \sum_{s,a} \rho_{\text{E}}(s,a) c(s,a) \right)
@@ -328,7 +328,7 @@ and the discrimnator update rule as:
     \label{eq_GAIL_disc_app}
     \nabla_{\omega} J(\rho_{\pi_{\theta}}, D_{\omega}) = \mathbb{E}_{\tau \propto \pi} [\nabla_w \mathrm{log}(D_w(s,a))] + {E}_{\tau_E} [\nabla_w \mathrm{log}(1 - D_w(s,a))].
 \end{equation}
-Note, because cost $c$ instead of reward $r$ is used in equation \ref{GAIL_update_policy_app} gradient descent is used, as the cost is minimized and in equation \ref{eq_GAIL_disc_app} 
+Note, because cost $c$ instead of reward $r$ is used in Equation \ref{GAIL_update_policy_app} gradient descent is used, as the cost is minimized and in Equation \ref{eq_GAIL_disc_app} 
 gradient ascent is used, as we want to maximize the discriminative power of $D$. The algorithm is summarized in algorithm \ref{GAIL_Algo_app}.\\
 \begin{algorithm}
     \caption{Generative Adversarial Imitation Learning}
