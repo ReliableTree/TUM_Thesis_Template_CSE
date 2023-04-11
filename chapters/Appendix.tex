@@ -116,13 +116,12 @@ optimization, we only optimize trajectories, for which the critic value is small
 \begin{figure}[h]
     \centering
     \begin{subfigure}[b]{1\linewidth}
-    \includegraphics[width=0.18\linewidth]{images/meta-world/pickplace/cropped/0_cropped.png}
-    \includegraphics[width=0.18\linewidth]{images/meta-world/pickplace/cropped/1_cropped.png}
-    \includegraphics[width=0.18\linewidth]{images/meta-world/pickplace/cropped/2_cropped.png}
-    \includegraphics[width=0.18\linewidth]{images/meta-world/pickplace/cropped/3_cropped.png}
-    \includegraphics[width=0.18\linewidth]{images/meta-world/pickplace/cropped/4_cropped.png}
+    \includegraphics[width=0.18\linewidth]{images/meta-world/pick_place/cropped/0_cropped.png}
+    \includegraphics[width=0.18\linewidth]{images/meta-world/pick_place/cropped/1_cropped.png}
+    \includegraphics[width=0.18\linewidth]{images/meta-world/pick_place/cropped/2_cropped.png}
+    \includegraphics[width=0.18\linewidth]{images/meta-world/pick_place/cropped/3_cropped.png}
+    \includegraphics[width=0.18\linewidth]{images/meta-world/pick_place/cropped/4_cropped.png}
     \caption{Expert demonstration of the Pick and Place environment.}
-    \label{fig:reach-environment}
     \end{subfigure}
     \begin{subfigure}[b]{1\linewidth}
         \includegraphics[width=0.18\linewidth]{images/meta-world/push/cropped/0_cropped.png}
@@ -131,7 +130,6 @@ optimization, we only optimize trajectories, for which the critic value is small
         \includegraphics[width=0.18\linewidth]{images/meta-world/push/cropped/3_cropped.png}
         \includegraphics[width=0.18\linewidth]{images/meta-world/push/cropped/4_cropped.png}
         \caption{Expert demonstration of the Push environment.}
-        \label{fig:reach-environment}
     \end{subfigure}
     \begin{subfigure}[b]{1\linewidth}
         \includegraphics[width=0.18\linewidth]{images/meta-world/reach/cropped/0_cropped.png}
@@ -140,58 +138,40 @@ optimization, we only optimize trajectories, for which the critic value is small
         \includegraphics[width=0.18\linewidth]{images/meta-world/reach/cropped/3_cropped.png}
         \includegraphics[width=0.18\linewidth]{images/meta-world/reach/cropped/4_cropped.png}
         \caption{Expert demonstration of the Reach environment.}
-        \label{fig:reach-environment}
     \end{subfigure}
     \begin{subfigure}[b]{1\linewidth}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/windowopen/cropped/0_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/windowopen/cropped/1_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/windowopen/cropped/2_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/windowopen/cropped/3_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/windowopen/cropped/4_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/window_open/cropped/0_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/window_open/cropped/1_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/window_open/cropped/2_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/window_open/cropped/3_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/window_open/cropped/4_cropped.png}
         \caption{Expert demonstration of the Window Open environment.}
-        \label{fig:reach-environment}
     \end{subfigure}
     \begin{subfigure}[b]{1\linewidth}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/drawerclose/cropped/0_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/drawerclose/cropped/1_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/drawerclose/cropped/2_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/drawerclose/cropped/3_cropped.png}
-        \includegraphics[width=0.18\linewidth]{images/meta-world/drawerclose/cropped/4_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/drawer_close/cropped/0_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/drawer_close/cropped/1_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/drawer_close/cropped/2_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/drawer_close/cropped/3_cropped.png}
+        \includegraphics[width=0.18\linewidth]{images/meta-world/drawer_close/cropped/4_cropped.png}
         \caption{Expert demonstration of the Drawer Close environment.}
-        \label{fig:reach-environment}
     \end{subfigure}
+    \caption{Meta-World tasks with expert demonstrations.}
+    \label{fig:meta-world}
 \end{figure}
   
 
 
+The Meta-World benchmark suite, consisting of 50 challenging robotic manipulation tasks designed to assess the capabilities of reinforcement learning (RL) algorithms, 
+has been introduced by Yu et al. \cite{yu2019meta}. Meta-World is widely utilized in meta-\ac{rl} and \ac{rl} tasks.
 
-Meta-World \cite{yu2019meta} is a benchmark suite of 50 robotic manipulation tasks designed to evaluate the generalization ability of \ac{rl} 
-algorithms. The tasks are highly challenging and involve complex manipulation of objects in a simulated environment. 
-While Meta-World is often used for meta-\ac{rl}, it can also be used for normal\ac{rl}tasks.
+One of the key advantages of Meta-World is the well-defined success criteria for the tasks, enabling the definition of sparse rewards in a natural way. 
+In this thesis, we select five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push", and "Reach", which provide diverse and varying levels of 
+difficulty. The corresponding environments, along with expert demonstrations, are depicted in figure \ref{fig:meta-world}. In "Reach," "Pick and Place," and "Push," the position of the goal 
+and the puck are randomly generated for each instance of the environment, whereas in "Window Open," the window's position changes, and in "Drawer Close," the drawer's position is variable.
 
-One of the strengths of Meta-World is that the tasks have well-defined success criteria, which makes it possible to naturally define sparse rewards. 
-In this thesis, we us five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push" and "Reach", as displayed in 
-figure . \\
-
-The environments have 39 dimensional observation space and 4 dimensional action space. 
-The actino space consists Of
-
-
-The observation space consists Of
-
-
-The instances of the environment sample different layouts of objects and goals, which are represented in the observations. We use the 
-goal observable V2 environments provided with the benchmark.
-
-table
-reach: goal positional
-pickpalce: goal positional
-drawer close: position of drawer
-windowopen: position of window
-push: goal position
-
-Meta-World uses the MuJoCo simulation environment \cite{todorov2012mujoco}. In our setting, we use the python package  
-"mujoco-py" version 2.1.2.14 with "metaworld" version 0.1.0.   
+The observation space consists of 39 dimensions, including a three-dimensional representation of the goal, while the action space is four-dimensional. For our experiments, 
+we employ the goal-observable V2 environments. Meta-World uses the MuJoCo simulation environment \cite{todorov2012mujoco}, which is an efficient physics-based 
+simulator capable of simulating object interactions such as puck grasping or window sliding.
 
 \chapter{Additional Plots}
 \label{chapter:additional_plots}
