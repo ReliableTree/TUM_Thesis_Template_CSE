@@ -6,7 +6,7 @@ A focus is to efficiently leverage expert demonstrations to solve environments w
 deterministic \ac{mdp}s with sparse rewards and fixed horizon deterministic \ac{pomdp}s, where only a single initial observation is provided, along with sparse rewards. \\
 
 Formally we define a continuous fixed horizon \ac{sopomdp} as a tuple
-$$\langle S,A,T,O,R,G, h  \rangle,$$
+$$( S,A,T,O,R,G, h ),$$
 where $S$ is the state space, $A$ is the action space, $T$ is the transition 
 function, $O$ is the observation space, $R$ is the reward function, $G$ is the set of states for which the reward is $1$, and $h$ is the time horizon.\\ 
 At each time step $t=1,...,T$, the agent has access to the observation $o_t = s_1$ and selects an action $a_t$.  

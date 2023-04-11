@@ -17,7 +17,7 @@ discuss how inference time search is used in current algorithms. Some of the pre
 \section{General Purpose Reinforcement Learning Algorithms}
 \subsection{Proximal Policy Optimization}
 \label{section:PPO}
-Schulman, et al. \cite{PPO} introduce "Proximal Policy Optimization" (\ac{ppo}), which 
+Schulman \etAl \cite{PPO} introduce "Proximal Policy Optimization" (\ac{ppo}), which 
 builds upon the ideas of \ac{trpo} \cite{TRPO}. In \ac{trpo}, instead of the objective \ref{LPG}, a "surrogate" objective $L^{TRPO}$ is optimized 
 with respect to a KL divergence constraint:
 \begin{flalign}
@@ -78,7 +78,7 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \end{algorithm}
 Overall, \ac{ppo} is a robust and effective algorithm for deep \ac{rl}, and has been successfully applied to a wide range of environments and tasks.\\
 
-A GRU can be used in the recurrent implementation of \ac{ppo} called Recurrent Proximal Policy optimization (RPPO) as analyzed by Pleines, et al. 
+A GRU can be used in the recurrent implementation of \ac{ppo} called Recurrent Proximal Policy optimization (RPPO) as analyzed by Pleines \etAl 
 \cite{RPPO}. Here the policy $\pi$ is defined on the history of observations and actions using a recurrent hidden state $h_t : o_{1:t} \times a_{1:t}$ with $\pi : o_{1:t} \times a_{1:t} \rightarrow \mathcal{R}$.
 The adapted loss function from \ac{ppo} is defined as:
 \begin{equation}
@@ -92,7 +92,7 @@ We will use RPPO as part of our baselines.
 
 \subsection{Truncated Mixture of Continuous Distributional Quantile Critics}
 \label{section:TQC}
-Arsenii Kuznetsov, et al. proposed "Truncated Mixture of Continuous Distributional Quantile Critics" \ac{tqc} \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
+Arsenii Kuznetsov \etAl proposed "Truncated Mixture of Continuous Distributional Quantile Critics" \ac{tqc} \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
 Empirically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
 two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the overestimation bias by 
 Thrun and Schwartz \cite{thrun1993issues} it is found that:
@@ -202,7 +202,7 @@ bounds can be found in appendix \ref{app:GAIL}.
 \subsection{Generative Adversarial Imitation Learning in POMDPs}
 \label{GAIL_POMDPS}
 In this section, we will describe an \ac{il} approach based on GAIL, that handles \ac{pomdp}s.\\
-The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani, et al. \cite{gangwani2019learning} 
+The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani \etAl \cite{gangwani2019learning} 
 extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leq t}, a_{\leq t}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
 \begin{equation}
@@ -233,7 +233,7 @@ the observations are high dimensional and include redundant or unnecessary infor
 optimize the overall objective. Moreover, as GAIL, this approach suffers from bad sample efficiency with respect to environment interactions and cannot make use of a reward signal from the environment. 
 
 \subsection{Single Observation Imitation Learning in POMDPs}
-Simon Stepputtis, et al. \cite{stepputtis2020languageconditioned} propose a method for robot manipulation tasks that takes 
+Simon Stepputtis \etAl \cite{stepputtis2020languageconditioned} propose a method for robot manipulation tasks that takes 
 into account natural language instructions. 
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the environment.
 The proposed method involves using a neural network to map natural language instructions to 
@@ -246,7 +246,7 @@ tasks when language instructions are given. A more detailed overview of the meth
 \section{Sparse Reward}
 \label{sec:HER}
 Learning with sparse rewards is challenging in a high-dimensional action and observation space, as nearly all trajectories will have a reward of 0.
-Until, by chance, a successful trajectory is found, the agent has to blindly guess. To overcome this problem, Marcin Andrychowicz et al. \cite{andrychowicz2018hindsight} 
+Until, by chance, a successful trajectory is found, the agent has to blindly guess. To overcome this problem, Marcin Andrychowicz \etAl \cite{andrychowicz2018hindsight} 
 propose "Hindsight Experience Replay".\\
 
 The algorithm works by generating new goals for a given trajectory based on the states that were actually reached.
@@ -264,7 +264,7 @@ Consider the goal of not driving into a vehicle or a goal expressed in natural l
 
 Another approach is to use curiosity for better exploration in sparse reward settings.\\
 
-One common approach similar to Pathak et al \cite{pathak2017curiositydriven} to curiosity-driven exploration is to use an intrinsic reward function, which is designed to 
+One common approach similar to Pathak \etAl \cite{pathak2017curiositydriven} to curiosity-driven exploration is to use an intrinsic reward function, which is designed to 
 measure how surprising or informative a particular 
 state or action is to the agent. \\
 
@@ -277,7 +277,7 @@ This approach is very general and can be added as an addition to classical \ac{r
 \subsection{Guided Reinforcement Learning with Sparse Rewards}
 \label{sec:rel_work_finetuning}
 With guided \ac{rl} we refer to expert knowledge that is provided to the algorithm, for example with expert demonstrations.
-Mel Vecerik et al. \cite{vecerik2018leveraging} describe a priority 
+Mel Vecerik \etAl \cite{vecerik2018leveraging} describe a priority 
 sampling algorithm in combination with deep deterministic policy gradient (DDPG). The probability with which a 
 training sample is chosen from the replay buffer is defined as: 
 \begin{equation}
@@ -289,7 +289,7 @@ with
 \end{equation}
 Here $\delta_{i}$ is the temporal difference error, $\lambda$ is used to weigh the importance of the sample i with respect to the loss of the actor, 
 $\epsilon$ is a small constant to ensure every transition is chosen with probability $p_i > 0$, and $\epsilon_D$ is a positive constant applied for expert transitions.\\
-The idea behind this importance sampling algorithm is to amend the priority experience replay probability as developed by Schaul et al. \cite{schaul2016prioritized} 
+The idea behind this importance sampling algorithm is to amend the priority experience replay probability as developed by Schaul \etAl \cite{schaul2016prioritized} 
 with a constant $\epsilon_{D}$ for expert demonstrations to make the policy converge faster to the expert behavior. In priority experience replay, more rare 
 experiences are chosen more likely to use the data in the replay buffer more efficiently. Moreover, they use a combination between $n=1$ temporal difference and 
 $n=N > 1$ temporal difference to get better estimations for rewards that are in the distant future, as they assume sparse rewards.\\
@@ -304,7 +304,7 @@ probability of choosing a transition and thus counter acts the improvement rate 
 \section{Search in Inference Time}
 \subsection{Discrete Action Space}
 
-Schrittwieser et al. \cite{MUZero} describe a search based algorithm for discrete action spaces called MuZero. It is designed to achieve state-of-the-art performance 
+Schrittwieser \etAl \cite{MUZero} describe a search based algorithm for discrete action spaces called MuZero. It is designed to achieve state-of-the-art performance 
 in a wide range of games without any prior knowledge of the game rules, unlike its predecessor AlphaGo and AlphaZero, which relied on a hand-crafted 
 domain-specific algorithm. MuZero learns to play games by combining deep neural networks with \ac{mcts} to plan and evaluate its actions. 
 It does not have access to the game states, but only to observations covering a limited amount of information in a \ac{pomdp} setting.

@@ -33,14 +33,15 @@ Supervised learning is a learning paradigm where the input-output pairs $(x,y) \
 $f^*$ that maps inputs $x \in X$ to outputs $y \in Y$. The objective function is typically a loss function that measures the difference between 
 the predicted output $f(x)$ and the true output $y$.
 
-Formally the signal or loss function $L = g^*$ is defined on a training set $\mathcal{D}_{\text{train}} = {(x_i,y_i)}_{i=1}^n$ where $x_i \in X$ and $y_i \in Y$. Using the 
+Formally the signal or loss function $L = g^*$ is defined on a training set $\mathcal{D}_{\text{train}} = {(x_i,y_i)}_{i=1}^N$ where $x_i \in X$, $y_i \in Y$ and $N$ is the 
+cardinality of the training set. Using the 
 labels, it computes a loss between the output of a function $f(x_i)$ and a desired output $y_i$. The signal function is shaped such that optimizing $f$ for $L$ 
 over $\mathcal{D}_{\text{train}}$ should be aligned with optimizing $f$ for $g$ over $D$:
 
 \begin{equation}
 \begin{aligned}
 f^* &= \arg\min_{f} \mathbb{E}_{(x,y) \sim D}[g(f(x), y)] \\
-f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim \mathcal{D}_{\text{train}}}[L(f(x),y)] = \arg\min{f} \frac{1}{n}\sum_{i=1}^n L(f(x_i),y_i)
+f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim \mathcal{D}_{\text{train}}}[L(f(x),y)] = \arg\min_{f} \frac{1}{n}\sum_{i=1}^n L(f(x_i),y_i)
 \end{aligned}
 \end{equation}
 
@@ -48,7 +49,7 @@ f^* &\approx f' = \arg\min_{f} \mathbb{E}_{(x,y) \sim \mathcal{D}_{\text{train}}
 Supervised learning can be used for a variety of tasks, including classification, regression, and sequence prediction. In classification, 
 the goal is to predict a discrete class label $y \in {1,2,\ldots,K}$ for a given input $x$. In regression, the goal is to predict a continuous 
 output $y \in \mathbb{R}$ for a given input $x$. In sequence prediction, the goal is to predict a sequence of outputs $y_1,\ldots,y_T$ for a 
-given input sequence $x_1,\ldots,x_T$ \cite[chapter~4]{bishop} \cite[chapter~5, chapter~6]{Goodfellow}.
+given input sequence $x_1,\ldots,x_T$, as stated in \cite[chapter~4]{bishop} \cite[chapter~5, chapter~6]{Goodfellow}.
 
 \section{Unsupervised Learning}
 \label{section:unsup_learn}
@@ -86,7 +87,7 @@ where $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots, s_T, a_T, r_T)$ is a trajec
 under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the importance of future rewards, and $N$ is the number of trajectories sampled.
 
 \subsection{Classification of Reinforcement Learning}
-\begin{minipage}{\textwidth}
+%\begin{minipage}{\textwidth}
 \begin{itemize}
 
     \item \textbf{Model type:}
@@ -114,19 +115,21 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
     \item Infinite horizon: the algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
     \item Finite horizon: the algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
     \end{itemize}
+    \begin{samepage}
     \item \textbf{inference type:}
     \begin{itemize}
     \item Probabilistic inference: the algorithm samples actions according to a probability distribution.
     \item Deterministic inference: the algorithm chooses an action deterministically.
     \end{itemize}
-    \end{itemize}
-\end{minipage}
+\end{samepage}
+\end{itemize}
+%\end{minipage}
 
 \section{Markov Decision Processes}
 \ac{mdp}s are a mathematical framework used to model decision-making processes that occur in a sequence. They provide a useful 
 context to develop \ac{rl} algorithms.
 
-An \ac{mdp}is defined as a tuple $\langle S, A, T, R, \gamma \rangle$, where:
+An \ac{mdp}is defined as a tuple $( S, A, T, R, \gamma )$, where:
 \begin{itemize}
     \item $S$ is the set of possible states in the system
     \item $A$ is the set of possible actions that can be taken in each state
@@ -146,17 +149,7 @@ $$R(s, a) = \mathbb{E}[r_{t+1} \mid s_t=s, a_t=a]$$
 
 This function specifies the expected immediate reward obtained after taking action $a$ in state $s$. The discount factor $\gamma$ is a 
 parameter that determines the importance of future rewards relative to immediate rewards. It is typically a value between 0 and 1, where 0 means that 
-only immediate rewards are important and 1 means that future rewards are equally important. \\
-
-Importantly, the transition function $T$ satisfies the Markov property. The Markov property characterizes stochastic processes where the future state of the 
-process depends only on the current state and not on any past states. Formally a stochastic process has the Markov property if, 
-for all time steps $t$, states $s_t$, and actions $a_t$, the following condition holds:
-
-\begin{equation*}
-    P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t).
-\end{equation*}
-In this thesis, we will refer to $r(s_t, a_t)$ as $r_t$, if not indicated otherwise. Moreover, we will use $\tau = \{(a_t, s_t)\}_0^T$ to 
-indicate a trajectory with actions $a_t$ and states $s_t$.
+only immediate rewards are important and 1 means that future rewards are equally important. An example diagram is depicted in figure \ref{fig:mdp_diagram}.\\
 
 \begin{figure}
     \centering
@@ -192,14 +185,27 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
   \caption{A \ac{mdp} diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
+  \label{fig:mdp_diagram}
 \end{figure}
+
+Importantly, the transition function $T$ satisfies the Markov property. The Markov property characterizes stochastic processes where the future state of the 
+process depends only on the current state and not on any past states. Formally a stochastic process has the Markov property if, 
+for all time steps $t$, states $s_t$, and actions $a_t$, the following condition holds:
+
+\begin{equation*}
+    P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots, s_1, a_1) = P(s_{t+1} \mid s_t, a_t).
+\end{equation*}
+In this thesis, we will refer to $r(s_t, a_t)$ as $r_t$, if not indicated otherwise. Moreover, we will use $\tau = \{(a_t, s_t)\}_0^T$ to 
+indicate a trajectory with actions $a_t$ and states $s_t$.
+
+
 
 \section{Policy Gradient}
 There are numerous ways to arrive at a policy that maximizes the \ac{rl} objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function.\\ 
 In this thesis we use neural networks for this task, as they show most promising results. The expectation over the cumulative 
-reward $J = E[\sum_{t} \gamma^t r_t]$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
+reward $J$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
 
 \begin{equation}
 J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_t \right]
@@ -218,14 +224,14 @@ Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the pol
 With $G_t = \sum_{t'=t}^T \gamma^{t'} r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
 $G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$ and following trajectory $\tau_{i>t}$ after that.
 
-In practice we don't have access to the real expectation. Instead we sample n trajectories and approximate the expectation.
+In practice we don't have access to the real expectation. Instead we sample $n$ trajectories and approximate the expectation.
 A common choice is to sample one trajectory per update step. 
 This finally gives us the gradient of the approximated expected reward with respect to the policy parameters $\theta$. We can use this gradient to update the parameters of the policy in the direction of steepest ascent. Specifically, we can use stochastic gradient ascent to update the policy parameters after observing a trajectory $\tau$:
 \begin{equation}
     \label{reinf_update}
     \theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
 \end{equation}
-where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm as developed by Sutton et al. \cite{NIPS1999_464d828b} depicted in algorithm \ref{fig:REINFORCE}.
+where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm as developed by Sutton \etAl \cite{NIPS1999_464d828b} depicted in algorithm \ref{fig:REINFORCE}.
 The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. 
 It continues until convergence.
 
@@ -273,7 +279,7 @@ which we will use as part of our baselines.
 
 \subsection{Value Functions}
 
-Value functions are a fundamental concept in \ac{rl} and are used to estimate the expected return of being in a 
+The following section follows Sutton and Barto \cite{sutton2015reinforcement}. Value functions are a fundamental concept in \ac{rl} and are used to estimate the expected return of being in a 
 particular state or taking a particular action. In this section we discuss the two main types of value functions in \ac{mdp}s: state 
 value functions and state action value functions.
 
@@ -323,7 +329,7 @@ The state action value function also satisfies the Bellman equation:
 Both value functions can be expressed in terms of the respective other value function using the Bellman equation:
 \begin{equation}
     \label{q_from_v}
-    Q_{\pi}(s,a) = r(s,a) + \gamma \mathbb{E}_{s'\propto T(s,a,s')}\left[ v_{\pi}(s') \right]
+    Q_{\pi}(s,a) = r(s,a) + \gamma \mathbb{E}_{s'\propto T(s,a,s')}\left[ V_{\pi}(s') \right]
 \end{equation}
 
 and 
@@ -353,13 +359,13 @@ value is analogous. Recursively plugging in the temporal difference error n time
 $\delta_t = r_t + \gamma (r_{t+1} + \gamma V(s_{t+2}) - V(s_{t+1})  ) - V(s_t)$.\\
 
 Iterating the value function estimate according to the update rule \ref{TD_update} is guaranteed to converge to the real value function of $\pi$. To see this, 
-let $V$ be the value function estimate and $V_{\pi}$ be the true value function for policy $\pi$ as defined in \ref{bootstrap_v}. Also let $T$ be the 
+let $V$ be the value function estimate and $V_{\pi}$ be the true value function for policy $\pi$ as defined in eqaution \ref{bootstrap_v}. Also let $T$ be the 
 Bellman update operator defined as:
 
 \begin{equation}
     (T V)(s) = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V(s')\right).
 \end{equation}
-It follows from this equation, that the expectation of the TD error \ref{TD_update} can be expressed from the Bellman operator $T$ as 
+It follows from this equation, that the expectation of the TD error defined in equation \ref{TD_update} can be expressed from the Bellman operator $T$ as 
 \begin{equation}
     \label{TD_update_BM}
     \delta_t = (T V)(s_t) - V(s_t),
@@ -410,7 +416,7 @@ $|V(s'') - W(s'')|$ is independent of $s'$.
 Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
 
 \textbf{Step 2:} Unique fixed point\\
-By the Banach fixed point theorem, $T$ has a fixed point $TV^* = V^*$. 
+By the Banach fixed point theorem, as discussed by Agarwal \etAl \cite{agarwal2018banach}, $T$ has a fixed point $TV^* = V^*$. 
 We see, that this fixed point satisfies the Bellman equation \ref{bootstrap_v} with 
 $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right).$$
 As the fixed point is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it is shown that for small enough 
@@ -425,7 +431,7 @@ rather then after the whole trajectory. This approximation is referred to as a "
 
 \subsubsection{Critic}
 In this section, we will derive an expression to approximate $G_t$ by using an iterative update step with guaranteed convergence.
-Revisiting \ref{nabla_reinforce}: 
+Revisiting equation \ref{nabla_reinforce} we define: 
 \begin{equation}
     \label{ac policy update}
     \begin{aligned}
@@ -481,7 +487,7 @@ A proof for the convergence and optimality of this estimator can be found in \ci
 
 \subsection{Soft Actor Critic}
 \label{SAC}
-Tuomas Haarnoja, et al. \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
+Tuomas Haarnoja \etAl \cite{haarnoja2018soft} developed a new approach for exploration called "Soft Actor-Critic" (SAC). Exploration vs. exploitation 
 is a fundamental trade-off in \ac{rl}. An agent must exploit the current knowledge to maximize the cumulative reward it receives 
 over the course of its interactions with the environment. Also, the agent must explore new actions and states to improve its knowledge and avoid getting stuck in suboptimal policies. 
 The balance between exploration and exploitation is crucial for the success of \ac{rl} algorithms, and different methods aim to find a good compromise between them.
@@ -509,13 +515,13 @@ The $Q$ values are trained with TD learning:
     \mathcal{J}(Q_{\theta_i}) = \mathbb{E}_{(s_t, a_t, r_t, s{t+1}) \sim \mathcal{D}}[(q_{\theta_i}(s_t,a_t) - y_t)^2]
 \end{equation}
 
-where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. This is the same update rule as derived in \ref{Q-ValueTD}, 
+where $y_t = r(s_t, a_t) + \gamma \mathbb{E}_{s_{t+1} \sim p}[V(s_{t+1})]$ is the target value. This is the same update rule as derived in equation \ref{Q-ValueTD}, 
 considering the identity \ref{q_from_v}.
 
 The policy is updated to minimize the Kullback-Leibler (KL) divergence to the normalized $Q$-Values:
 \begin{equation}
     \label{sac_pol_obj}
-    J_\pi(\phi_{i}) = D_{KL} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q_{min, {\theta_i}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\theta_i}(a|s_t))} \right).
+    J_\pi(\phi_{i}) = D_{\mathrm{KL}} \left( \pi_{\phi_{i}}(\cdot|s_t) || \frac{\exp(Q_{min, {\theta_i}}(\cdot|s_t))}{\underset{a}{\sum}  \exp(Q_{\theta_i}(a|s_t))} \right).
 \end{equation}
 
 The KL divergence is a measure of the alikeness of two distributions $P(x)$ and $Q(x)$ over the same sample space $X$:
@@ -555,13 +561,13 @@ We can compute $J(\tilde{\pi})$ for a different policy $\tilde{\pi}$ using $J(\p
 \end{equation}
 with the advantage function $A_{\pi}(s_t, a_t) = Q_{\pi}(s_t,a_t) - V_{\pi}(s_t)$. Note that the expectation of the states and actions is taken with respect to 
 $\tilde{\pi}$. 
-We now introduce the occupancy measure $\rho_{\pi}$ for states, which measures how often a state is visited, given a policy:
+We now introduce the occupancy measure $\rho_{\pi}:\mathcal{S} \rightarrow \mathbb{R}$ for states, which measures how often a state is visited, given a policy:
 \begin{equation*}
-    \rho_{\pi}:\mathcal{S} \rightarrow \mathbb{R} = \mathbb{E}_{\tau \propto \pi} \left[ \sum_{t=0}^\infty \gamma^t P(s_t=s) \right].
+    \rho_{\pi} = \mathbb{E}_{\tau \propto \pi} \left[ \sum_{t=0}^\infty \gamma^t P(s_t=s) \right].
 \end{equation*}
 With this, we can define a local approximation $L$ to $J(\tilde{\pi})$:
 \begin{equation}
-    L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_s \rho_{\pi}(s) \sum_a \tilde{\pi}(a|s) A_{\pi}(s,a),
+    L_{\pi}(\tilde{\pi}) = J(\pi) + \sum_{s \in S} \rho_{\pi}(s) \sum_{a \in A} \tilde{\pi}(a|s) A_{\pi}(s,a),
 \end{equation}
 where we used the occupancy measure and advantage function of $\pi$, but the policy $\tilde{\pi}$. This is a useful quantity for policy update algorithms. 
 Let's say we have policy $\pi$ and collect statistics by generating trajectories from it to approximate $J(\pi)$ and $\rho(\pi)$. We now want to change the policy 
@@ -588,7 +594,7 @@ In model-based \ac{rl} the actor has access to the transition model $\mathcal{T}
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
 $a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
 expectation is built with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
-$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu, et al. \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
+$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu \etAl \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
 model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
 and let $V_{\pi}^{M_\theta}$ be the value function, given $\pi$ is the optimal policy for the learned model $M_{\theta}$. It is shown, that 
 $|V_{\pi}^{M^*} - V_{\pi}^{M_\theta}| \le c \cdot \frac{1}{(1 - \gamma^2)}$, where $c$ is dependent on the KL divergence between the model $M_{\theta}$ and $M^*$. 
@@ -611,7 +617,7 @@ if $k$ applications of the Bellman operator result in the same updated value fun
     \left(\mathcal{T}^{m}_{\pi}(V)\right)^k = \left(\mathcal{T}^{m'}_{\pi}(V)\right)^k.
 \end{equation}
 It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall, the value function is 
-defined as $v_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
+defined as $V_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
 equivalent to $m$, but does not predict the observations or states is sometimes referred to as a "weakly grounded model".\\ 
 From this work we conclude that solving the 
 \ac{rl} problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual \ac{mdp} with model $m$. 
@@ -649,7 +655,7 @@ actions predicted by the learned policy. Formally let $a_{\text{expert}}$ be the
 predicted by the learned policy. The goal is to minimize the expected distance between the two actions:
 
 \begin{equation}
-\min_{\theta} \mathbb{E}{(s, a{\text{expert}}) \sim D_{\text{expert}}} [d(a_{\text{expert}}, a_{\text{imitation}})]
+\min_{\theta} \mathbb{E}{(s, a_{\text{expert}}) \sim D_{\text{expert}}} [d(a_{\text{expert}}, a_{\text{imitation}})]
 \end{equation}
 
 where $d(\cdot, \cdot)$ is a distance metric, and $\theta$ are the parameters of the learned policy. The distance metric could for example be the mean 
@@ -660,7 +666,7 @@ squared error, or the cross-entropy loss.
 Behavioral cloning for stochastic policies is a variant of behavioral cloning that is suited for learning policies that output probability distributions over actions. In this setting, the goal is to maximize the probability of the learned policy selecting the action proposed by the expert, rather than simply minimizing the distance between the expert and learned actions. 
 A common choice to achieve this is to minimize the KL divergence between the expert policy and the trained policy.
 
-Formally let 
+Formally, let 
 
 \begin{center}
     $\pi_{\text{expert}}(a|s) = 
@@ -672,15 +678,15 @@ Formally let
 
 be the probability of the expert selecting action $a$ in state $s$, and let $\pi_{\theta}(a|s)$ be the probability of the learned policy. Then the KL divergence can be approximated by
 \begin{equation}
-    D_{KL}(\pi_{\text{expert}} || \pi_{\theta}) \approx \sum_{a,s \in \mathcal{D}_{\text{expert}}} \pi_{\text{expert}}(a,s) log\left(\frac{\pi_{\text{expert}}(a,s)}{\pi_{\theta}(a|s)}\right)
+    D_{\mathrm{KL}}(\pi_{\text{expert}} || \pi_{\theta}) \approx \sum_{a,s \in \mathcal{D}_{\text{expert}}} \pi_{\text{expert}}(a,s) \log\left(\frac{\pi_{\text{expert}}(a,s)}{\pi_{\theta}(a|s)}\right)
 \end{equation}
 
 Differentiating the KL divergence with respect to $\theta$ gives:
 \begin{equation}
     \label{prob_imitation_learning}
-    \nabla_{\theta} D_{KL}(\pi_{\text{expert}} || \pi_{\theta}) \approx \nabla_{\theta} (-log\left({\pi_{\theta}(a|s)}\right))
+    \nabla_{\theta} D_{\mathrm{KL}}(\pi_{\text{expert}} || \pi_{\theta}) \approx \nabla_{\theta} (-\log\left({\pi_{\theta}(a|s)}\right)),
 \end{equation}
-, as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
+as $\pi_{\text{expert}}(a,s)$ does not depend on $\theta$.
 
 \section{Inverse Reinforcement Learning}
 \ac{irl} describes a class of algorithms that are provided with an incomplete $\text{MDP}_{\bar{\text{R}}}$, 
@@ -693,13 +699,13 @@ Formally let $r'$ be a reward function and $\pi_{r'}^*$ defined as:
 \begin{equation}
     \pi_{r'}^* = \arg\max_{\pi} \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r'_t \right]
 \end{equation}
-be the optimal policy under the reward function $r'$. This equation can be inverted, such that we find the reward function $r_{inv}$ for which the 
+be the optimal policy under the reward function $r'$. This equation can be inverted, such that we find the reward function $r_{\mathrm{inv}}$ for which the 
 actions under the policy $\pi_{r'}^*$ are optimal:
 \begin{equation}
-    r_{\text{inv}} = \underset{r}{\text{argmax}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
+    r_{\text{inv}} = \underset{r}{\text{arg max}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
 This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: \\
-Let $r_{max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
+Let $r_{\max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{\max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
 There are different approaches to disambiguate the reward function and the resulting policy. One approach is \ac{gail}, 
 which is developed in the next section.
 
@@ -710,7 +716,7 @@ So far, we have discussed \ac{mdp}s with knowledge of a state $s_t$ that gives u
 transition model $T$: $p(s_{t+1}) = T(s_{t+1}|s_t, a_t)$, which is called the Markovian assumption. In many real-world applications the underlying system 
 is only partially observable. Those dynamics are captured in a \ac{pomdp}.
 
-A \ac{pomdp} is defined as a tuple:
+A \ac{pomdp} is defined as a tuple $(\mathcal{S}, \mathcal{A}, \mathcal{O}, \mathcal{T}, \mathcal{R}, \mathcal{Z}, \gamma)$:
 
 \begin{itemize}
 \item $\mathcal{S}$: a finite set of states.
@@ -741,7 +747,7 @@ where $a_t$ is the action taken at time $t$, $o_{t+1}$ is the observation receiv
 
 While the transition probability $\mathcal{T}$ only depends on the last state $s_t$ and the last action $a_t$, 
 in equation \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}$.
-This means an optimal policy has to know the history of the mdp: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, thus the observation space grows linear in time. 
+This means an optimal policy has to know the history of the \ac{mdp}: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, thus the observation space grows linear in time. 
 An example is depicted in figure \ref{fig:POMDP}.  \\
 \begin{figure}
     \centering
@@ -785,7 +791,7 @@ An example is depicted in figure \ref{fig:POMDP}.  \\
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
         \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
-  \caption{A \ac{pomdp} diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
+  \caption{\ac{pomdp} diagram with an agent that takes in observation $o_t$ and outputs action $a_t$.}
   \label{fig:POMDP}
 \end{figure}
 
@@ -799,8 +805,8 @@ discrete probability distribution for a two-class classifier on n dimensions wit
 \begin{equation}
     p(C=i|x_1, ..., x_n)  = \theta_{i,j} | i \in \{0, 1\}, j \in \{0, ..., 2^n\}.
 \end{equation}
-There are $2^n$ possible values for $x_1, ..., x_n$ and two values for the class label. This gives a total of $2*(2^n-1)$ cases, where the $-1$ comes from using 
-the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empirifcal distribution 
+There are $2^n$ possible values for $x_1, ..., x_n$ and two values for the class label. This gives a total of $2 \cdot (2^n-1)$ cases, where the $-1$ comes from using 
+the fact that the probability mass function must sum up to one. The variance of $\theta_{i, j}$ follows the empirical distribution 
 with $\sigma_{\theta_{i,j}} \propto \frac{1}{N}$ and thus the standard deviation scales with $\frac{1}{\sqrt{N}}$, where N is the number of samples 
 for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon$, you get
 \begin{equation}
@@ -815,12 +821,12 @@ The idea behind the BIC is to model the posterior distribution $p(\mathcal{M}|\m
 Let $\mathcal{L}_n(\theta_j) = p(\mathcal{D}_n|\mathcal{M}_j, \theta_{j})$ with the model $\mathcal{M}_j$ and its parameter values $\theta_j$ be the likelihood 
 of measuring some data $\mathcal{D}_n$ under the assumption of model $\mathcal{M}_j$ with parameters $\theta_j$. The BIC is defined as:
 \begin{equation}
-    BIC(M_j) = \text{log}(\mathcal{L}_n(\theta_j)) - \frac{d}{2} \text{log}(n),
+    \mathrm{BIC}(M_j) = \text{log}(\mathcal{L}_n(\theta_j)) - \frac{d}{2} \text{log}(n),
 \end{equation}
 with $d$ the number of parameters of $\mathcal{M}$ and n the number of samples in the dataset $D_n$.
 It is shown that, under certain regularity conditions of $D_n$ and $\mathcal{M}_j$, the posterior probability of model $\mathcal{M}_j$ can be approximated by:
 \begin{equation}
-    p(\mathcal{M_j}|\mathcal{D}_n) \approx \frac{\text{exp}(BIC(\mathcal{M}_j))}{\sum_{i=i}^K(\text{exp}(BIC(\mathcal{M}_i)))},
+    p(\mathcal{M}_j|\mathcal{D}_n) \approx \frac{\text{exp}(\mathrm{BIC}(\mathcal{M}_j))}{\sum_{i=i}^K(\text{exp}(\mathrm{BIC}(\mathcal{M}_i)))},
 \end{equation}
 which is exponential in the number of parameters $d$.
 In summary, evidence for a model is approximately inverse proportional to the exponent of the number of dimensions of the dataset it is trained on.
@@ -837,7 +843,7 @@ their performance decreases with the number of frames needed to accurately repre
 Frame stacking handles the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
 structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
 sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically 
-by Sundermeyer, et al. \cite{6639310}.\\
+by Sundermeyer \etAl \cite{6639310}.\\
 Currently there are two types of sequence models widely used:
 \begin{itemize}
     \item Recurrent Neural Networks
@@ -848,9 +854,9 @@ Currently there are two types of sequence models widely used:
 \label{POMDP_RNN}
 Recurrent neural networks (RNNs) are a type of neural network, where the previous outputs are fed back as inputs to the current computation. A diagram of a 
 recurrent neural network is depicted in figure \ref{RNN_diag}. 
-A naiv implementation of RNNs suffers from the problem of vanishing gradients, where the gradients become extremely small as they propagate back in time, 
+A naive implementation of RNNs suffers from the problem of vanishing gradients, where the gradients become extremely small as they propagate back in time, 
 leading to slow learning and difficulty in capturing long-term dependencies.
-For a neural network, suppose the activation of a hidden state at time t+1 depends on the hidden state at time t like:
+For a neural network, suppose the activation of a hidden state at time $t+1$ depends on the hidden state at time $t$ like:
 \begin{equation}
     h_{t+1} = \sigma(\omega h_t),
 \end{equation}
@@ -860,10 +866,10 @@ where we ignored an input term and a bias term for ease of annotation. Now the u
         = \omega^{t} \Pi_{t'=1}^t \sigma'(\omega h_{t'}).
 \end{align*}
 If $\omega \neq 1$, this becomes zero (vanishing gradient) or infinity (exploding gradient) exponentially quickly with t.
-To address this issue, Long Short-Term Memory (LSTM) and Gated Recurrent Units (GRU) are proposed as more effective RNN variants. 
-LSTMs introduce a memory cell that can selectively store and erase information, and a set of gates to control the flow of information. 
-GRUs simplify the LSTM architecture by introducing only two gates, the reset gate and update gate. 
-They have empirically been shown to have comparable performance to LSTMs by Cahuantzi, et al. \cite{cahuantzi2023comparison}.
+To address this issue, Hochreiter \etal \cite{s_lstm} proposed \ac{lstm}. A simpler version called \ac{gru}, 
+as analyzed by Cahuantzi \etAl \cite{cahuantzi2023comparison}, have been empirically shown to have comparable performance to \ac{lstm}s. 
+Both architectures make use of a memory cell that can selectively store and erase information, and a set of gates to control the flow of information. 
+\ac{gru}s simplify the \ac{lstm} architecture by making use of only two gates, the reset gate and update gate.
 
 \begin{figure}
     \centering
@@ -910,13 +916,13 @@ They have empirically been shown to have comparable performance to LSTMs by Cahu
 
 The update equations for the GRU cell can be written as follows:
 
-\begin{align}
+\begin{align*}
     u_t = \sigma(W_u x_t + R_u h_{t-1} + b_u)\\
     r_t = \sigma(W_r x_t + R_r h_{t-1} + b_r)\\
     \tilde{h}_t = \tanh(W_h x_t + (r_t \odot h_{t-1})R_h + b_h)\\
     h_t = (1 - u_t) \odot h_{t-1} + u_t \tilde{h}_t\\
     y_t = \sigma(W_y h_t + b_y)
-\end{align}
+\end{align*}
 
 
 
@@ -953,7 +959,7 @@ The idea of attention can be explained as follows: given a set of inputs, the mo
 task at hand.
 This weighted sum of inputs is then used as a representation of the input sequence.\\
 
-One of the most successful architectures for attention based sequence models is the Transformer developed by Vaswani, et al. \cite{vaswani2017attention}. In the paper, the transformer 
+One of the most successful architectures for attention based sequence models is the Transformer developed by Vaswani \etAl \cite{vaswani2017attention}. In the paper, the transformer 
 consists of an encoder and a decoder.\\
 
 The Transformer architecture consists of an encoder and a decoder, each containing multiple layers of self-attention and feedforward neural networks. \\

@@ -162,7 +162,7 @@ optimization, we only optimize trajectories, for which the critic value is small
 
 
 The Meta-World benchmark suite, consisting of 50 challenging robotic manipulation tasks designed to assess the capabilities of reinforcement learning (RL) algorithms, 
-has been introduced by Yu et al. \cite{yu2019meta}. Meta-World is widely utilized in meta-\ac{rl} and \ac{rl} tasks.
+has been introduced by Yu \etAl \cite{yu2019meta}. Meta-World is widely utilized in meta-\ac{rl} and \ac{rl} tasks.
 
 One of the key advantages of Meta-World is the well-defined success criteria for the tasks, enabling the definition of sparse rewards in a natural way. 
 In this thesis, we select five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push", and "Reach", which provide diverse and varying levels of 
@@ -249,7 +249,7 @@ with the discounted expected reward
     \mathbb{E}_{(s,a,t) \propto \pi}[\gamma^t r(s,a)] = 
     \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^\infty \gamma^t r_t \right]
 \end{equation*}
-and the discounted causal entropy as defined by Bloem, et al. \cite{InfCausalEnt}:
+and the discounted causal entropy as defined by Bloem \etAl \cite{InfCausalEnt}:
 \begin{equation*}
     \mathbb{H}(\pi) = \mathbb{E}_{s_0, a_0} \left(\text{H}_{\pi}(a_{0...\infty}, s_{0,...\infty})\right) = \mathbb{E}_{\pi}\left[\sum_{t=0}^\infty -\gamma^t log \pi(a_t|s_t)\right].
 \end{equation*}
@@ -348,7 +348,7 @@ gradient ascent is used, as we want to maximize the discriminative power of $D$.
         where $Q(\bar{s}, \bar{a}) = \hat{\mathbb{E}}_{\tau_i} [\log D{w_{i+1}}(s, a) | s_0 = \bar{s}, a_0 = \bar{a}]$
     }
 \end{algorithm}
-Tian Xu, et al. proved that if a policy $\pi$ minimizes the $\text{D}_{JS}$ distance 
+Tian Xu \etAl proved that if a policy $\pi$ minimizes the $\text{D}_{JS}$ distance 
 between occupancy measures of $\rho_{\pi^*}$ and $\rho_{\pi}$, the generalization error $V_{\pi^*} - V_{\pi_{\text{imitation}}}$ is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma}}\right)$, while the generalization error of behavioral cloning is bound by 
 $V^{{\pi^*}} - V^{\pi} \leq \mathcal{O}\left(\frac{1}{\sqrt{1-\gamma^2}}\right)$ \cite{NEURIPS2020_b5c01503} . This explains better performance for\ac{gail} in long horizon tasks, which has 
@@ -357,7 +357,7 @@ asymptotical performance with respect to the amount of expert demonstrations but
 
 \chapter{Language-Conditioned Imitation Learning for Robot Manipulation Tasks}
 \label{LCILRM}
-Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} propose a benchmark for natural language conditioned robot manipulation tasks. \\
+Simon Stepputtis \etAl \cite{stepputtis2020languageconditioned} propose a benchmark for natural language conditioned robot manipulation tasks. \\
 The benchmark consists of a 7 dof simulated robot arm with a 
 tabletop setup using CoppeliaSim, which allows for accurate dynamics simulations at an update rate of 20 Hz. 
 An \ac{il} dataset consisting of 44 100 tasks is provieded, where 4000 tasks are used for 
@@ -369,7 +369,7 @@ all possible objects and an example task can be found in figure \ref{lang_imi_ex
 There is only one observation per trajectory, so the setting is the single observation \ac{pomdp}.  \\
 
 
-Simon Stepputtis et al. \cite{stepputtis2020languageconditioned} also propose a method to solve the benchmark. 
+Simon Stepputtis \etAl \cite{stepputtis2020languageconditioned} also propose a method to solve the benchmark. 
 The proposed method involves using a neural network to map natural language instructions to 
 corresponding robot actions. The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
 tasks when language instructions are given. \\

@@ -102,7 +102,7 @@ the policy, thus the \ac{iid} assumption holds.\\
 
 \section{Approximation Error}
 \label{inference_time_planning}
-As we only have a single observation, our model has to learn the dynamics of the \ac{mdp} in order to predict the reward signal at time point $t > 1$. Xu et al. \cite{NEURIPS2020_b5c01503} 
+As we only have a single observation, our model has to learn the dynamics of the \ac{mdp} in order to predict the reward signal at time point $t > 1$. Xu \etAl \cite{NEURIPS2020_b5c01503} 
 have shown, that learning a transition model for an \ac{mdp} has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
 However, we identify that this challenge also grants us a unique improvement over previous actor critic methods.\\ 
 
@@ -381,7 +381,7 @@ paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
 \section{Inference Time Search}
 \label{sec:inf_time_search}
 In the derivation of the \ac{avc} algorithm, we have used the gradient signal from the critic on the actions. As our approach is completely parametrized, we can calculate 
-the gradient with respect to the actor, the planner, the observation and the plan. Alet et al. \cite{alet2021noether} propose a method that aims 
+the gradient with respect to the actor, the planner, the observation and the plan. Alet \etAl \cite{alet2021noether} propose a method that aims 
 to learn useful conserved quantities to reconstruct a video sequence 
 using conservation laws of the underlying physics. While a different problem setup, they also have a high dimensional derivative with respect to a 
 generated output. The authors find, that 

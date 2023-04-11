@@ -18,8 +18,8 @@ To the authors knowledge, \ac{avc} is the only algorithm that uses inference tim
 To test our algorithm, we choose a setup where a single observation per trajectory is provided along with a sparse reward signal and expert demonstrations for guidance. 
 We also relax this constraint and test \ac{avc} on an \ac{mdp} setting with observations after each step.\\
 
-We find the single observation to be an interesting setting. This setup is interesting, as it is plausible that robots may not have time to perform complex computations 
-on the input signal after each time step, and sparse rewards are typically easy to define in real-world application.\\
+We find the single observation to be an interesting setting, as it is plausible that robots may not have time to perform complex computations 
+on the input signal after each time step. Additionally sparse rewards are typically easier to define in real-world application then dense rewards.\\
 
 Another possible application is natural language models. Resent efforts have been made to tune 
 them according to human preferences from a pretrained initialization \cite{cite:ChatGPT}. Language models are not reliant on additional observations as the environment state is the current 
@@ -27,7 +27,7 @@ text. The initial state is set by the user's input and the current environment s
 In this sense, it is comparable to our setup.\\
 
 
-\ac{avc} is a general-purpose \ac{rl} algorithm algorithm applicable in deterministic \ac{mdp}s and "Partially Observable" \ac{mdp}s. 
+\ac{avc} is a general-purpose \ac{rl} algorithm applicable in deterministic \ac{mdp}s and "Partially Observable" \ac{mdp}s. 
 For this reason, we compare it to two state-of-the-art general-purpose \ac{rl} algorithms. Additionally we use behavioral cloning as pretraining  
 and also compare our results to a state-of-the-art \ac{il} algorithm.\\
 
@@ -37,4 +37,4 @@ sparsely distributed rewards, surpassing the performance of alternative algorith
 
 The structure of this thesis is as follows: We begin by discussing the fundamentals of \ac{rl}, followed by an overview of model-free and model-based approaches, 
 including the baselines used in our study. We then introduce the \ac{il} framework, and present related literature before stating our problem. 
-Next, we present our approach, detailing the key aspects of our proposed method. We follow this with our experimental results, analysis of the findings, and conclude with ideas for future research.
+Next, we present our approach, detailing the key aspects of our proposed method. This is followed by our experimental results, analysis of the findings, and conclude with ideas for future research.
