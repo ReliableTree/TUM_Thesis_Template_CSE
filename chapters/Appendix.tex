@@ -166,7 +166,7 @@ has been introduced by Yu \etAl \cite{yu2019meta}. Meta-World is widely utilized
 
 One of the key advantages of Meta-World is the well-defined success criteria for the tasks, enabling the definition of sparse rewards in a natural way. 
 In this thesis, we select five environments from the ML10 suite, namely "Pick and Place", "Window Open", "Drawer Close", "Push", and "Reach", which provide diverse and varying levels of 
-difficulty. The corresponding environments, along with expert demonstrations, are depicted in figure \ref{fig:meta-world}. In "Reach," "Pick and Place," and "Push," the position of the goal 
+difficulty. The corresponding environments, along with expert demonstrations, are depicted in Figure \ref{fig:meta-world}. In "Reach," "Pick and Place," and "Push," the position of the goal 
 and the puck are randomly generated for each instance of the environment, whereas in "Window Open," the window's position changes, and in "Drawer Close," the drawer's position is variable.
 
 The observation space consists of 39 dimensions, including a three-dimensional representation of the goal, while the action space is four-dimensional. For our experiments, 
@@ -365,7 +365,7 @@ evaluation and 100 tasks are used for testing.\\
 
 The task consists of picking up objects and pouring their content into other objects. A sentense in natural language describes the task and the object. 
 For example "Pick up the red cup". Additionally, an rgb image of the scene is provided. An overview over 
-all possible objects and an example task can be found in figure \ref{lang_imi_expl}. 
+all possible objects and an example task can be found in Figure \ref{lang_imi_expl}. 
 There is only one observation per trajectory, so the setting is the single observation \ac{pomdp}.  \\
 
 
@@ -380,7 +380,7 @@ and a task description $v \in \mathcal{R}^{15 \times 50}$ from natural language.
 to create a task embedding $e$ using GloVe embeddings and a pretrained image recognition model in the semantic model, 
 which is subsequently used in the control model to generate robot actions at each time step in a closed-loop 
 fashion using a GRU to keep track of the former history. In addition to the hidden state of the GRU, 
-the task embedding $e$ is used in every time step, as we know, that the task does not change. A schematic overview can be seen in figure \ref{language_imitation}. \\
+the task embedding $e$ is used in every time step, as we know, that the task does not change. A schematic overview can be seen in Figure \ref{language_imitation}. \\
 
 \begin{figure}[htbp]
     \centering

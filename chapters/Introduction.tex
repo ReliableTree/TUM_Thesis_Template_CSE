@@ -13,7 +13,8 @@ Search is currently not widely used in robotics, as \ac{mcts} cannot be used, be
 using search on continuous action spaces \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim_2020}, they require a differentiable model of the system dynamics, which is difficult to provide in real world scenarios.\\ 
 
 In this thesis we develop a new \ac{rl} 
-paradigm called \ac{avc}. It learns relevant dynamics of the world model, conducts search in inference time, and makes efficient use of expert demonstrations. 
+paradigm called \ac{avc}. It learns relevant dynamics of the world model, conducts search in inference time, and makes efficient use of expert demonstrations. It uses the critic in inference time, 
+which "active" refers to in the name ActiVe Critic \ac{avc}. 
 To the authors knowledge, \ac{avc} is the only algorithm that uses inference time search on continuous action space with no given model of the environment.\\
 To test our algorithm, we choose a setup where a single observation per trajectory is provided along with a sparse reward signal and expert demonstrations for guidance. 
 We also relax this constraint and test \ac{avc} on an \ac{mdp} setting with observations after each step.\\

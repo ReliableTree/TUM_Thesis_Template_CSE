@@ -180,8 +180,8 @@ optimization mode".\\
 We hypothesize that 
 the actor planner optimization mode's much faster convergence rate is due to the actor and planner networks ability to 
 encode an informed representation of the useful trajectory space. This informed representation guides the gradient search 
-given by the critic, leading to more efficient exploration. Subfigure \ref{fig:direct_actions} illustrates the trajectory 
-changes resulting from the action optimization mode, while Subfigure \ref{fig:ac_pl_actions} displays 
+given by the critic, leading to more efficient exploration. SubFigure \ref{fig:direct_actions} illustrates the trajectory 
+changes resulting from the action optimization mode, while SubFigure \ref{fig:ac_pl_actions} displays 
 the trajectory changes resulting from the actor planner optimization mode. \\
 
 We observe that the actor planner 
@@ -258,7 +258,7 @@ decouples the actor from the critic, as discussed in section \ref{inference_time
     \label{fig:finetuning}
 \end{figure}
 
-We present our findings in figure \ref{fig:finetuning}. 
+We present our findings in Figure \ref{fig:finetuning}. 
 For the environments Pick and Place and Push, we show the plots for 15 expert demonstrations. We found 4 expert demonstrations were not 
 enough to meaningfully learn within 400 training episodes. The environments Reach and Window Open are easier to learn, so we display the 
 experiments with 4 expert demonstrations each. In these environments, giving 15 expert demonstrations lead to near perfect performance from \ac{il} alone. 
@@ -292,7 +292,7 @@ demonstration is needed to overcome the initial search problem. We only provide 
 trial and error is unviable for most problems. However, we found the Drawer Close environment can be learned without any expert guidance.\\
 
 We use \ac{ppo}, \ac{tqc} and RPPO for our baselines, as described in the introduction. We don't use \ac{gail} but make use of pretraining, as we focus on \ac{rl}. The results
-are shown in figure \ref{fig:guided_ref}.\\
+are shown in Figure \ref{fig:guided_ref}.\\
 
 \begin{figure}[htbp]
     \centering
@@ -343,7 +343,7 @@ helping to overcome the initial search problem. We find that all algorithms perf
 access to guidance to find successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms with 
 zero expert demonstrations on the 
 Drawer Close environment. We find, that random trajectories can already solve the environment with about $20\%$ success rate, so no expert guidance is needed to learn a feasible behavior.
-The results are shown in subfigure \ref{fig:drawerclose}.\\ 
+The results are shown in subFigure \ref{fig:drawerclose}.\\ 
 
 Notable, \ac{avc} performs significantly better then the baselines at the first data point of the plot. This is unexpected, since it indicates 
 random behavior from randomly initialization of the policies. In further tests, we found that the initial success rate is either close to one or close to zero for all policies depending 
@@ -354,7 +354,7 @@ initial success. We did not have time to repeat the experiment until the initial
 all algorithms sample trajectories randomly in the initial training phase. 
 We set the initial random phase to 1000 steps or 10 trajectories, so all algorithms had access to some successful trajectories with high probability. While the initialization was an advantage 
 for our algorithm in these experiment runs, it can still clearly be seen, that our algorithm is more stable with significantly smaller variance in its performance compared to the baselines. In a later 
-section, we also conduct an experiment on the Drawer Close environment with continued observations, as seen in figure \ref{fig:dense_ref}. We will discuss the figure in more detail later, but 
+section, we also conduct an experiment on the Drawer Close environment with continued observations, as seen in Figure \ref{fig:dense_ref}. We will discuss the figure in more detail later, but 
 notice, that in the runs \ac{avc} started from $0 \%$ success rate and managed to find a good policy quickly, which we take as further evidence that the results of the Drawer Close experiment were not 
 mainly due to luck. The overall high variance in the runs shown from the baselines can be explained by the sparse rewards, which provide highly non-linear feedback. 
 \ac{avc} rapidly improved to perfect performance within about 400 steps. \\
@@ -364,7 +364,7 @@ Next, we wanted to rule out that the observed performance gain of \ac{avc} over 
 from the different underlying neural network architectures. \ac{avc} uses transformer encoders for the actor and 
 critic, while the \ac{tqc} and \ac{ppo} implementations use MLPs and the RPPO implementation uses a GRU.\\ 
 We tested the performance of \ac{avc} using pure \ac{il} shown on the bottom row of
-figure \ref{fig:guided_ref}. We find \ac{avc} has similar \ac{il} performance to behavioral cloning for our baselines with strong inductive bias. However, it significantly benefits from the reinforcement phase.\\
+Figure \ref{fig:guided_ref}. We find \ac{avc} has similar \ac{il} performance to behavioral cloning for our baselines with strong inductive bias. However, it significantly benefits from the reinforcement phase.\\
 
 Overall, we take these finding as evidence for the effectiveness of the \ac{rl} aspect of the \ac{avc} algorithm.
 
@@ -375,7 +375,7 @@ In this section we test the relaxation of the \ac{avc} algorithm to \ac{mdp} env
 We use sparse rewards 
 and compare \ac{coavc} to \ac{ppo} and \ac{tqc} on the Reach, Window Open and Drawer Close environments. Apart from 
 providing an observation per time step,
-we use the same setup as described in previous sections. The results are shown in figure \ref{fig:dense_ref} for three runs per experiment.\\ 
+we use the same setup as described in previous sections. The results are shown in Figure \ref{fig:dense_ref} for three runs per experiment.\\ 
 
 \begin{figure}[htbp]
   \centering
@@ -423,7 +423,7 @@ feedback from it's actions on the environment, the better exploration is an adva
 In particular, as \ac{tqc}'s performance drops to about $0 \%$ for the Window Open 
 environment after the first data point, we wanted to analyze, if \ac{tqc} uses the guidance from the expert at all, or if it starts from 
 no usable knowledge about the environment. To do this, we also conducted the experiment three times with no initial behavioral cloning. The results are shown in 
-subfigure \ref{fig:TQC_0_vs_exp}. We observe that \ac{tqc} can solve the environment within 5000 steps from no expert demonstrations in one case, but does not find a good policy in the other two. 
+subFigure \ref{fig:TQC_0_vs_exp}. We observe that \ac{tqc} can solve the environment within 5000 steps from no expert demonstrations in one case, but does not find a good policy in the other two. 
 We propose pretraining from behavioral cloning is a useful bias for the algorithm to find feasible solutions quicker with higher probability.\\ 
 
 Following this insight, 
@@ -447,7 +447,7 @@ converges much quicker and has a more robust behavior in general.
 \subsection{Comparison of Continued and Single Observation}
 \label{sec:com_coavc_avc}
 In this section we compare \ac{coavc} and AVC, to investigate if \ac{coavc} makes use of the additionally provided information from the continued observations. 
-The results are shown in figure \ref{fig:dense_vs_single}.\\
+The results are shown in Figure \ref{fig:dense_vs_single}.\\
 
 \begin{figure}[htbp]
   \centering

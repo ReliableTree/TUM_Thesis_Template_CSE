@@ -36,7 +36,7 @@ is specifically pronounced in settings with highly non smooth feedback from the 
 and no further observations.
 \subsection{Curse of Dimensionality}
 \label{COD_AC}
-As introduces in \ref{COD}, the evidence for a model scales approximately inversely proportional to the exponent of the dimension on which it acts. In \ac{mdp}s, the 
+As introduced in section \ref{COD}, the evidence for a model scales approximately inversely proportional to the exponent of the dimension on which it acts. In \ac{mdp}s, the 
 actor $\pi$ acts on the observation space and returns an action from the action space. A probabilistic actor defines a probability distribution on the set 
 of actions $\mathcal{A} \in \mathcal{R}^m$ and observations $\mathcal{O} \in \mathcal{R}^n$ as $\pi(a|o) = \frac{p(a,o)}{p(o)}$. This also holds for 
 deterministic actors with integer probabilities $\pi(a|s) \in \{0,1\}$.
@@ -44,7 +44,7 @@ Thus the dimension of the preimage of the actor is $n \times m$ with $\pi:\mathc
 
 Similarly, the critic $Q$ usually defines a function on $\mathcal{A}$ and $\mathcal{O}$ to the cumulative discounted expected value 
 $Q:\mathcal{R}^m \times \mathcal{R}^n \rightarrow \mathcal{R}$\\
-We have shown in \ref{POMDP}, that in a \ac{pomdp}, the observation space grows linear in time, as the belief state depends on the history: 
+We have shown in section \ref{POMDP}, that in a \ac{pomdp}, the observation space grows linear in time, as the belief state depends on the history: 
 $$\pi(a| b_t(o_{1:t}, a_{1:t})):\mathcal{R}^{m \times T} \times \mathcal{R}^{n \times T} \rightarrow \mathcal{R},$$
 $$Q(a, o_{t}| b_{t-1}(o_{1:t-1}, a_{1:t-1})):\mathcal{R}^{m} \times \mathcal{R}^{n} \times \mathcal{R}^{m \times T-1} \times \mathcal{R}^{n \times T-1} \rightarrow \mathcal{R}.$$
 Together with the result from \ref{COD} we conclude, that we have 
@@ -55,7 +55,7 @@ We make the observation, that our case with the single observation at the beginn
 
 Usually, 
 we need to know all previous observations, as they can give us additional information about the believe state. However, as we don't have subsequent observations 
-after the initial, we only need the actions of the trajectory to update our belief $b_t$. Formally, as introduced in \ref{pomdp_bayes}, the optimal believe state 
+after the initial, we only need the actions of the trajectory to update our belief $b_t$. Formally, as introduced in equation \ref{pomdp_bayes}, the optimal believe state 
 update in \ac{pomdp}s using Bayes theorem is given by:
 \begin{equation}
     b_{t+1}(s') = \frac{\mathcal{Z}(s', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{Z}(a_t, s'', o_{t+1}) \sum_{s \in \mathcal{S}} \mathcal{T}(s, a_t, s') b_t(s)}.
@@ -88,7 +88,7 @@ Here we see,
 why this setup is specifically interesting for planning. Planning ahead fulfil the same constraint, namely that we can plan the actions, but we don't get feedback of the 
 observations we would receive, if we acted out a planned sequence. \\
 
-In our method, we implement a weak inductive bias, which is motivated by this observation. We use a transformer encoder type architecture, which inputs are 
+In our method, we implement a weak inductive bias, which is motivated by this observation. We use a transformer encoder type architecture, whose inputs are 
 the repeated initial observation plus a positional encoding. To generate the action sequence, we use a single pass through the network. While through the attention mechanism, 
 information between time steps can be exchanged, earlier actions are not part of the input of later actions. 
 We will discuss the architecture in more details in the coming sections. For now, we only want to motivate the single pass through 
@@ -102,8 +102,8 @@ the policy, thus the \ac{iid} assumption holds.\\
 
 \section{Approximation Error}
 \label{inference_time_planning}
-As we only have a single observation, our model has to learn the dynamics of the \ac{mdp} in order to predict the reward signal at time point $t > 1$. Xu \etAl \cite{NEURIPS2020_b5c01503} 
-have shown, that learning a transition model for an \ac{mdp} has a quadratic error bound in $\gamma$ thus we expect quadratic error with the length of the horizon. 
+As we only have a single observation, our model has to learn the dynamics of the \ac{mdp} in order to predict the reward signal at time point $t > 1$. 
+Since learning a transition model for an \ac{mdp} has a quadratic error bound in $\gamma$ \cite{NEURIPS2020_b5c01503}, we expect a quadratic error with the length of the horizon.
 However, we identify that this challenge also grants us a unique improvement over previous actor critic methods.\\ 
 
 By considering sequences of whole trajectories at once instead of single actions 
@@ -113,8 +113,8 @@ show that it can be used to find optimal actions, then we develop the objective 
 
 \subsection{Critic}
 \label{sec:AC_Critic}
-To train the critic in actor critic methods, we can either use on-policy data as in \ac{ppo} \ref{section:PPO}, which is not sample efficient, as only the data collected 
-in the current episode is used for training, or we can use off-policy data as in \ac{tqc} \ref{section:TQC}, where the critic has an overestimation bias. This 
+To train the critic in actor critic methods, we can either use on-policy data as in section \ac{ppo} \ref{section:PPO}, which is not sample efficient, as only the data collected 
+in the current episode is used for training, or we can use off-policy data as in section \ac{tqc} \ref{section:TQC}, where the critic has an overestimation bias. This 
 leads to sub optimal data usage and the reliance on an additional hyperparameters to compensate the overestimation. We find that in our setup with a single observation, we can use all data 
 collected without introducing a bias on the critic. \\
 Recall, that Thrun and Schwartz \cite{thrun1993issues} showed the overestimation bias comes from action noise $U(a)$ in the update step of the $Q$ value:
@@ -164,7 +164,7 @@ $$=\sum_{t=1}^T \gamma^t C_{s, a^*_{1:T}}(t),$$
 where we used that the expectation commutes with summation. As $V_{\pi^*}(s)$ is the maximal value function, we conclude 
 $$a^*_{1:T} = \max_{a_{1:T}}\gamma^t C_{s, a_{1:T}}(t),$$
 since $C$ is an unbiased estimator of $r$. From this we conclude that finding the optimal action sequence with respect to the critic $C$ ensures the optimal 
-cumulative reward of any policy. Following section \ref{sec:prop_val_eq}, we find for deterministic MDP, $C$ learns a proper value equivalent model $m'$ of the \ac{mdp} model $m$.
+cumulative reward of any policy. Following section \ref{sec:prop_val_eq}, we find that for deterministic \ac{mdp}s, $C$ learns a proper value equivalent model $m'$ of the \ac{mdp} model $m$.
 
 \subsection{Actor}
 \label{sec:AC_actor}
@@ -218,7 +218,7 @@ the actual parameters $\theta(\phi) +\epsilon$ and the optimal parameters $\thet
 \end{equation}
 the \textbf{distribution shift error}, as it is derived from the fact, that $\theta$ actually depends on $\phi$. \\
 While this derivation assumes DDPG policy update, stochastic actor policy update methods like the minimization of a KL divergence as 
-proposed in SAC will rely on similar gradients in their update step, see \cite{haarnoja2018soft}, equation 13.
+proposed in SAC will rely on similar gradients in their update step, see equation 13 of \cite{haarnoja2018soft}.
 
 \subsubsection{Distribution Shift Error}
 \label{dist_shift_error_section}
@@ -260,7 +260,7 @@ The idea is, we don't push the actor towards a predicted goal,
 but only towards measured goals. This formulation allows us to use good lower bound on the expected policy improvement.\\
 
 \subsubsection{Policy Improvement}
-Following, we will provide a lower bound for the policy improvement, which uses results from section \ac{trpo} \ref{sec:TRPO}. 
+In the following, we will provide a lower bound for the policy improvement, which uses results from \ac{trpo} (section \ref{sec:TRPO}). 
 Assume we have a dataset $\mathcal{D}_{\text{E}}$ sampled from the expert policy $\pi_{\text{E}}$ with optimal value 
 $$J(\pi_{\text{E}}) =\mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right],$$
 and a dataset $\tilde{\mathcal{D}}_{\text{E}}$ sampled from $\pi_{\text{E}}$ with $\mathcal{D}_{\text{E}} \subset \tilde{\mathcal{D}}_{\text{E}}$. 
@@ -301,7 +301,7 @@ be added to the set of trajectories for the critic $\mathcal{D}_c$ and to the se
 
 With this setup, our algorithm is truly on-policy, while being able to use all data collected from expert demonstrations and during train time. \\
 
-The actor is model free, while the critic is weakly grounded model-based, as it learns to predict the reward dynamics of the MDP. In this sense, it is close to MuZero, 
+The actor is model free, while the critic is weakly grounded model-based, as it learns to predict the reward dynamics of the \ac{mdp}. In this sense, it is close to MuZero \cite{MUZero}, 
 but our architecture enables search on continuous action space, which is not possible in MuZero. 
 
 \section{Average Actions Problem}
@@ -321,7 +321,7 @@ $a_1$ and $a_2$ going left and right around C. Given our algorithm, both traject
 The actor is now trained to minimize the $L_2$ distance, thus it will output the average of $a_1$ and $a_2$, which might be a straight line from A to B 
 through C and thus not a successful trajectory. \\
 
-To prevent this problem, we will disambiguate the actions $a_1$ and $a_2$. We propose an additional network we call the planner $P$. $P$ takes as an input 
+To prevent this problem, we will disambiguate the actions $a_1$ and $a_2$. We propose an additional network we call the planner $P$. $P$ takes 
 the action sequence $a$ and outputs a low dimensional encoding we call the plan $p_a$ of the sequence $a$: 
 $P:\mathcal{R}^{T\times n} \rightarrow \mathcal{R}^{d_p},\ p(a) = p_a$, with action dimension $n$, sequence length $T$ and plan dimension $d_p$.\\ 
 This encoding is then fed into the actor together 
@@ -331,7 +331,7 @@ However, during inference time, we obviously don't have access to an action sequ
 that would solve the problem to give to the planner $P$. Instead, we define the output of the planner for all action sequences that were initially provided as 
 expert trajectories as the zero vector. We can do this, as long as the expert, from which the initial trajectories were sampled, is deterministic, or we make sure 
 no two same observations are part of the initial expert trajectories. In inference time, we can then set the initial plan to the zero vector. An overview of the learning 
-paradigm for the actor and planner is shown in figure \ref{fig:actor_planner}.
+paradigm for the actor and planner is shown in Figure \ref{fig:actor_planner}.
 
 \begin{figure}
     \centering
@@ -405,7 +405,7 @@ $p(a_0) = 0$ for the first input to the actor network. \\
 We do not apply the updated weights to the actor after the inference, but only use them in inference time for the given trajectory. This is because while the update step to our 
 actor has no distribution shift error as shown in section \ref{dist_shift_error_section}, making the search highly efficient, we still have the function approximator error as 
 shown in section \ref{func_app_error}. Recall, the update to our actor is done by appending the expert dataset. An overview of the inference 
-algorithm is shown in \ref{fig:inference}
+algorithm is shown in Figure \ref{fig:inference}
 
 \begin{figure}
     \centering
@@ -474,7 +474,7 @@ are used to update the actor from time step $t$ to \color{black!50!green!80} $t+
 
 \section{Algorithm}
 \label{sec:algorithm}
-In the following chapter, we will use $o_1$ to indicate the first observation. In our derivation, we assumed access to $s_1$. In the experiments we will conduct, it will hold $o_1 = s_1$. \\
+In the following chapter, we will use $o_1$ to indicate the first observation. In our derivation, we assumed access to $s_1$. In the experiments we will conduct, $o_1 = s_1$ will hold . \\
 
 We will first describe the inference of AVC, then the update step of the actor and finally the update step of the critic.
 
@@ -502,13 +502,13 @@ The other optimization modes can be adapted straight forward. All models use a t
         $\mathcal{D}_{\text{expert}} \gets \mathcal{D}_{\text{expert}} \cup (o_1, a^N_{1, ..., T}, r)$
     }
     return $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$
-    \caption{\ac{avc} Inference}
+    \caption{Active Critic Inference}
     \label{AC_Inference}
 
 \end{algorithm}
 
 
-Following the insights from the section curse of dimensionality \ref{COD_AC}, we first repeat the input observation $o_1$ $T$ times and append a positional encoding $p_i$:
+Following the insights from the section \ref{COD_AC}, we first repeat the input observation $o_1$ $T$ times and append a positional encoding $p_i$:
 \begin{equation}
     \label{eq:seq_emb}
     \tilde{o}_{1, ..., T} = [o_1]^T \oplus [p_i]_{i=1}^T,
@@ -535,8 +535,8 @@ a specific expert, for example a human, but rather we mean generally an action s
 additional successful trajectories to the expert dataset. \\
 
 \subsection{Update Step Actor}
-Now we want to derive the update step of the whole sequence actor as motivated in the section "Actor" \ref{sec:AC_actor}.
-To prevent the average action problem defined in \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_{a_{\zeta}} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
+Now we want to derive the update step of the whole sequence actor as motivated in the section \ref{sec:AC_actor}.
+To prevent the average action problem defined in section \ref{avr_action_problem}, we first encode the expert action sequence using our planner $p_{a_{\zeta}} = P_{\zeta}(a^{\text{E}}_{1, ..., T})$. 
 We also build the sequence embedded observation sequence $\tilde{o}_{1, ..., T}$ as described in equation \ref{eq:seq_emb}. We can now compute the actions as:
 \begin{equation*}
     a_{\pi, 1,...,T} = \pi(\tilde{o}_{1, ..., T},p_{a_{\zeta}}).
@@ -568,8 +568,8 @@ The pseudocode is depicted in algorithm \ref{Actor_Update_Alg}.
     \end{cases}$ \hfill {generate plan $p_a$} \\
     $a^\pi_{1,...,T} \gets \pi_{\phi}(\tilde{o}_{1, ..., T}, p_a)$ \hfill{generate actions according to $\pi_{\phi}$} \\
     $J_{\pi} = \mathcal{L}_2(a^\pi_{1,...,T}, a^{\text{E}}_{1, ..., T})$ \hfill{compute $L_2$ loss from actions} \\
-    $\phi \gets \phi_{old} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
-    $\zeta \gets \zeta{old} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill {update $\phi$ and $\zeta$ according to gradients} \\
+    $\phi \gets \phi_{\mathrm{old}} - \alpha_{\phi} \nabla_{\phi}J_{\pi}$\\
+    $\zeta \gets \zeta{\mathrm{old}} - \alpha_{\zeta} \nabla_{\zeta}J_{\pi}$ \hfill {update $\phi$ and $\zeta$ according to gradients} \\
     return $\phi$, $\zeta$
 \end{algorithm}
 
@@ -592,28 +592,28 @@ with learning rate $\alpha_{\theta}$. The pseudocode is depicted in algorithm \r
     $c \gets C_{\theta}(\tilde{o}_{1, ..., T}, a^{\text{E}}_{1, ..., T})$\hfill{compute expected reward $c$} \\
     
     $J_{C} = \mathcal{L}_2(c, r)$ \hfill{compute $L_2$ loss from reward $r$} \\
-    $\theta \gets \theta{old} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
+    $\theta \gets \theta{\mathrm{old}} - \alpha_{\theta} \nabla_{\theta}J_{C}$\\
     return $\theta$
 \end{algorithm}
 \subsection{Active Critic Learner}
-Putting everything together, we can now define the learning paradigm of the \ac{avc} algorithm, depicted in figure \ref{AC_Learner}. The number of update 
+Putting everything together, we can now define the learning paradigm of the \ac{avc} algorithm, depicted in Algorithm \ref{AC_Learner}. The number of update 
 steps in inference time $N$ can be used to weigh exploration against exploitation. A high number of update steps means the critic can find very different 
 trajectories, to the one proposed by the actor. As these trajectories are further from the distribution on which the critic learned, the confidence of the 
 critic score will be lower. Note, this hyperparameter has no effect on the performance of the actor, as we decoupled the critic from the actor.
 \begin{algorithm}
-    \caption{Active critic learner}
+    \caption{Active Critic Learner}
     \label{AC_Learner}
-    Given expert demonstrations $\mathcal{D}_{\text{expert}}$, sequence length $T$, learning rates $\alpha_{\mathrm{inf}}$, $\alpha_{\theta}$, 
-    $\alpha_{\phi}$ and $\alpha_{\zeta}$, inference steps $N$ and update steps $N_{\text{update}}$\\
-     Initialize  $\mathcal{D}_{\text{critic}} = \mathcal{D}_{\text{expert}}$, 
+    Given expert demonstrations $\mathcal{D}_{\mathrm{expert}}$, sequence length $T$, learning rates $\alpha_{\mathrm{inf}}$, $\alpha_{\theta}$, 
+    $\alpha_{\phi}$ and $\alpha_{\zeta}$, inference steps $N$ and update steps $N_{\mathrm{update}}$\\
+     Initialize  $\mathcal{D}_{\mathrm{critic}} = \mathcal{D}_{\mathrm{expert}}$, 
     actor $\pi_{\phi}$, planner $P_{\zeta}$, critic $C_{\theta}$\\
-    \While {\text{not converged}}
+    \While {\mathrm{not converged}}
     {
-        \For {$s=1$ to $N_{\text{samples}}$}
+        \For {$s=1$ to $N_{\mathrm{samples}}$}
         {
-           $\mathcal{D}_{\text{expert}}$, $\mathcal{D}_{\text{critic}}$ = Inference Step \hfill{see algorithm \ref{AC_Inference}}\\
+           $\mathcal{D}_{\mathrm{expert}}$, $\mathcal{D}_{\mathrm{critic}}$ = Inference Step \hfill{see algorithm \ref{AC_Inference}}\\
         }
-        \For {$i=1$ to $N_{\text{update}}$}
+        \For {$i=1$ to $N_{\mathrm{update}}$}
         {
             $\phi_{new}$, $\zeta_{new}$ = Actor Update \hfill{see algorithm \ref{Actor_Update_Alg}}\\
             $\theta_{new}$ = Critic Update \hfill{see algorithm \ref{Critic_Update_Alg}}\\
@@ -625,7 +625,7 @@ critic score will be lower. Note, this hyperparameter has no effect on the perfo
 \label{sec:relax_dense}
 We now want to relax the constraint that we only use one observations per trajectory to the deterministic \ac{mdp} setting. 
 We refer to the typical \ac{mdp} setting as "continued" observations to differentiate it from our previous discussed setup with single (sparse) observations. 
-Following, we develop the addition to the \ac{avc} algorithm we call Continued Observation Active Critic (\ac{coavc}). 
+Following this, we develop the addition to the \ac{avc} algorithm we call Continued Observation Active Critic (\ac{coavc}). 
 We will first discuss how a straight forward adaption of \ac{avc} will have an unwanted failure mode. Then, we will develop an additional loss term to counter this problem.\\
 
 So far we had one initial observation and repeated it $T$ times, where $T$ is the sequence length. We then used positional encoding to disambiguate the observations and generate an action sequence of 
@@ -644,7 +644,7 @@ With this construction, we can still use the whole sequence critic,
 which prediction is defined as $C_{o_{1:t}, t_{f, t+1:T}, a_{1:T}}(i) = \mathbb{E}_{\tau \propto a_{1:T}, o_{1:t}}\left[r(o_i, a_i)\right]$. The corresponding loss is
 \begin{equation}
     \label{eq:dense_critic_loss}
-    J_{\theta, MDP} = \mathbb{E}_{(o_{1:t}, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(C_{\theta, o_{1, ..., t}, t_{f, t+1:T},  a_{1,...,T}}(t) - r_t)^2\right].
+    J_{\theta, \mathrm{MDP}} = \mathbb{E}_{(o_{1:t}, a_{1,...,T}, r_{1,...,T}) \in \mathcal{D}_{\text{critic}},\ t \in {1, ..., T}}\left[(C_{\theta, o_{1, ..., t}, t_{f, t+1:T},  a_{1,...,T}}(t) - r_t)^2\right].
 \end{equation}
 
 For simplicity, we will denote the prediction 
@@ -668,17 +668,17 @@ ${a^t}^*$. \\
 As $C_{{a^t}^*}^t$ is the maximum cumulative reward and we showed that $C_{{a^t}^*}^t$ is not learned, we conclude that $\sum_{i=t}^T C_{{a^t}^*}^t(i)$ 
 will be an overestimation of the actual rewards $r \propto {a^t}^*$, where the action sequence ${a^t}^*$ is used for all actions of the trajectory. \\
 
-To counter this, we propose the loss $J_{pred, C}$ defined as:
+To counter this, we propose the loss $J_{\mathrm{pred}, C}$ defined as:
 \begin{equation}
     \label{proxy_loss_dense}
-    J_{pred, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\text{train data}}}\left[ \sum_{i=1}^T(C_{{a^t}}^t(i) - C_{{a^t}}^{t+1}(i))^2 \right].
+    J_{\mathrm{pred}, C} = \mathbb{E}_{o_{\textbf{1:t}} , o_{t+1}, a^t_{1:T} \propto \mathcal{D}_{\mathrm{train data}}}\left[ \sum_{i=1}^T(C_{{a^t}}^t(i) - C_{{a^t}}^{t+1}(i))^2 \right].
 \end{equation}
 Following, we will motivate how this loss can solve the problem. A rigorous proof 
 is left for future work.\\
 
 Intuitively, we demand that the critic expects the same rewards at time step $t$ and $t+1$, given action sequence $a^t$. When this loss is minimized, always taking the actions sequence ${a^t}^*$ maximising the estimated sum of 
 rewards $C_{{a^t}^*}^t(i)$, 
-the expected values $C^t$ will converge to the actual rewards received $r$. This is because minimizing loss \ref{proxy_loss_dense} ensures, that the expected 
+the expected values $C^t$ will converge to the actual rewards received $r$. This is because minimizing the loss defined in \ref{proxy_loss_dense} ensures, that the expected 
 values at time step $t+1$ must be equal or higher than the expected values at time step $t$, as the action sequence ${a^{t+1}}^* = {a^t}^*$ can be chosen with 
 $C_{{{a^t}^*}}^t(i) = C_{{a^{t+1}}^*}^{t+1}(i)$. Now if $C_{{a^t}^*}^t(i) = C_{{a^t}^*}^{t+1}(i)$, the action sequence does not change in $t$: ${a^t}^* = {a^{t+1}}^*$, thus the action 
 sequence ${a^t}^*$ is actually used for all actions of the trajectory and $C^t$ becomes an unbiased estimate, as ${a^t}^*$ is part of the train data set. \\
@@ -705,7 +705,7 @@ If the number is high, the computation time per trajectory is too long, as the t
 T.\\ 
 
 This problem did not occur with the \ac{avc} algorithm, as the action sequence is only optimized 
-once per trajectory, limiting the additional compute cost.\\
+once per trajectory, limiting the additional computational cost.\\
 
 Recall, in section \ref{sec:inf_time_search} we proposed to use the gradient from the critic on the actor and recompute the 
 actions, instead of optimizing the actions directly. We found a good solution is to keep the states of the actor and planner during inference of a trajectory, 

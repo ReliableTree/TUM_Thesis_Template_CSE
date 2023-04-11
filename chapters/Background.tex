@@ -149,7 +149,7 @@ $$R(s, a) = \mathbb{E}[r_{t+1} \mid s_t=s, a_t=a]$$
 
 This function specifies the expected immediate reward obtained after taking action $a$ in state $s$. The discount factor $\gamma$ is a 
 parameter that determines the importance of future rewards relative to immediate rewards. It is typically a value between 0 and 1, where 0 means that 
-only immediate rewards are important and 1 means that future rewards are equally important. An example diagram is depicted in figure \ref{fig:mdp_diagram}.\\
+only immediate rewards are important and 1 means that future rewards are equally important. An example diagram is depicted in Figure \ref{fig:mdp_diagram}.\\
 
 \begin{figure}
     \centering
@@ -745,7 +745,7 @@ where $a_t$ is the action taken at time $t$, $o_{t+1}$ is the observation receiv
 While the transition probability $\mathcal{T}$ only depends on the last state $s_t$ and the last action $a_t$, 
 in equation \ref{pomdp_bayes} the probability distribution over the current state $p(s_{t+1} = s') = b_{t_+1}(s')$ depends on the last probability distribution $b_{t}$.
 This means an optimal policy has to know the history of the \ac{mdp}: $\pi(a_t|a_{0:t-1}, o_{0:t-1})$, thus the observation space grows linear in time. 
-An example is depicted in figure \ref{fig:POMDP}.  \\
+An example is depicted in Figure \ref{fig:POMDP}.  \\
 \begin{figure}
     \centering
     \begin{tikzpicture}[scale=0.1]
@@ -850,7 +850,7 @@ Currently there are two types of sequence models widely used:
 \subsection{Recurrent Neural Networks}
 \label{POMDP_RNN}
 Recurrent neural networks (RNNs) are a type of neural network, where the previous outputs are fed back as inputs to the current computation. A diagram of a 
-recurrent neural network is depicted in figure \ref{RNN_diag}. 
+recurrent neural network is depicted in Figure \ref{RNN_diag}. 
 A naive implementation of RNNs suffers from the problem of vanishing gradients, where the gradients become extremely small as they propagate back in time, 
 leading to slow learning and difficulty in capturing long-term dependencies.
 For a neural network, suppose the activation of a hidden state at time $t+1$ depends on the hidden state at time $t$ like:
@@ -978,7 +978,7 @@ The attention weights represent the importance of each value vector in the weigh
  
 Note with this setup, the model has no way to encode the relative position of the tokens, which is why a positional encoding is added along the sequence dimension, 
 using sine and cosine functions, to break the symmetry.\\ 
-In this thesis, we will use transformer encoder to model our neural networks. They only consists of self attention and the output MLP, as depicted in figure \ref{fig:transformer}. 
+In this thesis, we will use transformer encoder to model our neural networks. They only consists of self attention and the output MLP, as depicted in Figure \ref{fig:transformer}. 
 We will not describe the whole transformer architecture, 
 as in this thesis we only make use of the encoder architecture.\\
 One advantage of the Transformer architecture is that it does not suffer from the problem of vanishing or exploding gradients.
