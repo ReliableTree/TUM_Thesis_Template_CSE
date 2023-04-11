@@ -52,19 +52,18 @@ AVC, the latter already achieves high accuracy in solving environments.
 \section{Limitations and Drawbacks}
 \subsection{Baselines}
 We have chosen general-purpose \ac{rl} algorithms for our baselines, because our paradigm is also generally applicable 
-and we wanted to test it in a wide range of experiments, including those with no expert demonstrations.\\ 
+and we wanted to test it in a wide range of experiments. This means however, that the baselines are not specifically tailored for fine-tuning or sparse rewards.\\ 
 
-However, we think it is interesting to test the specific strength in fine-tuning against baselines which are 
-tailored for it. 
+We think it is interesting to test the specific strength in fine-tuning against baselines with priority replay buffers as introduces in Section \ref{sec:rel_work_finetuning}. 
 While we argued why we expect our algorithm to perform better in cases with provided expert demonstrations than the featured algorithm, we have to 
 leave testing it for future work.\\
 
 Another aspect that we would like to test in more depths is the sparse reward setting. In Section \ref{sec:HER}, we have introduced two concepts that are used for sparse \ac{rl}, namely 
-HER and curiosity driven exploration. While \ac{her} is not generally applicable, we would like to both test our approach against a baseline using curiosity, as well as incorporate 
-curiosity into our algorithm as an additional reward signal. 
+\ac{her} and curiosity driven exploration. Both approaches are not applicable in the \ac{sopomdp} setting, as they rely on observations during the trajectory. 
+For the \ac{mdp} setting, we think it is interesting to add both approaches to the \ac{avc} paradigm and test the results against \ac{ppo} and \ac{tqc} with both \ac{her} and curiosity driven exploitation. 
 
 \subsection{Exploration}
-Although COAVC outperformed baselines, its performance in the Pick and Place and Push environments did not reach near-perfect levels, 
+Although \ac{covac} outperformed baselines, its performance in the Pick and Place and Push environments did not reach near-perfect levels, 
 indicating limitations in more challenging environments. While a longer reinforcement phase might improve performance, this was not explored 
 due to time constraints. \ac{avc} currently does not use a stochastic actor, which we expect to be key for improved exploration.\\ 
 
@@ -72,8 +71,6 @@ Additionally, exploration from no expert demonstrations was not extensively stud
 environment. We expected pure \ac{rl} is not feasible for more challenging environments given sparse rewards. 
 However, we found \ac{tqc} was able to solve the Window Open environment without expert demonstrations, but further investigation on whether 
 COAVC performs well in this environment was not possible due to time constraints.\\ 
-
-  
 
 \subsection{Indeterminacy}
 In COAVC, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
