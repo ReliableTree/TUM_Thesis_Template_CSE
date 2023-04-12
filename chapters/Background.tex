@@ -160,8 +160,8 @@ only immediate rewards are important and 1 means that future rewards are equally
         \node (s2) [circle, draw, fill = green!30, right of = t1_2, xshift=1.5cm] {$s_2$};
         \node (t2_3) [rectangle, draw, right of=s2, xshift=1.5cm] {$T(s_3|s_2, a_2)$};
         \node (s3) [circle, draw, fill = green!30, right of = t2_3, xshift=1.5cm] {$s_3$};
-        \node (r_1) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t1_2] {$R(s_1, a_1)$};
-        \node (r_2) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t2_3] {$R(s_2, a_2)$};
+        \node (r_1) [rectangle, draw, fill = {rgb,255:red,100;green,150;blue,100}, below of=t1_2] {$R(s_1, a_1)$};
+        \node (r_2) [rectangle, draw, fill = {rgb,255:red,100;green,150;blue,100}, below of=t2_3] {$R(s_2, a_2)$};
 
         \node (policy_1) [diamond, draw, fill = yellow!30, above of = s1, yshift=1.5cm] {$\pi$};
         \node (policy_2) [diamond, draw, fill = yellow!30, above of = s2, yshift=1.5cm] {$\pi$};
@@ -181,8 +181,8 @@ only immediate rewards are important and 1 means that future rewards are equally
         \draw [->, black!50, line width=2pt] (t1_2) -- node[midway, left] {} (s2);
         \draw [->, black!50, line width=2pt] (t2_3) -- node[midway, left] {} (s3);
 
-        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
-        \draw [->, color={rgb,255:red,70;green,90;blue,70}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
+        \draw [->, color={rgb,255:red,100;green,150;blue,100}, line width=2pt] (t1_2) -- node[midway, left] {} (r_1);
+        \draw [->, color={rgb,255:red,100;green,150;blue,100}, line width=2pt] (t2_3) -- node[midway, left] {} (r_2);
     \end{tikzpicture}
   \caption{A \ac{mdp} diagram with an agent that takes in states $s_t$ and outputs action $a_t$.}
   \label{fig:mdp_diagram}
@@ -416,7 +416,7 @@ $|V(s'') - W(s'')|$ is independent of $s'$.
 Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
 
 \textbf{Step 2:} Unique fixed point\\
-By the Banach fixed point theorem, as discussed by Agarwal \etAl \cite{agarwal2018banach}, $T$ has a fixed point $TV^* = V^*$. 
+By the Banach fixed point theorem, as discussed by Agarwal \etAl \cite{agarwa}, $T$ has a fixed point $TV^* = V^*$. 
 We see, that this fixed point satisfies the Bellman Equation \ref{bootstrap_v} with 
 $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right).$$
 As the fixed point is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it is shown that for small enough 
@@ -592,15 +592,16 @@ similar or better performance than \ac{trpo}.
 \label{sec:mod_based_ref}
 In model-based \ac{rl} the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
-$a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the model has to learn the transition model, the 
+$a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the algorithm has to learn the transition model, the 
 expectation is built with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
-$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$. As shown by Xu \etAl \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
+$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$.\\ 
+As shown by Xu \etAl \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
 model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
 and let $V_{\pi}^{M_\theta}$ be the value function, given $\pi$ is the optimal policy for the learned model $M_{\theta}$. It is shown, that 
 $|V_{\pi}^{M^*} - V_{\pi}^{M_\theta}| \le c \cdot \frac{1}{(1 - \gamma^2)}$, where $c$ is dependent on the KL divergence between the model $M_{\theta}$ and $M^*$. 
 Intuitively, with higher $\gamma$, the value function $V_{\pi}^{M_\theta}$ can further deviate from the optimal value 
 function $V_{\pi}^{M^*}$.\\
-Considering these findings, it is obvious that most successful applications of this framework are in cases, where the model is known or 
+Considering these findings, it is obvious that most successful applications of this framework are in cases where the model is known or 
 the action space is discrete, to make the task of learning the model easier.
 
 \subsection{Proper Value Equivalence}
@@ -640,7 +641,7 @@ Returning to our general learning paradigm \ref{general_learning_paradigm}, $g^*
 The challenge of \ac{il} 
 opposed to the general supervised learning paradigm is, that the data distribution during test time depends on the learned policy $\pi_{\text{imitation}}$:
 \begin{align}
-    \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \ propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]
+    \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]
 \end{align}
 in general.
 \\ \\
@@ -761,8 +762,8 @@ An example is depicted in Figure \ref{fig:POMDP}.  \\
         \node (policy_1) [diamond, draw, fill = yellow!30, above of = o1, yshift=1.5cm] {$\pi$};
         \node (policy_2) [diamond, draw, fill = yellow!30, above of = o2, yshift=1.5cm] {$\pi$};
         \node (policy_3) [diamond, draw, fill = yellow!30, above of = o3, yshift=1.5cm] {$\pi$};
-        \node (r_1) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t1_2] {$R(s_1, a_1)$};
-        \node (r_2) [rectangle, draw, fill = {rgb,255:red,70;green,90;blue,70}, below of=t2_3] {$R(s_2, a_2)$};
+        \node (r_1) [rectangle, draw, fill = {rgb,255:red,100;green,150;blue,100}, below of=t1_2] {$R(s_1, a_1)$};
+        \node (r_2) [rectangle, draw, fill = {rgb,255:red,100;green,150;blue,100}, below of=t2_3] {$R(s_2, a_2)$};
 
 
         \draw [->, green!50!black, line width=2pt] (s1) -- node[midway, above] {} (o1);
@@ -772,12 +773,12 @@ An example is depicted in Figure \ref{fig:POMDP}.  \\
         \draw [->, black!50, line width=2pt] (s1) -- node[midway, above] {} (t1_2);
         \draw [->, black!50, line width=2pt] (s2) -- node[midway, above] {} (t2_3);
 
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_1);
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_2);
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_3);
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_2);
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_3);
-        \draw [->, color={rgb,255:red,80;green,80;blue,180}, line width=2pt] (o3) -- node[midway, above] {} (policy_3);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_1);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_2);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o1) -- node[midway, above] {} (policy_3);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_2);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o2) -- node[midway, above] {} (policy_3);
+        \draw [->, color={rgb,255:red,120;green,120;blue,180}, line width=2pt] (o3) -- node[midway, above] {} (policy_3);
 
         \draw [->, color={rgb,255:red,200;green,200;blue,0}, line width=2pt] (policy_1) -- node[color={rgb,255:red,30;green,30;blue,0}, midway, below] {$a_1$} (t1_2);
         \draw [->, color={rgb,255:red,200;green,200;blue,0}, line width=2pt] (policy_2) -- node[color={rgb,255:red,30;green,30;blue,0}, midway, below] {$a_2$} (t2_3);
@@ -795,8 +796,8 @@ An example is depicted in Figure \ref{fig:POMDP}.  \\
 \subsection{Curse Of Dimensionality}
 \label{COD}
 A problem in dealing with \ac{pomdp}s is the large input space to a policy, considering the time horizon. 
-The curse of dimensionality describes how the volume of a distribution increases exponentially with the dimension of the distribution. That means in general, 
-that you need exponentially many observations from a distribution with respect to the number of dimensions, to get sufficient evidence for a model of the distribution. 
+The curse of dimensionality describes how the volume of a distribution increases exponentially with the dimension of the distribution. In general, 
+you need exponentially many observations from a distribution with respect to the number of dimensions, to get sufficient evidence for a model of the distribution. 
 To motivate this, assume a simple 
 discrete probability distribution for a two-class classifier on n dimensions with two values per dimension:
 \begin{equation}
