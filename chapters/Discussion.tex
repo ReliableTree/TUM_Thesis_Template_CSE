@@ -2,7 +2,7 @@
 
 \chapter{Discussion}
 \label{chapter:Discussion}
-In this chapter we will summarize our findings and discuss advantages as well es remaining limitations of our approach and evaluation.
+In this chapter, we will summarize our findings and discuss advantages as well as remaining limitations of our approach and evaluation.
 \section{Applicability and Advantages}
 \subsection{Imitation Learning}
 Our results from Section \ref{sec:exp_imi_lr} demonstrate that our \ac{il} approach outperforms recurrent algorithms in continuous action space, 
@@ -58,9 +58,9 @@ We think it is interesting to test the specific strength in fine-tuning against 
 While we argued why we expect our algorithm to perform better in cases with provided expert demonstrations than the featured algorithm, we have to 
 leave testing it for future work.\\
 
-Another aspect that we would like to test in more depths is the sparse reward setting. In Section \ref{sec:HER}, we have introduced two concepts that are used for sparse \ac{rl}, namely 
+Another aspect that we have not tested in more depth is the sparse reward setting. We have introduced two concepts in Section \ref{sec:HER}, that are used for sparse \ac{rl}, namely 
 \ac{her} and curiosity driven exploration. Both approaches are not applicable in the \ac{sopomdp} setting, as they rely on observations during the trajectory. 
-For the \ac{mdp} setting, we think it is interesting to add both approaches to the \ac{avc} paradigm and test the results against \ac{ppo} and \ac{tqc} with both \ac{her} and curiosity driven exploitation. 
+They are applicable in the context of the \ac{mdp} setting though, and it should be tested adding them to \ac{avc}, \ac{ppo} and \ac{tqc}.
 
 \subsection{Exploration}
 Although \ac{coavc} outperformed baselines, its performance in the Pick and Place and Push environments did not reach near-perfect levels, 
