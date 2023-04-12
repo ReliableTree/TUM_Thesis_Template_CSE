@@ -220,7 +220,7 @@ The authors include three regularization losses to improve the expressiveness of
 where g is a learned stochastic unimodal gaussian with learned mean and fixed variance.\\
 
 Intuitively, this term seeks to impose, that the belief state $b_t$ is indeed a sufficient statistic for the 
-\ac{pomdp}, by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $\mathrm{f}$ of the regularization loss means forward. 
+\ac{pomdp} by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $\mathrm{f}$ of the regularization loss means forward. 
 In a similar way, there is an inverse regularization $i$, which looks k steps into the past. Additionally, the authors propose an action regularization $a$ which tries to reproduce the actions that were 
 taken, given the initial belief state and the subsequent observations. With all three regularization losses, the total loss function for the believe module is:
 \begin{equation}
@@ -259,7 +259,7 @@ The agent can then learn from these hindsight goals, which can provide more freq
 Overall, \ac{her} is a powerful algorithm that addresses the problem of sparse rewards in \ac{rl} by leveraging hindsight. It has been successfully applied to a wide range of tasks, 
 including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard \ac{rl} algorithms.\\
 
-A downside of \ac{her} is that it requires the inverse function $g(s)$, meaning from a visited state, the goal must be reconstructible. This is not always given.
+A downside of \ac{her} is that it requires the inverse function $g(s)$, meaning the goal must be reconstructible from a visited state. This is not always given.
 Consider the goal of not driving into a vehicle or a goal expressed in natural language. \\
 
 Another idea is to use curiosity for better exploration in sparse reward settings. One common 

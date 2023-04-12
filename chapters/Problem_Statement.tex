@@ -53,9 +53,9 @@ proposed trajectory of the actor, without changing the actor itself. \\
 
 While there are approaches using search in inference time, they either require discrete action spaces \cite{MUZero} or a given differentiable model of the environment \cite{Lee_Jeon_Kim_Kim_2020}. 
 In our approach, we 
-don't make the assumption that such a model is provided, as in real world robotic applications, this is typically not the case.\\
+don't make the assumption that such a model is provided, as this is typically not the case in real world robotic applications   .\\
 
 We are interested in investigating the effectiveness of our search paradigm, which requires a learned weakly grounded model of the environment. We first develop the approach 
 for single observation environments, 
-as they don't provide additional information during the trajectory is rolled out, making the prediction of the whole environment dynamics crucial. We will then relax the constraint to the typcial 
+as they don't provide additional information during the trajectory is roll-out, making the prediction of the whole environment dynamics crucial. We will then relax the constraint to the typcial 
 \ac{mdp} setting.
