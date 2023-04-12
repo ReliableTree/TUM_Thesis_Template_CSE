@@ -71,7 +71,7 @@ for the downstream task \cite[chapter~9]{bishop} \cite[chapter~5]{Goodfellow}.
 
  \ac{rl} is a learning paradigm where an agent interacts with an environment and learns to take actions that maximize a 
 cumulative reward signal. In this paradigm, the input $x$ is typically the state $s$ of the environment, the output $y$ is the action $a$ taken by the agent, 
-and the the objective function $g$ is a reward signal $r$.
+and the objective function $g$ is a reward signal $r$.
 
 The agent learns a policy $\pi: S \to A$ that maps states to actions, in order to maximize the expected cumulative reward:
 
@@ -92,34 +92,34 @@ under policy $\pi$, $\gamma \in [0,1]$ is a discount factor that controls the im
 
     \item \textbf{Model type:}
     \begin{itemize}
-    \item Model based: the algorithm explicitly models the dynamics of the environment.
-    \item Model free: the algorithm learns a policy without explicitly modelling the environment.
+    \item Model based: The algorithm explicitly models the dynamics of the environment.
+    \item Model free: The algorithm learns a policy without explicitly modelling the environment.
     \end{itemize}
     \item \textbf{Action/Observation space:}
     \begin{itemize}
-    \item Continuous: the action/observation space is continuous, typically represented by a real-valued vector.
-    \item Discrete: the action/observation space is discrete, typically represented by a finite set of actions.
+    \item Continuous: The action/observation space is continuous, typically represented by a real-valued vector.
+    \item Discrete: The action/observation space is discrete, typically represented by a finite set of actions.
     \end{itemize}
     \item \textbf{Policy type:}
     \begin{itemize}
-    \item On-policy: the algorithm learns the optimal policy while using the same policy to collect experience.
-    \item Off-policy: the algorithm learns the optimal policy while using a different policy to collect experience.
+    \item On-policy: The algorithm learns the optimal policy while using the same policy to collect experience.
+    \item Off-policy: The algorithm learns the optimal policy while using a different policy to collect experience.
     \end{itemize}
     \item \textbf{Reward type:}
     \begin{itemize}
-    \item Dense reward: the agent receives a reward signal for every time step in the environment.
-    \item Sparse reward: the agent receives a reward signal only for certain time steps in the environment.
+    \item Dense reward: The agent receives a reward signal for every time step in the environment.
+    \item Sparse reward: The agent receives a reward signal only for certain time steps in the environment.
     \end{itemize}
     \item \textbf{Time horizon:}
     \begin{itemize}
-    \item Infinite horizon: the algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
-    \item Finite horizon: the algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
+    \item Infinite horizon: The algorithm aims to maximize the expected sum of rewards over an infinite time horizon.
+    \item Finite horizon: The algorithm aims to maximize the expected sum of rewards over a fixed time horizon.
     \end{itemize}
     \begin{samepage}
     \item \textbf{inference type:}
     \begin{itemize}
-    \item Probabilistic inference: the algorithm samples actions according to a probability distribution.
-    \item Deterministic inference: the algorithm chooses an action deterministically.
+    \item Probabilistic inference: The algorithm samples actions according to a probability distribution.
+    \item Deterministic inference: The algorithm chooses an action deterministically.
     \end{itemize}
 \end{samepage}
 \end{itemize}
@@ -201,10 +201,10 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
 
 
 \section{Policy Gradient}
-There are numerous ways to arrive at a policy that maximizes the \ac{rl} objective as defined in equation 
+The following section follows Sutton \etAl \cite{NIPS1999_464d828b}. There are numerous ways to arrive at a policy that maximizes the \ac{rl} objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
 to parametrize the policy using a differentiable function.\\ 
-In this thesis we use neural networks for this task, as they show most promising results. The expectation over the cumulative 
+In this thesis we use neural networks for this task. The expectation over the cumulative 
 reward $J$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
 
 \begin{equation}
@@ -213,15 +213,15 @@ J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \gamma^t r_
 where  $p(\tau | \pi)$ is the probability of generating trajectory $\tau$ under policy $\pi$, and $\theta$ are the parameters of the policy $\pi$. 
 $T$ can either be finite or infinite. If $T$ is infinite, $\gamma$ must be smaller than 1.
 
-Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can use the policy gradient theorem to compute the gradient of $J(\theta)$:
+Our goal is to maximize $J(\theta)$ with respect to $\theta$. We can compute the gradient of $J(\theta)$:
 \begin{equation}
     \label{nabla_reinforce}
     \begin{aligned}
         \nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot \sum_{t'=t}^T \gamma^{t'-t} r_{t'} \right]\\
-        = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right]
+        = \mathbb{E}_{\tau \sim p(\tau | \pi)} \left[ \sum_{t=0}^T \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot  G_t\right],
     \end{aligned}
 \end{equation}
-With $G_t = \sum_{t'=t}^T \gamma^{t'} r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
+where $G_t = \sum_{t'=t}^T \gamma^{t'} r_{t'}$ and $\pi(a_t|s_t;\theta)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi$ with parameters $\theta$. 
 $G_t$ represents the total discounted reward obtained after taking action $a_t$ in state $s_t$ and following trajectory $\tau_{i>t}$ after that.
 
 In practice we don't have access to the real expectation. Instead we sample $n$ trajectories and approximate the expectation.
@@ -231,7 +231,7 @@ This finally gives us the gradient of the approximated expected reward with resp
     \label{reinf_update}
     \theta \leftarrow \theta + \alpha \nabla_{\theta} \log \pi(a_t|s_t;\theta) \cdot G_t
 \end{equation}
-where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm as developed by Sutton \etAl \cite{NIPS1999_464d828b} depicted in algorithm \ref{fig:REINFORCE}.
+where $\alpha$ is the learning rate. This update rule is used in the REINFORCE algorithm \cite{NIPS1999_464d828b} depicted in algorithm \ref{fig:REINFORCE}.
 The algorithm collects 1 trajectory, computes the gradient estimate, and updates the policy parameters using stochastic gradient ascent. 
 It continues until convergence.
 
@@ -445,17 +445,17 @@ where
 
 \begin{align}
     \mathbb{E}_{s_t, a_t, r_t...s_T, a_T, r_T \propto \pi} \left[ G_t \right] \\
-    = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
-    = q_{\pi}(s_{t},a_{t}).
+    = r(s_t,a_t) + \gamma \mathbb{E}_{s_{t+1} \propto T(s_{t+1}|s_t, a_t)}\left[\mathbb{E}_{a_{t+1} \propto \pi(\cdot|s_t)}  \left[Q_{\pi}(s_{t+1},a_{t+1})\right]  \right]
+    = Q_{\pi}(s_{t},a_{t}).
 \end{align}
 
 
 Plugging in the definition of the $Q$-value recursively gives us the Bellman equation for $Q$-values:
 \begin{equation*}
-q_{\pi}(s_t, a_t) 
+Q_{\pi}(s_t, a_t) 
 \end{equation*}
 \begin{equation*}
-    = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma q_{\pi}(s_{t+1}, a_{t+1})\right]
+    = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma Q_{\pi}(s_{t+1}, a_{t+1})\right]
 \end{equation*}
 for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.\\
 
