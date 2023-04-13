@@ -6,20 +6,26 @@ approximators and \ac{mcts} to plan actions ahead.
 Another field that made leaps forward recently is generative AI. As examples, Midjourney \cite{midjourney} 
 can generate highly detailed pictures from natural 
 language description and ChatGPT \cite{cite:ChatGPT} is able to provide meaningful assistance through natural language interface. We identify two important paradigms from these 
-examples, which we will make effective use of: planning and pretraining. 
+examples, which we will make effective use of: planning and pretraining from expert knowledge. 
 
 The planning algorithm used in MuZero is not applicable in robotics, as \ac{mcts} cannot be used, because the number of branches per node is infinite in continuous action spaces, 
 making enumeration impossible. While there are recent approaches 
 using planning on continuous action spaces, they either require a differentiable model of the system dynamics \cite{Manna2022} \cite{Lee_Jeon_Kim_Kim_2020}, which is difficult to provide in real world scenarios,
-or are computationally costly in inference time \cite{hafner2018planet}, as they use population based methods to plan optimal action sequences.
+or are computationally costly in inference time \cite{hafner2018planet}, as they use population based methods to plan optimal action sequences. 
 
 In this thesis we develop a new \ac{rl} 
 paradigm called ActiVe Critic (AVC). It learns relevant dynamics of the world model, conducts search on planned trajectories, 
-and makes efficient use of expert demonstrations. Our approach is highly computation efficient in inference time. Because of the planning, it can be used with a single observation provided 
-for the whole sequence, where computing the actions after the first step is just a lookup operation. It can also incorporate updates from observations during 
-the trajectory, using few optimization steps per inference step to update the 
-optimal trajectory. Here, we keep the knowledge from the past optimizations, making it highly efficient compared to model based methods, that start over after 
-each observation.
+and makes efficient use of expert demonstrations. To plan, we predict all actions and the corresponding rewards for the whole trajectory in one step 
+using transformer networks. This has several advantages over autoregressive planners. First, it is quicker, as it computes all actions and rewards in 
+parallel. Second, we don't have compounding errors resulting from the recursive usage of previous predicted states, which is crucial to have 
+stable predictions for long term planning. Third, we can optimize the whole trajectory using gradient descent, which uses the 
+continuous action space to our advantage. Our approach is highly computation efficient in inference time. For the initial prediction of the 
+actions, we use an actor network. We then optimize the actor with respect to the predicted rewards from the critic and recompute the action sequence. 
+Because of the highly stable whole sequence planning, \ac{avc} can be used with a single observation provided 
+for the whole trajectory, where computing the actions after the first step is just a lookup operation. It can also incorporate updates from observations during 
+the trajectory. To do so, it uses a small number of optimization steps per inference step to update the 
+optimal trajectory. We use three in this thesis, which takes fractions of a second. With this approach, we can keep the knowledge from the past optimizations, making it highly efficient compared to model based methods, that start over after 
+each observation. 
 
 We provide a thorough theoretical analysis of the paradigm showing improved stability in the update steps compared to actor critic methods and 
 establish a lower policy improvement bound that includes expert demonstrations. 

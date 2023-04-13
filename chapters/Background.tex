@@ -53,12 +53,10 @@ given input sequence $x_1,\ldots,x_T$, as stated in \cite[chapter~4]{bishop} \ci
 
 \section{Unsupervised Learning}
 \label{section:unsup_learn}
-Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to 
-
-discover underlying patterns or structure in the data.
+Unsupervised learning is a learning paradigm where the input data is unlabeled and the goal is to discover underlying patterns or structure in the data.
 The objective function in unsupervised learning is typically not based on a predefined notion of correctness, but
 rather on measures of statistical
-independence or data compression.\\
+independence or data compression.
 
 Unsupervised learning can be used for a variety of tasks, including clustering, density estimation, dimensionality 
 reduction, and anomaly detection.
@@ -149,7 +147,7 @@ $$R(s, a) = \mathbb{E}[r_{t+1} \mid s_t=s, a_t=a]$$
 
 This function specifies the expected immediate reward obtained after taking action $a$ in state $s$. The discount factor $\gamma$ is a 
 parameter that determines the importance of future rewards relative to immediate rewards. It is typically a value between 0 and 1, where 0 means that 
-only immediate rewards are important and 1 means that future rewards are equally important. An example diagram is depicted in Figure \ref{fig:mdp_diagram}.\\
+only immediate rewards are important and 1 means that future rewards are equally important. An example diagram is depicted in Figure \ref{fig:mdp_diagram}.
 
 \begin{figure}
     \centering
@@ -203,8 +201,7 @@ indicate a trajectory with actions $a_t$ and states $s_t$.
 \section{Policy Gradient}
 The following section follows Sutton \etAl \cite{NIPS1999_464d828b}. There are numerous ways to arrive at a policy that maximizes the \ac{rl} objective as defined in equation 
 \ref{rl_objective}. For large or continuous action and observation spaces, a common approach is 
-to parametrize the policy using a differentiable function.\\ 
-In this thesis we use neural networks for this task. The expectation over the cumulative 
+to parametrize the policy using a differentiable function. In this thesis we use neural networks for this task. The expectation over the cumulative 
 reward $J$ with respect to a policy $\pi$ with parameters $\theta$ can be written as:
 
 \begin{equation}
@@ -261,7 +258,7 @@ It continues until convergence.
 \section{MDP Model}
 Now that we have established the foundation of \ac{rl}, we will investigate two learning paradigms, 
 namely model-free \ac{rl} in Section \ref{sec:mod_free_ref} and model-based 
-\ac{rl} in Section \ref{sec:mod_based_ref}. \\
+\ac{rl} in Section \ref{sec:mod_based_ref}.
 
 Model-free algorithms aim to learn the dynamics of the system together with the action distribution induced by the policy. In this sense, they learn to predict the posterior 
 estimate of the expected rewards given the \ac{mdp} dynamics and the current policy. It is the preferred paradigm in continuous action spaces, 
@@ -356,10 +353,10 @@ $$V(s_t) \leftarrow V(s_t) + \alpha \delta_t$$
 
 where $\alpha (0 < \alpha \leq 1)$ is the learning rate, which determines the weight given to new information relative to old information. TD learning for the $Q$ 
 value is analogous. Recursively plugging in the temporal difference error n times is referred to as n-step TD learning. For example, 2-step TD learning can be written as 
-$\delta_t = r_t + \gamma (r_{t+1} + \gamma V(s_{t+2}) - V(s_{t+1})  ) - V(s_t)$.\\
+$\delta_t = r_t + \gamma (r_{t+1} + \gamma V(s_{t+2}) - V(s_{t+1})  ) - V(s_t)$.
 
 Iterating the value function estimate according to the update rule \ref{TD_update} is guaranteed to converge to the real value function of $\pi$. To see this, 
-let $V$ be the value function estimate and $V_{\pi}$ be the true value function for policy $\pi$ as defined in eqaution \ref{bootstrap_v}. Also let $T$ be the 
+let $V$ be the value function estimate and $V_{\pi}$ be the true value function for policy $\pi$ as defined in equation \ref{bootstrap_v}. Also let $T$ be the 
 Bellman update operator defined as:
 
 \begin{equation}
@@ -390,7 +387,7 @@ Let $(X, d)$ be a complete metric space. A map $\mathcal{B}:X \rightarrow X$ is 
 
 \textbf{Banach Fixed Point Theorem:}\\
 Let (X,d) be a complete metric space and $\mathcal{B}:X \rightarrow X$ a contractor. 
-Then $\mathcal{B}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{B}(x^*) = x^*$. The sequence $\text{lim}_{n \rightarrow \infty}\mathcal{B}^n(x)$ converges to $x^*$.\\ \\
+Then $\mathcal{B}$ has a unique fixed point $x^* \in X$, s.t. $\mathcal{B}(x^*) = x^*$, as discussed by Agarwal \etAl \cite{agarwa}. The sequence $\text{lim}_{n \rightarrow \infty}\mathcal{B}^n(x)$ converges to $x^*$.
 
 First we will show that $T$ is a contraction mapping with respect to the infinity norm. Let $V$ and $W$ be two value function estimates. Then we have:
 
@@ -416,7 +413,7 @@ $|V(s'') - W(s'')|$ is independent of $s'$.
 Therefore, $T'$ is a contraction mapping with respect to the infinity norm. \\
 
 \textbf{Step 2:} Unique fixed point\\
-By the Banach fixed point theorem, as discussed by Agarwal \etAl \cite{agarwa}, $T$ has a fixed point $TV^* = V^*$. 
+By the Banach fixed point theorem, $T$ has a fixed point $TV^* = V^*$. 
 We see, that this fixed point satisfies the Bellman Equation \ref{bootstrap_v} with 
 $$TV^* = E_{\tau \propto \pi} \left(r(s,a) + \gamma \sum_{s' \in S} p(s' \mid s,a) V^*(s')\right).$$
 As the fixed point is unique, this proves that iteratively applying $TV$ will converge to $V_{\pi}$. Following \ref{TD_update_BM} it is shown that for small enough 
@@ -457,7 +454,7 @@ Q_{\pi}(s_t, a_t)
 \begin{equation*}
     = \mathbb{E}_{\tau \propto p(\tau|\pi)} \left[ r(s_t,a_t) + \gamma Q_{\pi}(s_{t+1}, a_{t+1})\right]
 \end{equation*}
-for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.\\
+for the sequence $\tau = (s_0,a_0, s_1, a_1...) \propto \pi$.
 
 One way to approximate the $Q$ value using a neural network with parameters $\theta$ is to use the temporal difference term as defined in \ref{TD_update_BM} for the $Q$ value:
 \begin{equation}
@@ -500,9 +497,8 @@ J(\pi) = \mathbb{E}_{s_t \sim \mathcal{D}, a_t \sim \pi}[r(s_t, a_t) + \alpha \m
 \end{equation}
 
 where $\mathcal{D}$ is the replay buffer, $r(s_t, a_t)$ is the immediate reward for taking action $a_t$ in state $s_t$, and $\mathcal{H}(\pi(\cdot|s_t))$ is the entropy of the policy. The entropy 
-encourages the policy to explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation.\\
-
-In the original implementation, SAC uses two $Q$ value estimates and a state value estimate $V$. $V$ is learned given by 
+encourages the policy to explore different actions, while the temperature parameter $\alpha$ controls the trade-off between exploration and exploitation. In the original implementation, 
+SAC uses two $Q$ value estimates and a state value estimate $V$. $V$ is learned given by:
 
 \begin{equation}
     V_{\psi}(s_t) = \mathbb{E}_{a_t \sim \pi_{\phi(a_t|s_t)}}[q_\text{min}(s_t, a_t) - \alpha \log \pi_{\phi(a_t|s_t)}],
@@ -530,12 +526,11 @@ The KL divergence is a measure of the alikeness of two distributions $P(x)$ and 
     \mathrm{KL}(P\|Q) = \int_{x\in X} P(x) \log \frac{P(x)}{Q(x)} \mathrm{d}x
 \end{equation}
 It is non-negative, asymmetric in the distributions and $\mathrm{KL}(P\|Q) = 0$ if and only if $P = Q$. In addition to that, it can be differentiated, making it 
-a common choice in deep learning applications.\\
+a common choice in deep learning applications.
 
-This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper \cite{haarnoja2018soft}. \\
+This approach also leads to provably optimal policies, as shown in the appendix B3.1 of the SAC paper \cite{haarnoja2018soft}. 
 The policy is inherently stochastic and returns an action according to a spherical gaussian distribution with noise vector $\epsilon_t$, learned mean and variance $a_t = f_{\phi}(\epsilon_t;s_t)$. 
 To approximate the derivative of \ref{sac_pol_obj} given limited sample size, the reparameterization trick is used:
-
    
 \begin{align}
  \label{SAC_update_rule}
@@ -543,14 +538,12 @@ To approximate the derivative of \ref{sac_pol_obj} given limited sample size, th
     + \left( \nabla_{a_t} log (\pi(\phi_{i})(a_t, s_t)) - \nabla_{a_t} Q_{\theta_i}(a_t, s_t) \right) \nabla_{\phi} f_{\phi}(\epsilon_t;s_t)].
 \end{align}
 
-
-
 To summarize, SAC introduces a parameter $\alpha$ with which the trade-off between exploration and exploitation can be tuned. It outperforms non-stochastic 
 policies in a number of challenging tasks including robot manipulation tasks with large, continuous action spaces.
 
 \subsection{Trust Region Policy Optimization}
 \label{sec:TRPO}
-Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement.\\ 
+Trust Region Policy optimization \cite{TRPO} aims to find a policy update step with a provable lower bound on value improvement. 
 Recall, we defined the \ac{rl} objective as:
 \begin{equation}
     J(\pi) = \mathbb{E}_{s_0, a_0, ...}\left[\sum_{t=0}^{\infty}  \gamma^t r(s_t) \right].
@@ -593,14 +586,16 @@ similar or better performance than \ac{trpo}.
 In model-based \ac{rl} the actor has access to the transition model $\mathcal{T}(s, a, s')$ of the MDP. Given this transition model, it can predict the 
 expected reward of a sequence of actions given the current state. With this prediction, the agent can use planning algorithms to find an action sequence 
 $a_{1, ..., T}$ to optimize the expected reward $J(a_{1:T}) = \mathbb{E}_{\tau \propto a, s_1}\sum_{t=1}^T \gamma^t r_t$. If the algorithm has to learn the transition model, the 
-expectation is built with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with \\
-$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t$.\\ 
+expectation is built with respect to the current estimate of the transition model $\mathcal{T}'(s,a,s')$ with 
+$J(a_{1:T}) = \mathbb{E}_{s_t \propto T'(s_{t-1}, a_t, s_t)}\sum_{t=1}^T \gamma^t r_t.$
+
 As shown by Xu \etAl \cite{NEURIPS2020_b5c01503}, a policy based on a learned 
 model of the environment has a quadratic error in $\gamma$. Formally let $V_{\pi}^{M^*}$ be the optimal value function for the environment with model $M^*$ and
 and let $V_{\pi}^{M_\theta}$ be the value function, given $\pi$ is the optimal policy for the learned model $M_{\theta}$. It is shown, that 
 $|V_{\pi}^{M^*} - V_{\pi}^{M_\theta}| \le c \cdot \frac{1}{(1 - \gamma^2)}$, where $c$ is dependent on the KL divergence between the model $M_{\theta}$ and $M^*$. 
 Intuitively, with higher $\gamma$, the value function $V_{\pi}^{M_\theta}$ can further deviate from the optimal value 
-function $V_{\pi}^{M^*}$.\\
+function $V_{\pi}^{M^*}$.
+
 Considering these findings, it is obvious that most successful applications of this framework are in cases where the model is known or 
 the action space is discrete, to make the task of learning the model easier.
 
@@ -608,7 +603,8 @@ the action space is discrete, to make the task of learning the model easier.
 \label{sec:prop_val_eq}
 So far we have stated, that the proper transition function $T(s,a,s')$ must be known or learned for model-based learning. However this is not strictly the case. Recall, we are 
 interested in optimizing the expected reward $J$. When we plan n steps ahead to choose the best sequence of actions, we are not interested in the exact state $s_t$ 
-of our environment at each time step, but only in the rewards $r_t$. \\
+of our environment at each time step, but only in the rewards $r_t$.
+
 This insight has been formalized by Christopher Grimm et. al \cite{grimm2021proper} by defining a proper value equivalence model class of an MDP. For that 
 let $\mathcal{T}^m_{\pi}(V)$ be the Bellman update for policy $\pi$ given the actual transition function $m$ of the \ac{mdp} and let 
 $\mathcal{T}^{m'}_{\pi}(V)$ be another Bellman update given a model $m'$. A model $m'$ is $k^{th}$ order value equivalent to $m$, 
@@ -619,7 +615,8 @@ if $k$ applications of the Bellman operator result in the same updated value fun
 \end{equation}
 It can be shown, that for $\lim_{k \rightarrow \infty}$ the value function $V_{\pi}^{m'} = V_{\pi}^m$ for every policy $\pi$. Recall, the value function is 
 defined as $V_{\pi}(s) = \mathbb{E}_{\tau \propto \pi}\left[\sum_{t=0}^{\infty} \gamma^t r_t \mid s_0 = s\right]$. A model $m'$ that is proper value 
-equivalent to $m$, but does not predict the observations or states is sometimes referred to as a "weakly grounded model".\\ 
+equivalent to $m$, but does not predict the observations or states is sometimes referred to as a "weakly grounded model".
+
 From this work we conclude that solving the 
 \ac{rl} problem on $m'$ is guaranteed to find a policy $\pi$ that is optimal for the actual \ac{mdp} with model $m$. 
 
@@ -627,7 +624,7 @@ From this work we conclude that solving the
 Imitation learning (\ac{il}) is a type of supervised learning in which an agent learns a policy by observing expert demonstrations, 
 rather than by trial and error \cite{IL}. In this approach, the data distribution seen during test time is dependent on the learned policy, 
 breaking the \ac{iid} assumption typically made in supervised learning. This means that the performance of the 
-learned policy can be severely impacted by distributional shifts between the training data and the test data. \\ \\
+learned policy can be severely impacted by distributional shifts between the training data and the test data.
 
 Formally \ac{il} can be defined as the task of learning a policy $\pi^*$ that maximizes the expected discounted sum over rewards during test time, given a dataset of expert demonstrations $D = {s_1, a_1, ..., s_T, a_T}$:
 
@@ -644,7 +641,7 @@ opposed to the general supervised learning paradigm is, that the data distributi
     \mathbb{E}_{\mathcal{D} \propto \pi_{\text{imitaion}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)] \neq \mathbb{E}_{\mathcal{D} \propto \pi_{\text{expert}}}[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)]
 \end{align}
 in general.
-\\ \\
+
 The goal of \ac{il} is to learn a policy that performs as well as the expert demonstrations in a new, unseen environment. 
 This approach has been applied successfully in a variety of domains, including robotics \cite{stepputtis2020languageconditioned}, video games \cite{MUZero}, 
 and natural language processing \cite{brown2020language}.
@@ -705,11 +702,10 @@ actions under the policy $\pi_{r'}^*$ are optimal:
 \begin{equation}
     r_{\text{inv}} = \underset{r}{\text{arg max}} \left( \mathbb{E}_{\tau \sim p(\tau | \pi_{r'}^*)} \left[ \sum_{t=0}^T \gamma^t r_t \right] \right).
 \end{equation}
-This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: \\
-Let $r_{\max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{\max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward.\\
+This equation is not convex and there is no unique solution for $r_{\text{inv}}$. It can be easily understood by the following example: 
+Let $r_{\max}(a,s)$ be the maximum reward and let $r_{\text{inv}} = r_{\max} \forall a,s$. It is obvious, that every policy maximizes the expected discounted reward. 
 There are different approaches to disambiguate the reward function and the resulting policy. One approach is \ac{gail}, 
 which is developed in the next section.
-
 
 \section{Partially Observable Markov Decision Processes}
 \label{POMDP}
@@ -811,7 +807,8 @@ for a specific value of $\theta_{i,j}$. So for $\sigma_{\theta_{i,j}} < \epsilon
     N_{i,j} > \left(\frac{1}{\epsilon}\right)^2
 \end{equation}
 and $N = \sum_{i, j} N_{i, j} = 2 (2^n-1) N_{i,j}$. While this example uses discrete distributions, continuous distributions also empirically follow a similar 
-power law.\\
+power law.
+
 An explanation for the power law in the continuous case can be provided by using the Bayesian Information Criterion (BIC), assuming the parameter number increases linearly with the dimension 
 of the problem, which is a natural assumption given that for each degree of freedom, you need at least one parameter. 
 The BIC links the evidence for a model to the number of parameters in that model, as discussed by Bishop \cite[chapter 4.4.1]{bishop}.
@@ -832,16 +829,19 @@ In summary, evidence for a model is approximately inverse proportional to the ex
 \section{Sequence Models}
 Sequence models are a natural choice to model \ac{pomdp}s. 
 A sequence model takes in a sequence of inputs and returns a sequence of outputs. The input and output sequence do not have to have the same length. For example, 
-a sequence model could take as input a sequence of n observations and return one action. \\ 
+a sequence model could take as input a sequence of n observations and return one action. 
+
 Naively, the input sequence of n tokens with dimension $d$ could be modelled  by stacking the n inputs together and use the stacked observation sequence as one 
 input to a model. The dimension of the input then scales linear with the sequence length. As motivated in Section \ref{COD}, this means exponentially more evidence is 
 required with sequence length n to achieve the same confidence. These approaches are referred to as "frame stacking" and can solve a \ac{pomdp}s as shown by Raffin 
 \cite{framestacking}, though 
-their performance decreases with the number of frames needed to accurately represent the \ac{pomdp}. \\
+their performance decreases with the number of frames needed to accurately represent the \ac{pomdp}. 
+
 Frame stacking handles the input sequence uniformly without regard for structure of the input data. We know however, that consecutive observations share a common 
 structure. For example, if the observations are sensor readings, the same dimensions of each observation refer to the same sensor. To make use of this structure, 
 sequence models reuse their parameters along the input sequence, which we expect to be an advantage following the BIC criterion. This has also been studied empirically 
-by Sundermeyer \etAl \cite{6639310}.\\
+by Sundermeyer \etAl \cite{6639310}.
+
 Currently there are two types of sequence models widely used:
 \begin{itemize}
     \item Recurrent Neural Networks
@@ -933,7 +933,7 @@ While GRUs still can have vanishing gradients, they cannot have exploding gradie
 
 While RNNs are a popular choice for sequence modelling, they have some limitations such as difficulties in capturing long-term dependencies and parallelization.
 Attention based sequence models, on the other hand, allow parallel processing of the input sequence and can selectively focus on relevant parts of the 
-input sequence. \\
+input sequence.
 
 \begin{figure}[htbp]
     \centering
@@ -955,12 +955,10 @@ input sequence. \\
 
 The idea of attention can be explained as follows: given a set of inputs, the model learns to assign a weight to each input based on its relevance to the 
 task at hand.
-This weighted sum of inputs is then used as a representation of the input sequence.\\
+This weighted sum of inputs is then used as a representation of the input sequence. One of the most successful architectures for attention based sequence models is the Transformer developed by Vaswani \etAl \cite{vaswani2017attention}. In the paper, the transformer 
+consists of an encoder and a decoder.
 
-One of the most successful architectures for attention based sequence models is the Transformer developed by Vaswani \etAl \cite{vaswani2017attention}. In the paper, the transformer 
-consists of an encoder and a decoder.\\
-
-The Transformer architecture consists of an encoder and a decoder, each containing multiple layers of self-attention and feedforward neural networks. \\
+The Transformer architecture consists of an encoder and a decoder, each containing multiple layers of self-attention and feedforward neural networks. 
 In the self-attention layer, each input token is transformed into a query $Q$, key $K$, and value $V$ vector. 
 The vectors $Q$, $K$ and $V$ are computed using a position wise feed forward network with ReLU activation:
 \begin{equation}
@@ -975,13 +973,15 @@ The attention weights are computed as follows:
 \end{equation}
 where $d_k$ is the dimensionality of the key vectors.
 The softmax function normalizes the dot product of $Q$ and $K$, which represents the similarity between the query and key vectors.
-The attention weights represent the importance of each value vector in the weighted sum. They can then be input to an MLP to compute the result.\\
+The attention weights represent the importance of each value vector in the weighted sum. They can then be input to an MLP to compute the result.
  
 Note with this setup, the model has no way to encode the relative position of the tokens, which is why a positional encoding is added along the sequence dimension, 
-using sine and cosine functions, to break the symmetry.\\ 
+using sine and cosine functions, to break the symmetry.
+
 In this thesis, we will use transformer encoder to model our neural networks. They only consists of self attention and the output MLP, as depicted in Figure \ref{fig:transformer}. 
 We will not describe the whole transformer architecture, 
-as in this thesis we only make use of the encoder architecture.\\
+as in this thesis we only make use of the encoder architecture.
+
 One advantage of the Transformer architecture is that it does not suffer from the problem of vanishing or exploding gradients.
 This is because the self-attention mechanism allows the model to directly access any input token, without the need for recurrent connections. Self attention type 
 architectures have been shown to outperform recurrent networks on a number of sequence based tasks. For example they are used in the GPT-3 architecture, which has 
