@@ -65,11 +65,6 @@ Although \ac{coavc} outperformed baselines, its performance in the Pick and Plac
 indicating limitations in more challenging environments. While a longer reinforcement phase might improve performance, testing this is left for 
 future work. \ac{avc} currently does not use a stochastic actor, which we expect to be key for improved exploration.
 
-Additionally, exploration from no expert demonstrations was not extensively studied, except for the Drawer Close 
-environment. We expected pure \ac{rl} is not feasible for more challenging environments given sparse rewards. 
-However, we found \ac{tqc} was able to solve the Window Open environment without expert demonstrations, but further investigation on whether 
-\ac{coavc} performs well in this environment was not possible due to time constraints.
-
 \subsection{Indeterminacy}
 In \ac{coavc}, the critic estimates the expected reward given an action sequence and chooses the best sequence greedily. 
 However, choosing the action sequence with the highest expected reward is not equivalent to choosing the action with the highest posterior 
