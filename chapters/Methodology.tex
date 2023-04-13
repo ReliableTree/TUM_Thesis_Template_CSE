@@ -261,7 +261,7 @@ the action. For probabilistic policies, we can use the update rule as stated in 
 The idea is, we don't push the actor towards a predicted goal, 
 but only towards measured goals. This formulation allows us to use a good lower bound on the expected policy improvement.\\
 
-\subsubsection{Policy Improvement}
+\subsection{Policy Improvement}
 \label{sec:impro_bounds_avc}
 In the following, we will provide a lower bound for the policy improvement, which uses results from \ac{trpo} (Section \ref{sec:TRPO}). 
 Assume we have a dataset $\mathcal{D}_{\text{E}}$ sampled from the expert policy $\pi_{\text{E}}$ with optimal value 
@@ -285,7 +285,6 @@ On the seen dataset, $L_{\pi_{\text{E}}}({\pi}) = L_{\pi_{\text{E}}}({\tilde{\pi
 \begin{equation}
     J(\tilde{\pi}) \geq J({\pi}).
 \end{equation}
-A more rigorous proof, specifically considering the assumption $L_{\pi_{\text{E}}}({\pi}) = L_{\pi_{\text{E}}}({\tilde{\pi}})$ is left for future work.\\
 
 This leaves us with the question of how to append the dataset $\mathcal{D}_{\text{E}}$ to improve our policy beyond what it can learn from the 
 initial set of expert trajectories.\\

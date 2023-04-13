@@ -318,4 +318,10 @@ To tune the actions, the gradient of the reward with respect to the policy is ta
 Formally, the gradient can be written as $\Delta \pi_t = \frac{\partial V (s_t, \pi_{t:T})}{\pi_{t}}$. Given a differentiable model of the environment, their algorithm can 
 find solutions to tasks with no prior training. The authors demonstrate their approach on several robot 
 benchmarks, where it can match or surpass the performance of pretrained SAC, given 5 seconds computation time per action.\\
-While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the \ac{mcts}.
+
+While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the \ac{mcts}.\\
+
+Another approach from Hafner \etAl \cite{hafner2018planet} learns the model of the environment from interactions. For planning, it relies on a 
+population based method where multiple action sequences are un-rolled step-by-step and resampled according to the predicted rewards. This approach 
+does not make use of an actor but computes the behavior from the learned model, which requires substantial compute for each action. For long horizon 
+action sequences, this becomes unpractical in real-world applications.

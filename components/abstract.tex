@@ -14,20 +14,18 @@
 \chapter*{Abstract}
 \label{chapter:Abstract}
 
-\ac{rl} has shown remarkable progress in recent years, but still faces challenges in solving tasks with high-dimensional 
-continuous state and action spaces, and sparse rewards. This thesis proposes a new \ac{rl} paradigm called \ac{avc}, which uses search at 
-inference time and leverages expert demonstrations to overcome these challenges. \ac{avc} is a general-purpose algorithm applicable to both deterministic 
-\ac{mdp}s and deterministic \ac{pomdp}s, and is the first algorithm to use inference-time search on continuous 
-action spaces without a given model of the environment.\\
+\ac{rl} has made significant progress in recent years, but it still faces challenges in achieving sample efficiency for tasks that involve high-dimensional continuous state and action spaces. 
+This thesis proposes a new \ac{rl} paradigm called \ac{avc} that leverages planning with a learned model of the environment and expert demonstrations to improve performance on such challenging tasks. 
+\ac{avc} is a general-purpose algorithm applicable to both deterministic \ac{mdp}s and deterministic \ac{pomdp}s. To the author's knowledge, it is the first algorithm to incorporate expert knowledge 
+into inference-time planning on continuous action spaces without a given model of the environment.
 
-In this thesis, we investigate the effectiveness of \ac{avc} in solving tasks with sparse rewards and limited observations. We test \ac{avc} on 
-a setup where a single observation per trajectory is provided along with expert demonstrations, as well as on an \ac{mdp} setting with observations 
-after each step. We compare \ac{avc}'s performance to state-of-the-art \ac{rl} algorithms and a state-of-the-art imitation 
-learning algorithm. \\
+The efficiency of our planning algorithm enables fast inference, which is necessary for real-world applications where steps must be computed in real-time. In this thesis, we investigate 
+\ac{avc} on a setup with a single observation per trajectory, which challenges the learned model of the \ac{mdp}. This setup is particularly interesting in real-world scenarios where the 
+robot is not given enough time to compute the input signal after each step of the trajectory. We also conduct experiments on an \ac{mdp} with observations after each step, where we incorporate 
+inference time constraints. We provide a thorough theoretical analysis of the paradigm and establish a lower improvement bound that includes expert demonstrations.
 
-Our experimental results show that \ac{avc} outperforms the selected baselines in both the single observation \ac{pomdp}s and \ac{mdp}s, achieving superior 
-performance while maintaining high sample efficiency. We also propose several avenues for future research, such as incorporating stochastic 
-observations, modelling uncertainty estimates, and incorporating curiosity-driven exploration.\\
+We compare \ac{avc}'s performance to state-of-the-art \ac{rl} algorithms and a state-of-the-art imitation learning algorithm. Our experimental results show that \ac{avc} outperforms the selected 
+baselines in both the \ac{sopomdp}s and \ac{mdp}s, achieving superior performance with improved sample efficiency. We also investigate \ac{avc} in tasks without expert demonstrations and 
+find superior stability and sample efficiency, showcasing the generality of the approach.
 
-Overall, the results demonstrate the efficacy of the \ac{avc} paradigm in leveraging expert knowledge and search to achieve swift learning and 
-increased stability in challenging \ac{rl} tasks.
+Overall, the results demonstrate the efficacy of the \ac{avc} paradigm in incorporating expert knowledge and planning to achieve efficient learning and improved stability in challenging \ac{rl} tasks.
