@@ -10,7 +10,7 @@ natural language conditioned robot manipulation task benchmark as described in a
 
 Then we will use environments from the Meta-World benchmark as described in appendix \ref{chapter:MetaWorld} for both \ac{sopomdp}s and \ac{mdp}s.
 
-We first investigate the effect of different search paradigms in inference time for the \ac{avc} algorithm, as described in section Inference Time Search \ref{sec:inf_time_search}.
+We first investigate the effect of different search paradigms in inference time for the \ac{avc} algorithm, as described in Section \ref{sec:inf_time_search}.
 
 To compare our results, we use \ac{ppo} and \ac{tqc} for the \ac{rl} algorithms, as they are state-of-the-art with respect to stability and 
 exploration respectively. For the base implementations, we use "Stable Baselines3" \cite{stable-baselines3}, which is a common choice, as it provides well-implemented algorithms with tested
@@ -226,26 +226,27 @@ Following the insights presented in this section, we will use the actor planner 
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/4_400/Window Open.png}
-    \caption{Window Open environment, 4 expert demonstrations.}
+    \caption{Four expert demonstrations.}
   \end{subfigure}
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/4_400/Reach.png}
-    \caption{Reach environment, 4 expert demonstrations.}
+    \caption{Four expert demonstrations.}
   \end{subfigure}
   \medskip
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/15_400/Push.png}
-    \caption{Push environment, 15 expert demonstrations.}
+    \caption{15 expert demonstrations.}
   \end{subfigure}
   \begin{subfigure}[t]{0.45\textwidth}
     \includegraphics[width=\textwidth]{images/15_400/Pick and Place.png}
-    \caption{Pick and Place environment, 15 expert demonstrations.}
+    \caption{15 expert demonstrations.}
   \end{subfigure}
   \caption{
     All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
     The horizontal axis shows the number of sampled environment episodes, each with 100 steps. 
     One initial observation and, for \ac{rl}, a sparse reward signal at the end of each episode was provided. 
-    The shaded area indicates the standard deviations from four runs per experiment.}
+    The shaded area indicates the standard deviations from four runs per experiment. \ac{ppo} and \ac{tqc} use \ac{gail} to 
+    provide dense rewards.}
     \label{fig:finetuning}
 \end{figure}
 
@@ -316,12 +317,12 @@ are shown in Figure \ref{fig:guided_ref}.
     \medskip
     \begin{subfigure}[t]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000_imi/Reach.png}
-      \caption{Reach environment. Comparison between pure \ac{il} and \ac{rl}.}
+      \caption{Comparison between pure \ac{il} and \ac{rl}.}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.45\textwidth}
       \includegraphics[width=\textwidth]{images/1_2000_imi/Window Open.png}
-      \caption{Window Open environment. Comparison between pure \ac{il} and \ac{rl}.}
+      \caption{Comparison between pure \ac{il} and \ac{rl}.}
     \end{subfigure}
     \caption{
     All baselines were pretrained using behavioral cloning with the given number of expert demonstrations, where demonstrations were provided. 
@@ -383,28 +384,36 @@ and compare \ac{coavc} to \ac{ppo} and \ac{tqc} on the Reach, Window Open and Dr
 providing an observation per time step,
 we use the same setup as described in previous sections. The results are shown in Figure \ref{fig:dense_ref} for three runs per experiment.
 
+
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[t]{0.45\textwidth}
-    \includegraphics[width=\textwidth]{images/dense_1/Reach.png}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_1_big_font/Reach.png}
     \caption{One expert demonstration.}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.45\textwidth}
-    \includegraphics[width=\textwidth]{images/dense_0/Drawer Close.png}
-    \caption{No expert demonstrations.}
-  \end{subfigure}
-  \medskip
-  \begin{subfigure}[t]{0.45\textwidth}
+  \begin{subfigure}[t]{0.32\textwidth}
     \includegraphics[width=\textwidth]{images/dense_1/Window Open.png}
     \caption{One expert demonstration.}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.45\textwidth}
+  \begin{subfigure}[t]{0.32\textwidth}
     \includegraphics[width=\textwidth]{images/TQC_bc_GAIL_vs_ref/Window Open.png}
     \caption{Comparison between \ac{tqc} with no expert demonstrations and expert guided baselines.}
     \label{fig:TQC_0_vs_exp}
   \end{subfigure}
+
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Reach.png}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Window Open.png}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Drawer Close.png}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
+
   \caption{All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
     The x-axis shows the number of sampled environment episodes, each with 100 steps. 
     Continued observations and a sparse reward signal at the end of each episode was provided. 
@@ -439,8 +448,8 @@ the authors mentioned in the paper \cite{ho2016generative}, that \ac{gail} is no
 environment interactions are needed, before the discriminator of \ac{gail} provides useful rewards for the learner. We suppose that is a reason, why \ac{gail} does not perform 
 well in our setting, where a relatively small amount of environment interactions are used.
 
-We also included results for the Drawer Close environment with no expert demonstrations. All algorithms perform better than in the single observation environment, 
-but \ac{coavc} is the only algorithm with stable performance. It found a solution with near perfect success rate in all three runs quickly.
+We also included results for the Reach, Window Open and Drawer Close environment with no expert demonstrations. All algorithms perform better than in the single observation environment, 
+but \ac{coavc} converges significantly quicker then all baselines, further showcasing the improved sample efficiency and more stable update behavior over actor critic methods.
 
 Overall, \ac{coavc} performs well in all shown environments. Especially in the Reach environment it is the only algorithm that finds a feasible solution while it 
 converges much quicker and has a more robust behavior in general. 

@@ -197,9 +197,11 @@ simulator capable of simulating object interactions such as puck grasping or win
       \includegraphics[width=\textwidth]{images/15_400/Pick and Place.png}
       \caption{Pick and Place environment.}
     \end{subfigure}
-    \caption{All learners were pretrained using behavioral cloning with the given 15 expert demonstrations. 
-    The x-axis shows the number of sampled environment episodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided. 
-    The shaded area indicates the standard deviations from four runs per experiment.}
+    \caption{All baselines were pretrained using behavioral cloning with 15 expert demonstrations. 
+    The horizontal axis shows the number of sampled environment episodes, each with 100 steps. 
+    One initial observation and, for \ac{rl}, a sparse reward signal at the end of each episode was provided. 
+    The shaded area indicates the standard deviations from four runs per experiment. \ac{ppo} and \ac{tqc} use \ac{gail} to 
+    provide dense rewards.}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -223,9 +225,11 @@ simulator capable of simulating object interactions such as puck grasping or win
     \includegraphics[width=\textwidth]{images/4_400/Pick and Place.png}
     \caption{Pick and Place environment.}
   \end{subfigure}
-  \caption{All learners were pretrained using behavioral cloning with the given 4 expert demonstrations. 
-  The x-axis shows the number of sampled environment episodes, each with 100 steps.  One initial observation and a sparse reward signal at the end of each episode was provided. 
-  The shaded area indicates the standard deviations from four runs per experiment.}
+  \caption{All baselines were pretrained using behavioral cloning with four expert demonstrations. 
+  The horizontal axis shows the number of sampled environment episodes, each with 100 steps. 
+  One initial observation and, for \ac{rl}, a sparse reward signal at the end of each episode was provided. 
+  The shaded area indicates the standard deviations from four runs per experiment. \ac{ppo} and \ac{tqc} use \ac{gail} to 
+  provide dense rewards.}
 \end{figure}
 
 \chapter{Generative Adversarial Imitation Learning}

@@ -295,10 +295,9 @@ On the seen dataset, $L_{\pi_{\text{E}}}({\pi}) = L_{\pi_{\text{E}}}({\tilde{\pi
 This leaves us with the question of how to append the dataset $\mathcal{D}_{\text{E}}$ to improve our policy beyond what it can learn from the 
 initial set of expert trajectories.
 
-To do this, we propose to use 
-a search based method using the critic in inference time.
+To do this, we propose to use a planning and search based method using the critic in inference time.
 
-Let $a = \pi(s)$ be the action sequence proposed by the actor and $C_{\theta, s, a_{1:T}}(t)$ be the predicted rewards by the critic. 
+Let $a = \pi(s)$ be the planned action sequence proposed by the actor and $C_{\theta, s, a_{1:T}}(t)$ be the predicted rewards by the critic. 
 We can now find the gradient of the predicted cumulative reward $J(a) = \sum_{t=1}^{T} C_{\theta, s, a_{1:T}}(t)$ with respect to the actions to define new actions: 
 $$a_{i+1} = a_i + \alpha_{\mathrm{inf}} \nabla_{a} J(a_i),$$ 
 with inference time learning rate $\alpha_{\mathrm{inf}}$, as the predicted rewards are a differentiable function of the actions given the critic. This step is repeated k times, to find new actions. 
