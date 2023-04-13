@@ -4,14 +4,13 @@
 \label{chapter:RelWork}
 Our work focuses on using search in inference time. Importantly, we consider \ac{mdp}s and \ac{pomdp}s where only a single observation is given. 
 We assume some expert demonstrations and access to a sparse
-reward of whether the task was successfully solved. \\
+reward of whether the task was successfully solved. 
 
 While sparse rewards and expert demonstrations are a key feature of our algorithm, it is generally applicable to deterministic \ac{mdp}s and deterministic \ac{pomdp}s. That is why we compare our 
 findings to two state-of-the-art general purpose \ac{rl} algorithms, which we will develop in this section in detail, as we find it key to analyze experimental results. 
-Another key aspect is \ac{il}, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. \\
+Another key aspect is \ac{il}, which is why we include a state-of-the-art imitation learning algorithm in our baselines, which we will introduce in this section. 
 
-Furthermore, we will discuss current approaches that addresses parts of our setup. \\
-We will first focus on \ac{il}, then cover guided \ac{rl} with sparse rewards, and then
+Furthermore, we will discuss current approaches that addresses parts of our setup. First we will focus on \ac{il}, then cover guided \ac{rl} with sparse rewards, and then
 discuss how inference time search is used in current algorithms. Some of the presented approaches cover multiple requirements, so they cannot unambiguously be sorted into the provided categories.
 
 \section{General Purpose Reinforcement Learning Algorithms}
@@ -47,7 +46,7 @@ Most common implementations of \ac{ppo} use a stochastic policy, like in SAC, wi
 
 In \ac{trpo}, ensuring the KL constraint requires a second order approximation to it. \ac{ppo} is an on-policy algorithm that uses only first order approximations, while 
 also making sure that the policy update does not change the policy too much. Instead of the hard KL constraint, it clips the gradient of the policy update within 
-an $\epsilon$ region around the old policy.\\
+an $\epsilon$ region around the old policy.
 
 Let
 \begin{equation}
@@ -56,12 +55,13 @@ Let
 
 \begin{equation}
         L^{\mathrm{CLIP}}(\theta) = {E}_t \left[ \min \left(r_t(\theta) {A}_t, \text{clip} \left(r_t(\theta), 1-\epsilon, 1+\epsilon \right) {A}_t \right) \right].
-\end{equation} \\
+\end{equation}
 
 The algorithm aims to minimize $L^{\mathrm{CLIP}}(\theta)$ by doing gradient update steps:
 \begin{equation}
+
     \theta_{i+1} = \theta_{i} + \alpha \nabla_{\theta} L^{\mathrm{CLIP}}(\theta_i).
-\end{equation}\\
+\end{equation}
 
 The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
 \begin{algorithm}[h]
@@ -76,7 +76,7 @@ The pseudocode of the algorithm is shown in algorithm \ref{ppo_algo}.
     \label{ppo_algo}
 
 \end{algorithm}
-Overall, \ac{ppo} is a robust and effective algorithm for deep \ac{rl}, and has been successfully applied to a wide range of environments and tasks.\\
+Overall, \ac{ppo} is a robust and effective algorithm for deep \ac{rl}, and has been successfully applied to a wide range of environments and tasks.
 
 A GRU can be used in the recurrent implementation of \ac{ppo} called Recurrent Proximal Policy optimization (RPPO) as analyzed by Pleines \etAl 
 \cite{RPPO}. Here the policy $\pi$ is defined on the history of observations and actions using a recurrent hidden state $h_t : o_{1:t} \times a_{1:t}$ with $\pi : o_{1:t} \times a_{1:t} \rightarrow \mathcal{R}$.
@@ -92,7 +92,7 @@ We will use RPPO as part of our baselines.
 
 \subsection{Truncated Mixture of Continuous Distributional Quantile Critics}
 \label{section:TQC}
-Arsenii Kuznetsov \etAl proposed "Truncated Mixture of Continuous Distributional Quantile Critics" \ac{tqc} \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.\\
+Arsenii Kuznetsov \etAl proposed "Truncated Mixture of Continuous Distributional Quantile Critics" \ac{tqc} \cite{TQC_Paper} to compensate for the over estimation bias of critics in actor critic methods.
 Empirically, the learned $Q$ function tends to overestimate the actual $Q$ value. We already saw one way to counter this bias by using the minimum value of 
 two critics in the SAC algorithm \ref{SAC}. From a formal derivation of the overestimation bias by 
 Thrun and Schwartz \cite{thrun1993issues} it is found that:
@@ -101,16 +101,19 @@ Thrun and Schwartz \cite{thrun1993issues} it is found that:
     \max_a Q(s,a) = \max_a \mathbb{E}_{U}\left[Q(s,a) + U(a)\right] \leq \mathbb{E}_{U}\left[\max_a \left( Q(s,a)  U(a)\right)\right],
 \end{equation}
 
-where $U(a)$ is action dependent random noise with zero mean. \\
+where $U(a)$ is action dependent random noise with zero mean. 
+
 The main idea of \ac{tqc} is to learn the probability distribution of the $Q$ value, rather than approximating the expectation of the $Q$ value. 
-It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.\\
+It is then possible to drop the "right tail", meaning the highest quantile estimates for the $Q$ value, to lower the estimate.
+
 Formally the goal is to approximate the random variable $Z^\pi(s,a):=\sum_{t=0}^\infty\gamma^tR(s_t, a_t)$, rather then 
-$Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.\\
+$Q^\pi  := \mathbb{E}[Z^\pi(s,a)] = \mathbb{E}[\sum_{t=0}^\infty\gamma^tR(s_t, a_t)]$. This is done using quantiles.
+
 The $k$th $M$-quantile of a distribution with random variable $X$ is defined as the the value $x$ for which the cumulative distribution function crosses $k/M$:
 \begin{equation}
     Pr[X \leq x] \leq k/M
 \end{equation}
-with $M$ total quantiles. \\
+with $M$ total quantiles. 
 Quantile regression is used to learn the values of the $M$ quantiles:
 \begin{align}
     \label{rho}
@@ -118,7 +121,8 @@ Quantile regression is used to learn the values of the $M$ quantiles:
     \quad \text{where} \quad \rho_{\tau_m}(u) = u({\tau_m} - I(u < 0)), \quad \forall u \in \mathbb{R}.
 \end{align}
     
-with ${\tau_m = \frac{2m-1}{2M}}, m \in [1, ...., M]$.\\
+with ${\tau_m = \frac{2m-1}{2M}}, m \in [1, ...., M]$.
+
 Let $\theta^m(s,a)$ be the approximation of the $m$-th quantile of $Q(s,a)$. The probability distribution $Z(s,a)$ can be approximated using $\theta^m$:
 \begin{equation}
     Z_{\theta}(s,a) (v) = \frac{1}{M} \sum_{m=1}^M 1_{\theta^m(s,a) \geq v} | v\in\mathcal{R}.
@@ -131,12 +135,14 @@ with the target distribution
 \begin{equation}
     Y(s,a)(v) = \frac{1}{N} \sum_{i=1}^N 1_{y_i(s,a) > v} | v \in \mathcal{R}
 \end{equation}
-$N<M$, where only the lowest $N$ quantiles were used. \\
+$N<M$, where only the lowest $N$ quantiles were used. 
+
 Finally this expression leads us to the loss function for the quantiles $\theta_m^{\psi}$ of Y:
 \begin{equation}
     L_k(s,a;\psi) = \frac{1}{kN}\sum_{m=1}^{M}\sum_{i=1}^{kN}\rho^H_{\tau_m} \left(y_i(s,a) - \theta_m^{\psi}(s,a)\right),
 \end{equation}
-where $\psi$ denotes the parametrization of $\theta$.\\
+where $\psi$ denotes the parametrization of $\theta$.
+
 From this we can find the entropy regularized policy loss function $J$:
 \begin{equation}
     J_\pi(\phi) = \mathbb{E}_{D \propto \pi}\left[\alpha\log\pi{\phi}(a|s) - \frac{1}{M}\sum_{m=1}^{M}\theta_m^{\psi}(s,a)\right].
@@ -171,7 +177,7 @@ for off-policy learning with a focus on exploration, in contrast to PPO, which w
 \subsection{Generative Adversarial Imitation Learning}
 \ac{gail} \cite{ho2016generative} is a key paradigm for efficient \ac{il} that uses expert demonstrations in \ac{mdp}s. 
 The main idea of \ac{gail} is to disambiguate the reward signal from IRL by ensuring that every policy except the expert policy has a lower expected reward under the inverse reward function, given the expert 
-demonstrations. Following, we will use a cost function $c \propto -r$, as it gives a natural optimum at $c=0$.\\
+demonstrations. Following, we will use a cost function $c \propto -r$, as it gives a natural optimum at $c=0$.
 
 The entropy regularized IRL objective is written as:
 
@@ -190,18 +196,19 @@ Formally the \ac{gail} objective is defined as:
     J(\rho_{\pi_{\theta}}, D_{\omega}) =  - \lambda \bar{\text{H}}(\rho_{\pi_{\theta}} ) + \mathbb{E}_{\pi_{\theta}}\left[ \text{log}(D_{\omega}(s,a))\right] + \mathbb{E}_{\pi_{\text{E}}}\left[ \text{log}(1 - D_{\omega}(s,a))\right],
 \end{equation}
 where $\theta$ and $\omega$ are the parameters of the generator and discriminator, respectively, 
-$\lambda$ controls the trade-off between the similarity to the expert trajectories and the entropy of the policy and $D_{\text{KL}}(\cdot || \cdot)$ denotes the Kullback-Leibler divergence. \\
-Intuitively discriminator tries to distinguish between the expert and generated trajectories, while the generator tries to produce trajectories that are indistinguishable from those of the expert.\\
+$\lambda$ controls the trade-off between the similarity to the expert trajectories and the entropy of the policy and $D_{\text{KL}}(\cdot || \cdot)$ denotes the Kullback-Leibler divergence. 
+Intuitively discriminator tries to distinguish between the expert and generated trajectories, while the generator tries to produce trajectories that are indistinguishable from those of the expert.
 
 Overall, \ac{gail} is a state-of-the-art \ac{il} algorithm which is able to learn complex behavior with limited expert demonstrations. It shows outstanding 
-asymptotical performance with respect to the amount of expert demonstrations, which is why we will use it as a baseline in our experiments.\\ 
+asymptotical performance with respect to the amount of expert demonstrations, which is why we will use it as a baseline in our experiments. 
 A downside is that it requires a high number of environment interactions to train the discriminator and actor, as stated by the authors. A more detailed derivation of the algorithm and theoretical 
 bounds can be found in appendix \ref{app:GAIL}.
 
 
 \subsection{Generative Adversarial Imitation Learning in POMDPs}
 \label{GAIL_POMDPS}
-In this section, we will describe an \ac{il} approach based on GAIL, that handles \ac{pomdp}s.\\
+In this section, we will describe an \ac{il} approach based on GAIL, that handles \ac{pomdp}s.
+
 The \ac{gail} algorithm assumes access to the actual state $s_t$ of the MDP. Gangwani \etAl \cite{gangwani2019learning} 
 extend the \ac{gail} paradigm to work on \ac{pomdp}s. To do so, they introduce a network $B_{\phi}(o_{\leq t}, a_{\leq t}) = b_{t, \phi}$ that aims to approximate a 
 representation of the belief state $b_t$. Using $b_{\phi}$ instead of $s$ the new objective is:
@@ -217,7 +224,7 @@ The authors include three regularization losses to improve the expressiveness of
 \begin{equation}
     \mathcal{L}^\mathrm{f}(\phi) = \mathbb{E}|| o_{t+k} - g(b_t^\phi, a_{t:t+k-1})||_2^2,
 \end{equation}
-where g is a learned stochastic unimodal gaussian with learned mean and fixed variance.\\
+where g is a learned stochastic unimodal gaussian with learned mean and fixed variance.
 
 Intuitively, this term seeks to impose, that the belief state $b_t$ is indeed a sufficient statistic for the 
 \ac{pomdp} by forcing the model $b_{\phi}$ to learn a representation that can predict future observations given future actions. The superscript $\mathrm{f}$ of the regularization loss means forward. 
@@ -226,7 +233,8 @@ taken, given the initial belief state and the subsequent observations. With all 
 \begin{equation}
     L(\phi) = L^\text{IM} + \lambda_1 L^\text{f} + \lambda_2 L^\text{i} + \lambda_3 L^\text{a},
 \end{equation}
-where $\lambda_i$ are the weights for the respective regularizers. \\
+where $\lambda_i$ are the weights for the respective regularizers. 
+
 The approach is superior to \ac{gail} with frame stacking and can also improve upon \ac{gail} with recurrent networks for the discriminator and the actor, though the margins are small in some cases. The advantage 
 of their approach is, that the believe state representation will be expressive following their regularizers. However, they use an $L_2$ distance error between the predictions and the observations. In most environments, 
 the observations are high dimensional and include redundant or unnecessary information that will be hard to learn. This forces the network to allocate capacity that is not directly used to 
@@ -238,16 +246,16 @@ into account natural language instructions.
 In this setup, there is only one observation per trajectory, namely the task description and the first image of the environment.
 The proposed method involves using a neural network to map natural language instructions to 
 corresponding robot actions, using a GRU to unroll the trajectory. The authors also introduce a novel dataset of language-conditioned robot manipulation tasks, which we will use to evaluate 
-and compare the performance of our method in pure \ac{il} settings.\\ 
-The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
-tasks when language instructions are given. A more detailed overview of the method, dataset and benchmark can be found in appendix \ref{LCILRM}.\\
+and compare the performance of our method in pure \ac{il} settings.
 
+The experimental results demonstrate the effectiveness of their approach in inferring and executing trajectories for robot manipulation 
+tasks when language instructions are given. A more detailed overview of the method, dataset and benchmark can be found in appendix \ref{LCILRM}.
 
 \section{Sparse Reward}
 \label{sec:HER}
 Learning with sparse rewards is challenging in a high-dimensional action and observation space, as nearly all trajectories will have a reward of 0.
 Until, by chance, a successful trajectory is found, the agent has to blindly guess. To overcome this problem, Marcin Andrychowicz \etAl \cite{andrychowicz2018hindsight} 
-propose \ac{her}.\\
+propose \ac{her}.
 
 Their algorithm works by generating new goals for a given trajectory based on the states that were actually reached.
 Specifically, consider the problem of finding a policy $\pi(a|o, g)$ given observation $o$ and goal $g$.
@@ -257,18 +265,18 @@ To use the information of which state was actually reached by the trajectory, a 
 The agent can then learn from these hindsight goals, which can provide more frequent rewards and enable faster learning. An additional advantage of \ac{her} is that it is agnostic with respect to the learning algorithm, as it only provides additional trajectories for the replay buffer.
 
 Overall, \ac{her} is a powerful algorithm that addresses the problem of sparse rewards in \ac{rl} by leveraging hindsight. It has been successfully applied to a wide range of tasks, 
-including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard \ac{rl} algorithms.\\
+including robotic manipulation, locomotion, and game playing, and has shown superior performance compared to standard \ac{rl} algorithms.
 
 A downside of \ac{her} is that it requires the inverse function $g(s)$, meaning the goal must be reconstructible from a visited state. This is not always given.
-Consider the goal of not driving into a vehicle or a goal expressed in natural language. \\
+Consider the goal of not driving into a vehicle or a goal expressed in natural language. 
 
 Another idea is to use curiosity for better exploration in sparse reward settings. One common 
 approach similar to Pathak \etAl \cite{pathak2017curiositydriven} to curiosity-driven exploration is to use an intrinsic reward function, which is designed to 
 measure how surprising or informative a particular 
-state or action is to the agent. \\
+state or action is to the agent. 
 
 By incorporating this intrinsic reward signal into the overall \ac{rl} objective, the agent is encouraged to explore areas of the environment that are 
-unexpected or uncertain, which can lead to discovering new strategies or behaviors that improve its performance.\\
+unexpected or uncertain, which can lead to discovering new strategies or behaviors that improve its performance.
 
 \subsection{Guided Reinforcement Learning with Sparse Rewards}
 \label{sec:rel_work_finetuning}
@@ -284,14 +292,17 @@ with
     p_i = \delta_{i}^2 + \lambda \lvert \nabla_a Q(s_i, a_i \vert \theta_Q) \rvert^2 + \epsilon + \epsilon_{\mathrm{D}}.
 \end{equation}
 Here $\delta_{i}$ is the temporal difference error, $\lambda$ is used to weigh the importance of the sample i with respect to the loss of the actor, 
-$\epsilon$ is a small constant to ensure every transition is chosen with probability $p_i > 0$, and $\epsilon_\mathrm{D}$ is a positive constant applied for expert transitions.\\
+$\epsilon$ is a small constant to ensure every transition is chosen with probability $p_i > 0$, and $\epsilon_\mathrm{D}$ is a positive constant applied for expert transitions.
+
 The idea behind this importance sampling algorithm is to amend the priority experience replay probability as developed by Schaul \etAl \cite{schaul2016prioritized} 
 with a constant $\epsilon_{\mathrm{D}}$ for expert demonstrations to make the policy converge faster to the expert behavior. In priority experience replay, more rare 
 experiences are chosen more likely to use the data in the replay buffer more efficiently. Moreover, they use a combination between $n=1$ temporal difference and 
-$n=N > 1$ temporal difference to get better estimations for rewards that are in the distant future, as they assume sparse rewards.\\
+$n=N > 1$ temporal difference to get better estimations for rewards that are in the distant future, as they assume sparse rewards.
+
 The effectiveness of the approach is demonstrated by comparing the performance of their importance sampling algorithm with sparse rewards to a standard DDPG 
 implementation using no expert demonstration but dense reward. The authors find that their approach can learn faster then standard DDPG with 100 expert 
-demonstrations on a challenging robotic insertion task.\\ 
+demonstrations on a challenging robotic insertion task.
+
 A problem with this approach is, that the critic assumes the temporal difference error approximates the distribution induced by the policy $\pi_{\theta}$, but by 
 mixing in expert demonstrations, the expected $Q$ value will be higher, then that of the policy $\pi_{\theta}$. This overestimation can lead to poor performance. 
 To counter this, the authors include a term to "weigh the update to the network" $w_i = \frac{1}{N} \cdot \frac{1}{P(i)}$. This term however is inversely proportional to the 
@@ -304,22 +315,23 @@ Schrittwieser \etAl \cite{MUZero} describe a search based algorithm for discrete
 in a wide range of games without any prior knowledge of the game rules, unlike its predecessor AlphaGo and AlphaZero, which relied on a hand-crafted 
 domain-specific algorithm. MuZero learns to play games by combining deep neural networks with \ac{mcts} to plan and evaluate its actions. 
 It does not have access to the game states, but only to observations covering a limited amount of information in a \ac{pomdp} setting.
-To plan ahead, it predicts the expected rewards $r_{t:T}$ for a proposed action sequence $a_{t:T}$ given a history of observations $o_{1:t}$.\\
+To plan ahead, it predicts the expected rewards $r_{t:T}$ for a proposed action sequence $a_{t:T}$ given a history of observations $o_{1:t}$.
+
 For the search, the planner needs access to a model predicting the reward after n steps. To learn this model, the authors use an end-to-end trained recurrent neural network, which 
-compares it's prediction to the actual rewards from the environment. The prediction and search proves to be crucial for the performance of MuZero.\\ 
+compares it's prediction to the actual rewards from the environment. The prediction and search proves to be crucial for the performance of MuZero. 
 While MuZero achieves state-of-the-art performance on the challenging ATARI 57 benchmark, it requires discrete actions for the \ac{mcts} based algorithm.
 
 \subsection{Continuous Action Space}
 \label{sec:mctsca}
 Lee et. al \cite{Lee_Jeon_Kim_Kim_2020} develop a possible way to relax the requirement of a discrete action space of the MuZero algorithm. 
 The main idea is to separate 
-the \ac{mcts} into two phases, a coarse phase, where actions from the action space are coarsely sampled and a fine tuning phase, where the actions are tuned, using the continuity of the action space.\\
+the \ac{mcts} into two phases, a coarse phase, where actions from the action space are coarsely sampled and a fine tuning phase, where the actions are tuned, using the continuity of the action space.
 To tune the actions, the gradient of the reward with respect to the policy is taken, where $\pi_t(a|t)$ represents the policy for action at time step t. 
 Formally, the gradient can be written as $\Delta \pi_t = \frac{\partial V (s_t, \pi_{t:T})}{\pi_{t}}$. Given a differentiable model of the environment, their algorithm can 
 find solutions to tasks with no prior training. The authors demonstrate their approach on several robot 
-benchmarks, where it can match or surpass the performance of pretrained SAC, given 5 seconds computation time per action.\\
+benchmarks, where it can match or surpass the performance of pretrained SAC, given 5 seconds computation time per action.
 
-While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the \ac{mcts}.\\
+While this approach uses planning on continuous action space, it relies on a given model of the environment to approximate the gradients and perform the \ac{mcts}.
 
 Another approach from Hafner \etAl \cite{hafner2018planet} learns the model of the environment from interactions. For planning, it relies on a 
 population based method where multiple action sequences are un-rolled step-by-step and resampled according to the predicted rewards. This approach 
