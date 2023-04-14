@@ -242,7 +242,7 @@ Following the insights presented in this section, we will use the actor planner 
     \caption{15 expert demonstrations.}
   \end{subfigure}
   \caption{
-    All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
+    \textbf{Single Observation}. All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
     The horizontal axis shows the number of sampled environment episodes, each with 100 steps. 
     One initial observation and, for \ac{rl}, a sparse reward signal at the end of each episode was provided. 
     The shaded area indicates the standard deviations from four runs per experiment. \ac{ppo} and \ac{tqc} use \ac{gail} to 
@@ -311,7 +311,7 @@ are shown in Figure \ref{fig:guided_ref}.
     \end{subfigure}
     \begin{subfigure}[t]{0.32\textwidth}
       \includegraphics[width=\textwidth]{images/0/Drawer Close.png}
-      \caption{Zero expert demonstrations.}
+      \caption{No demonstrations.}
       \label{fig:drawerclose}
     \end{subfigure}
     \medskip
@@ -325,7 +325,7 @@ are shown in Figure \ref{fig:guided_ref}.
       \caption{Comparison between pure \ac{il} and \ac{rl}.}
     \end{subfigure}
     \caption{
-    All baselines were pretrained using behavioral cloning with the given number of expert demonstrations, where demonstrations were provided. 
+    \textbf{Single Observation}. All baselines were pretrained using behavioral cloning with the given number of expert demonstrations, where demonstrations were provided. 
     The x-axis shows the number of sampled environment episodes, each with 100 steps. On the bottom row, 
     the x-axis displays equal amount of compute for the pure \ac{il} experiment and the \ac{rl} experiment. 
     One initial observation and, for \ac{rl}, a sparse reward signal at the end of each episode was provided. 
@@ -346,7 +346,7 @@ First we wanted to rule out that the performance difference comes mainly from ou
 we pretrained them using behavioral cloning. We expected that after pretraining, at least one successful trajectory would be sampled in the training phase, thus
 helping to overcome the initial search problem. We find that all algorithms perform significantly above $0\%$ success rate, so we conclude that all algorithms had
 sufficient guidance to find further successful trajectories. To further rule out that our methodology gives an unequal advantage to our algorithm, we tested all algorithms with 
-zero expert demonstrations on the 
+no expert demonstrations on the 
 Drawer Close environment. We find, that random trajectories can already solve the environment with about $20\%$ success rate, so no expert guidance is needed to learn a feasible behavior.
 The results are shown in Figure \ref{fig:drawerclose}.
 
@@ -414,7 +414,7 @@ we use the same setup as described in previous sections. The results are shown i
     \caption{No expert demonstrations.}
   \end{subfigure}
 
-  \caption{All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
+  \caption{\textbf{Continued Observation}. All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
     The x-axis shows the number of sampled environment episodes, each with 100 steps. 
     Continued observations and a sparse reward signal at the end of each episode was provided. 
     The shaded area indicates the standard deviations from three runs per experiment.}
@@ -478,7 +478,7 @@ The results are shown in Figure \ref{fig:dense_vs_single}.
   \hfill
   \begin{subfigure}[t]{0.32\textwidth}
     \includegraphics[width=\textwidth]{images/dense_vs_sparse_0/Drawer Close.png}
-    \caption{Zero expert demonstrations.}
+    \caption{No expert demonstrations.}
   \end{subfigure}
   \caption{Comparison of \ac{avc} in single observation and \ac{coavc} in continued observation \ac{mdp} environments. Each experiment was repeated three times with 30 evaluation episodes per data point.
   }
