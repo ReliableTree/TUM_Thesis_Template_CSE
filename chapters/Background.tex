@@ -864,7 +864,7 @@ where we ignored an input term and a bias term for ease of annotation. Now the u
         = \omega^{t} \Pi_{t'=1}^t \sigma'(\omega h_{t'}).
 \end{align*}
 If $\omega \neq 1$, this becomes zero (vanishing gradient) or infinity (exploding gradient) exponentially quickly with t.
-To address this issue, Hochreiter \etal \cite{s_lstm} proposed \ac{lstm}. A simpler version called \ac{gru}, 
+To address this issue, Hochreiter \etAl \cite{s_lstm} proposed \ac{lstm}. A simpler version called \ac{gru}, 
 as analyzed by Cahuantzi \etAl \cite{cahuantzi2023comparison}, have been empirically shown to have comparable performance to \ac{lstm}s. 
 Both architectures make use of a memory cell that can selectively store and erase information, and a set of gates to control the flow of information. 
 \ac{gru}s simplify the \ac{lstm} architecture by making use of only two gates, the reset gate and update gate.
