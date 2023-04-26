@@ -17,11 +17,70 @@
 
 \begin{frame}{Introduction}
 
-  \begin{itemize}
-    \item Briefly introduce your topic
-    \item Explain the motivation for your research
-    \item Provide an overview of your presentation
-  \end{itemize}
+  \begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,0) {$\text{Planner}_{t\rightarrow \color{black!50!green!80} t+1}$};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (critic) at (6,2) {Critic};
+        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (0,2) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
+        
+        \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
+            $\begin{cases}
+                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>1}\\
+                [0]_{t=0}
+            \end{cases}$
+            };
+        \node[draw, fill=blue!20, rounded corners] (actions) at (3,2) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
+        \node[draw, fill=blue!20, rounded corners] (exp_values) at (8.5,2) {$\left[\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}\right]_t$};
+        \node[draw, thick, rectangle] (loss) at (11,2) {$|c^t_T - 1|_{_2}^{^2}$};
+
+        \node[draw, fill=blue!20, rounded corners] (obs_1) at (0,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
+        \node[draw, fill=blue!20, rounded corners] (obs_2) at (6,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
+
+        \node[draw, thick, circle] (embplus_1) at (0,3.5) {$\oplus$};
+        \node[draw, thick, circle] (embplus_2) at (6,3.5) {$\oplus$};
+
+        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
+        (pe_1) at (-1.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
+        (pe_2) at (4.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
+
+
+        \draw[<-, black!50, line width=1pt] (plans)  to (planner);
+
+        \draw[->, black!50, line width=1pt] (plans)  to (actor);
+
+        \draw[->, black!50, line width=1pt] (actor) to (actions);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.west) to (actor.east);
+
+        \draw[->, black!50, line width=1pt] (critic) to (exp_values);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (exp_values.west) to (critic.east);
+
+        \draw[->, black!50, line width=1pt] (actions) to (critic);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (critic.west) to (actions.east);
+
+        \draw[->, black!50, line width=1pt] (obs_1) to (embplus_1);
+        \draw[->, black!50, line width=1pt] (embplus_1) to (actor);
+        \draw[->, black!50, line width=1pt] (actions) to (planner);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.south) to (planner.north);
+
+
+        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
+
+        \draw[->, black!50, line width=1pt] (embplus_2) to (critic);
+        \draw[->, black!50, line width=1pt] (obs_2) to (embplus_2);
+        \draw[->, black!50, line width=1pt] (pe_2) to (embplus_2);
+
+        \draw[->, black!50, line width=1pt] (exp_values) to (loss);
+        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (exp_values.east);
+
+
+    \end{tikzpicture}
+\caption{Overview of the inference mechanism of \ac{avc}. The solid lines indicate the forward path, the dashed lines indicate backward gradients, which 
+are used to update the actor from time step $t$ to \color{black!50!green!80} $t+1$ \color{black}.}
+\label{fig:inference}
+
+\end{figure}
 
 \end{frame}
 

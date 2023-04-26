@@ -193,7 +193,7 @@ Generally, we do not have access to $\theta(\phi)$, but only an approximation gi
 $Q$ function we have as $Q(\theta(\phi) + \epsilon)$, where $\epsilon$ indicates an error between the optimal parameters and the actual parameters.
 Let us now assume for simplicity, that $\phi$ and $\theta$ are one dimensional. A generalization to n dimensions is straight forward. We want 
 to estimate the update error to $\pi$ from the objective $J$. While the proper derivative given optimal $\theta$ is given by $\nabla_{\phi} J(\phi, \theta(\phi))$,
-the actor gradient $\widetilde{\nabla}_\phi J$ assumes $\theta$ is locally constant with respect to $\phi$ with $\widetilde{\nabla}_\phi J(\phi, \theta)$ 
+the actor gradient $\widetilde{\nabla}_\phi J$ assumes $\theta$ is locally constant with respect to $\phi$ with $\widetilde{\nabla}_\phi J(\phi, \theta)$. 
 We can express this in terms of the parameters $\theta(\phi) + \epsilon$ to 
 find the actual update step $\widetilde{\nabla}_{\phi} J(\phi, \theta + \epsilon)$ computed in actor critic methods:
 \begin{equation*}
@@ -209,12 +209,12 @@ From this, we can now derive the update error in the actor gradient step:
     \nabla_{\phi} J(\phi, \theta(\phi)) - \widetilde{\nabla}_\phi J(\phi, \theta + \epsilon) = \nabla_{\phi} J(\phi, \theta(\phi)) - \widetilde{\nabla}_\phi J(\phi, \theta + \epsilon) - \epsilon_{\widetilde{\nabla}_{\theta}}
 \end{equation}
 \begin{equation*}
-    = \left(\nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \widetilde{\nabla}_\phi J(\phi, \theta + \epsilon)\right) - \left( \epsilon_{\widetilde{\nabla}_{\theta}} + \epsilon_{\nabla_{\theta}} \right).
+    = \left(\nabla_{\phi} J(\phi, \theta(\phi) + \epsilon) - \widetilde{\nabla}_\phi J(\phi, \theta + \epsilon)\right) - \epsilon_{\widetilde{\nabla}_{\theta}}.
 \end{equation*}
 We will call 
 \begin{equation}
     \label{eq:def_func_app_err}
-     \epsilon_{\widetilde{\nabla}_{\theta}} + \epsilon_{\nabla_{\theta}}
+     \epsilon_{\widetilde{\nabla}_{\theta}}
 \end{equation}
 the \textbf{function approximator error}, as it is derived from the difference between 
 the actual parameters $\theta(\phi) +\epsilon$ and the optimal parameters $\theta$, and
@@ -247,10 +247,9 @@ see the distribution shift error as defined in equation \ref{eq:def_di_sh_err} i
 
 \subsubsection{Function Approximation Error}
 \label{func_app_error}
-Recall, the function approximator error $\epsilon_{\widetilde{\nabla}_{\theta}} + \epsilon_{\nabla_{\theta}}$ defined in Equation \ref{eq:def_func_app_err} was 
+Recall, the function approximator error $\epsilon_{\widetilde{\nabla}_{\theta}}$ defined in Equation \ref{eq:def_func_app_err} was 
 derived from the observation, that $\theta$ is underdetermined 
-given limited data $\mathcal{D}^n$. With the whole sequence critic, $\epsilon_{\widetilde{\nabla}_{\theta}} = 0$, as we have no dependency from $C$ to $\pi$, 
-but $\epsilon_{\nabla_{\theta}} \neq 0$, as $C$ is still a function approximator for $r$.
+given limited data $\mathcal{D}^n$.
 
 Intuitively, while we have the actual value $C_{s_1, a_{1:T}}(t), (s_1, a_{1:T}) \in \mathcal{D}^n$ of a given action sequence in our database $\mathcal{D}^n$, 
 we don't know the value of an arbitrary action sequence starting from $s_1$: $C_{s_1, \tilde{a}_{1:T}}(t), (s_1 \in \mathcal{D}^n, \tilde{a}_{1:T} \notin \mathcal{D}^n)$.
