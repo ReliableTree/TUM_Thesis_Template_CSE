@@ -242,5 +242,28 @@ $$J(\phi, C_{\theta(\phi)}) = \mathbb{E}_{\tau \propto (s_1, a_{1:T})}\left[ \su
 
   \end{figure}
 
+  \documentclass{article}
+\usepackage{tikz}
+
+\begin{document}
+    
+\begin{tikzpicture}[>=stealth,font=\small]
+    
+    % Define node styles
+    \tikzstyle{block} = [draw, rounded rectangle, minimum width=2cm, minimum height=1cm, text centered]
+    \tikzstyle{vector} = [draw, rectangle, minimum width=2cm, minimum height=2cm, text centered]
+    
+    % Draw nodes
+    \node [block] (o0) {$o_0$};
+    \node [block, right=1cm of o0] (actor) {Actor};
+    \node [vector, right=1cm of actor] (vector) {$\begin{matrix}a_0\\ \vdots\\ a_T\end{matrix}$};
+    
+    % Draw arrows
+    \draw [<->, double] (o0) -- (actor);
+    \draw [<->, double] (actor) -- (vector);
+    
+\end{tikzpicture}
+
+\end{document}
 
 \end{document}
