@@ -83,184 +83,40 @@
 
 \begin{document} 
 
-\begin{figure}
-    \centering
-    \begin{tikzpicture}
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,0) {$\text{Planner}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (critic) at (6,2) {Critic};
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (0,2) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        
-        \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
-            $\begin{cases}
-                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>1}\\
-                [0]_{t=1}
-            \end{cases}$
-            };
-        \node[draw, fill=blue!20, rounded corners] (actions) at (3,2) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
-        \node[draw, fill=blue!20, rounded corners] (exp_values) at (8.5,2) {$\left[\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}\right]_t$};
-        \node[draw, thick, rectangle] (loss) at (11,2) {$|c^t_T - 1|_{_2}^{^2}$};
-
-        \node[draw, fill=blue!20, rounded corners] (obs_1) at (0,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
-        \node[draw, fill=blue!20, rounded corners] (obs_2) at (6,5) {$\begin{matrix}[o_1,..., \times T, ..., o_1\end{matrix} ]^\textbf{T}$};
-
-        \node[draw, thick, circle] (embplus_1) at (0,3.5) {$\oplus$};
-        \node[draw, thick, circle] (embplus_2) at (6,3.5) {$\oplus$};
-
-        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
-        (pe_1) at (-1.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
-        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
-        (pe_2) at (4.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
-
-
-        \draw[<-, black!50, line width=1pt] (plans)  to (planner);
-
-        \draw[->, black!50, line width=1pt] (plans)  to (actor);
-
-        \draw[->, black!50, line width=1pt] (actor) to (actions);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.west) to (actor.east);
-
-        \draw[->, black!50, line width=1pt] (critic) to (exp_values);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (exp_values.west) to (critic.east);
-
-        \draw[->, black!50, line width=1pt] (actions) to (critic);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (critic.west) to (actions.east);
-
-        \draw[->, black!50, line width=1pt] (obs_1) to (embplus_1);
-        \draw[->, black!50, line width=1pt] (embplus_1) to (actor);
-        \draw[->, black!50, line width=1pt] (actions) to (planner);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.south) to (planner.north);
-
-
-        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
-
-        \draw[->, black!50, line width=1pt] (embplus_2) to (critic);
-        \draw[->, black!50, line width=1pt] (obs_2) to (embplus_2);
-        \draw[->, black!50, line width=1pt] (pe_2) to (embplus_2);
-
-        \draw[->, black!50, line width=1pt] (exp_values) to (loss);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (exp_values.east);
-
-
-    \end{tikzpicture}
-\caption*{Overview of the inference AVC.}
-\label{fig:inference}
-
-\end{figure}
-
-
-\begin{figure}
-    \centering
-    \begin{tikzpicture}
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (planner) at (3,0) {$\text{Planner}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (critic) at (6,2) {Critic};
-        \node[draw, fill=black!20, rounded corners, minimum width=2cm, minimum height=1cm] (actor) at (0,2) {$\text{Actor}_{t\rightarrow \color{black!50!green!80} t+1}$};
-        
-        \node[draw, fill=blue!20, rounded corners] (plans) at (0,0) {
-            $\begin{cases}
-                \begin{matrix}[p_1, ..., p_T\end{matrix} ]^\textbf{T}_{t>1}\\
-                [0]_{t=1}
-            \end{cases}$
-            };
-        \node[draw, fill=blue!20, rounded corners] (actions) at (3,2) {$\left[\begin{matrix}a_1\\ \vdots\\ a_T\end{matrix}\right]_t$};
-        \node[draw, fill=blue!20, rounded corners] (exp_values) at (8.5,2) {$\left[\begin{matrix}c_1\\ \vdots\\ c_T\end{matrix}\right]_t$};
-        \node[draw, thick, rectangle] (loss) at (11,2) {$|c^t_T - 1|_{_2}^{^2}$};
-
-        \node[draw, fill=blue!20, rounded corners] (obs_1) at (0,5) {$\begin{matrix}[o_1, o_2, ..., o_\mathrm{t}, o_\mathrm{f}..., o_\mathrm{f}\end{matrix} ]^\textbf{T}$};
-        \node[draw, fill=blue!20, rounded corners] (obs_2) at (6,5) {$\begin{matrix}[o_1, o_2, ..., o_\mathrm{t}, o_\mathrm{f}..., o_\mathrm{f}\end{matrix} ]^\textbf{T}$};
-
-        \node[draw, thick, circle] (embplus_1) at (0,3.5) {$\oplus$};
-        \node[draw, thick, circle] (embplus_2) at (6,3.5) {$\oplus$};
-
-        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
-        (pe_1) at (-1.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
-        \node[draw, thick, circle, inner sep=0pt,label={[align=left]left:Positional\\Encoding}] 
-        (pe_2) at (4.5,3.5) {\tikz \draw[scale=0.1] plot[domain=0.0:6.28] (\x,{sin(\x r)});};
-
-
-        \draw[<-, black!50, line width=1pt] (plans)  to (planner);
-
-        \draw[->, black!50, line width=1pt] (plans)  to (actor);
-
-        \draw[->, black!50, line width=1pt] (actor) to (actions);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.west) to (actor.east);
-
-        \draw[->, black!50, line width=1pt] (critic) to (exp_values);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (exp_values.west) to (critic.east);
-
-        \draw[->, black!50, line width=1pt] (actions) to (critic);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (critic.west) to (actions.east);
-
-        \draw[->, black!50, line width=1pt] (obs_1) to (embplus_1);
-        \draw[->, black!50, line width=1pt] (embplus_1) to (actor);
-        \draw[->, black!50, line width=1pt] (actions) to (planner);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (actions.south) to (planner.north);
-
-
-        \draw[->, black!50, line width=1pt] (pe_1) to (embplus_1);
-
-        \draw[->, black!50, line width=1pt] (embplus_2) to (critic);
-        \draw[->, black!50, line width=1pt] (obs_2) to (embplus_2);
-        \draw[->, black!50, line width=1pt] (pe_2) to (embplus_2);
-
-        \draw[->, black!50, line width=1pt] (exp_values) to (loss);
-        \draw[->, black!50!green!50, line width=1pt, bend right = 30, dashed] (loss.west) to (exp_values.east);
-
-
-    \end{tikzpicture}
-\caption*{Overview of the inference COAVC.}
-\label{fig:inference}
-
-\end{figure}
-
-$$J(\phi, C_{\theta(\phi)}) = \mathbb{E}_{\tau \propto (s_1, a_{1:T})}\left[ \sum_{t=1}^T \gamma^t r(s_t,a_t) \right] = \mathbb{E}_{\tau \propto (s_1, a_{1:T})}\left[ \sum_{t=1}^T \gamma^t C_{\theta(\phi)}(s_1,a_{1:T})(t) \right]$$
-
-\end{figure}
-
 \begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[t]{0.32\textwidth}
-      \includegraphics[width=\textwidth]{images/dense_1_big_font/Reach.png}
-      \caption{One expert demonstration.}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.32\textwidth}
-      \includegraphics[width=\textwidth]{images/dense_1/Window Open.png}
-      \caption{One expert demonstration.}
-    \end{subfigure}
-  
-    \begin{subfigure}[t]{0.32\textwidth}
-      \includegraphics[width=\textwidth]{images/dense_0/Reach.png}
-      \caption{No expert demonstrations.}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.32\textwidth}
-      \includegraphics[width=\textwidth]{images/dense_0/Window Open.png}
-      \caption{No expert demonstrations.}
-    \end{subfigure}
-    \begin{subfigure}[t]{0.32\textwidth}
-      \includegraphics[width=\textwidth]{images/dense_0/Drawer Close.png}
-      \caption{No expert demonstrations.}
-    \end{subfigure}
+  \centering
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_1_big_font/Reach.pdf}
+    \caption{One expert demonstration.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_1/Window Open.pdf}
+    \caption{One expert demonstration.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/TQC_bc_GAIL_vs_ref/Window Open.pdf}
+    \caption{Comparison between tqc with no expert demonstrations and expert guided baselines.}
+    \label{fig:TQC_0_vs_exp}
+  \end{subfigure}
 
-  \end{figure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Reach.pdf}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Window Open.pdf}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{images/dense_0/Drawer Close.pdf}
+    \caption{No expert demonstrations.}
+  \end{subfigure}
 
-  
-  
-  
-  \begin{tikzpicture}[>=stealth,font=\small]
-      
-      % Define node styles
-      \tikzstyle{block} = [draw, rounded rectangle, minimum width=2cm, minimum height=1cm, text centered]
-      \tikzstyle{vector} = [draw, rectangle, minimum width=2cm, minimum height=2cm, text centered]
-      
-      % Draw nodes
-      \node [block] (o0) {$o_0$};
-      \node [block, right of=o0, xshift=2cm] (actor) {Actor};
-      \node [vector, right of=actor, xshift=2cm] (actions_vector) {$\begin{matrix}a_0\\ \vdots\\ a_T\end{matrix}$};
-      
-      % Draw arrows
-      \draw [->, double] (o0) -- (actor);
-      \draw [->, double] (actor.east) ++(0, -0.3cm) --node[midway, above] {} (actions_vector.west |- 0,-0.3cm);
-      \draw [->, dashed] (o0.south) |- (actions_vector.south -| 0.3cm,0);
-      
-  \end{tikzpicture}
+  \caption{\textbf{Continued Observation}. All baselines were pretrained using behavioral cloning with the given number of expert demonstrations. 
+    The x-axis shows the number of sampled environment episodes, each with 100 steps. 
+    Continued observations and a sparse reward signal at the end of each episode was provided. 
+    The shaded area indicates the standard deviations from three runs per experiment.}
+    \label{fig:dense_ref}
+\end{figure}
   
 \end{document}
